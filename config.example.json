@@ -1,7 +1,7 @@
 {
   "port": 3000,
   "oneOffice": {
-    "baseUrl": "https://YOURCOMPANY.1office.vn",
+    "baseUrl": "https://maycha.1office.vn",
 
     "_note_token": "Token MẶC ĐỊNH (1Office cấp token theo từng object). Token này gắn với object 'candidate' (Hồ sơ ứng viên).",
     "token": "PASTE_YOUR_1OFFICE_TOKEN_HERE",

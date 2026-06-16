@@ -1,0 +1,13 @@
+{
+  "name": "ttvh-tuyendung",
+  "version": "1.0.0",
+  "description": "Landing page tuyển dụng + Kanban + kết nối API 1Office — Thịnh Thế Vinh Hoa F&B Group",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "private": true
+}

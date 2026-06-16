@@ -19,12 +19,29 @@ const ROOT = __dirname;
 const CONFIG_PATH = path.join(ROOT, 'config.json');
 
 function loadConfig() {
+  let cfg = null;
   try {
-    return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
+    cfg = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
   } catch (e) {
-    console.error('Không đọc được config.json:', e.message);
-    return null;
+    // Khi deploy (vd Railway) không có config.json (đã gitignore) -> dùng config.example.json làm nền
+    try {
+      cfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'config.example.json'), 'utf8'));
+    } catch (e2) {
+      console.error('Không đọc được config.json/config.example.json:', e2.message);
+      return null;
+    }
   }
+  // Overlay biến môi trường (cho deploy) — token & các giá trị nhạy cảm KHÔNG nằm trong git
+  const o = cfg.oneOffice || (cfg.oneOffice = {});
+  if (process.env.ONEOFFICE_TOKEN) o.token = process.env.ONEOFFICE_TOKEN;
+  if (process.env.ONEOFFICE_BASEURL) o.baseUrl = process.env.ONEOFFICE_BASEURL;
+  if (o.create) {
+    if (process.env.ONEOFFICE_WRITE_TOKEN) o.create.token = process.env.ONEOFFICE_WRITE_TOKEN;
+    o.create.extra = o.create.extra || {};
+    if (process.env.APPLY_SOURCE) o.create.extra.source = process.env.APPLY_SOURCE;
+    if (process.env.APPLY_CAMPAIGN) o.create.extra.campaign_current_id = process.env.APPLY_CAMPAIGN;
+  }
+  return cfg;
 }
 
 const MIME = {
