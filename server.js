@@ -190,7 +190,7 @@ function proxyTo1Office(key, cfg, res, clientParams) {
 
 function serveStatic(req, res) {
   let pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
-  if (pathname === '/') pathname = '/tuyen-dung.html';
+  if (pathname === '/') pathname = '/index.html';
   // chặn path traversal
   const safe = path.normalize(pathname).replace(/^(\.\.[/\\])+/, '');
   const filePath = path.join(ROOT, safe);
