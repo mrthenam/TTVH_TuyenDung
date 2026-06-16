@@ -1,0 +1,16 @@
+# Cấu hình chứa TOKEN thật — KHÔNG đưa lên git
+config.json
+
+# Cấu hình cục bộ của Claude Code
+.claude/settings.local.json
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Hệ thống / editor
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/

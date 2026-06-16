@@ -1,0 +1,67 @@
+{
+  "port": 3000,
+  "oneOffice": {
+    "baseUrl": "https://YOURCOMPANY.1office.vn",
+
+    "_note_token": "Token MẶC ĐỊNH (1Office cấp token theo từng object). Token này gắn với object 'candidate' (Hồ sơ ứng viên).",
+    "token": "PASTE_YOUR_1OFFICE_TOKEN_HERE",
+
+    "tokenMode": "query",
+    "tokenParam": "access_token",
+    "headerName": "Authorization",
+    "headerPrefix": "Bearer ",
+
+    "_note_endpoints": "Đường dẫn 4 object của module recruitment.",
+    "endpoints": {
+      "candidates": "/api/recruitment/candidate/gets",
+      "proposals": "/api/recruitment/request/gets",
+      "campaigns": "/api/recruitment/campaign/gets",
+      "channels": "/api/recruitment/channel/gets"
+    },
+
+    "_note_endpointTokens": "Token RIÊNG cho từng mục (1Office cấp token theo object). Để trống = dùng token mặc định.",
+    "endpointTokens": {
+      "candidates": "",
+      "proposals": "PASTE_TOKEN_DE_XUAT_TUYEN_DUNG",
+      "campaigns": "PASTE_TOKEN_CHIEN_DICH_TUYEN_DUNG",
+      "channels": "PASTE_TOKEN_KENH_TUYEN_DUNG"
+    },
+
+    "_note_pageLimit": "Số bản ghi lấy mỗi lần gọi (1Office phân trang). Mặc định 100.",
+    "pageLimit": 100,
+
+    "_note_dataPath": "Mảng dữ liệu nằm trong key 'data' của JSON 1Office.",
+    "dataPath": "data",
+
+    "_note_create": "Cấu hình TẠO ứng viên từ form (đẩy vào Kanban).",
+    "create": {
+      "endpoint": "/api/recruitment/candidate/insert",
+      "token": "",
+      "method": "POST",
+      "_note_fieldMap": "Map: field-form -> field-1Office (theo tài liệu API insert).",
+      "fieldMap": {
+        "name": "name",
+        "gender": "gender",
+        "birthday": "birthday",
+        "phone": "phone",
+        "email": "email",
+        "idcard": "private_code",
+        "address": "current_address",
+        "region": "place_current_address",
+        "workarea": "work_place",
+        "position": "cf49",
+        "brand": "cf63",
+        "referrer": "note",
+        "source_id": "source",
+        "campaign_current_id": "campaign_current_id"
+      },
+      "_note_extra": "Giá trị MẶC ĐỊNH khi form không kèm tham số URL. source = mã nguồn/kênh (BẮT BUỘC). campaign_current_id không bắt buộc.",
+      "extra": {
+        "source": "49",
+        "campaign_current_id": ""
+      },
+      "_note_codePrefix": "Tiền tố cho mã ứng viên tự sinh (code bắt buộc & duy nhất).",
+      "codePrefix": "HSUV_WEB"
+    }
+  }
+}

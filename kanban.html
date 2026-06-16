@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Phân loại hồ sơ ứng viên (Kanban) — Thịnh Thế Vinh Hoa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#f3f4fb;--card:#fff;--line:rgba(40,28,60,.10);--line-2:rgba(40,28,60,.16);
+    --txt:#22202e;--muted:#7c7a8a;--red:#e0342b;--gold:#f4a521;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Be Vietnam Pro',system-ui,sans-serif;background:var(--bg);color:var(--txt);-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+
+  header{position:sticky;top:0;z-index:30;background:rgba(243,244,251,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .nav{display:flex;align-items:center;gap:16px;height:64px;padding:0 20px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:900}
+  .brand img{height:42px;border-radius:9px}
+  .brand small{display:block;font-size:11px;color:var(--muted);font-weight:700}
+  .nav .links{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap}
+  .nav .links a{font-size:13px;font-weight:700;color:var(--muted);padding:8px 14px;border:1px solid var(--line-2);border-radius:9px;background:#fff}
+  .nav .links a.active{background:#22202e;color:#fff;border-color:#22202e}
+  .nav .links a:hover{background:#fff7ea}
+
+  .topbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:18px 20px 8px}
+  .topbar h1{font-size:22px;font-weight:900;display:flex;align-items:center;gap:8px}
+  .topbar .sub{font-size:13px;color:var(--muted)}
+  .controls{display:flex;gap:10px;align-items:center;margin-left:auto;flex-wrap:wrap}
+  .search{position:relative}
+  .search input{padding:10px 12px 10px 36px;border-radius:10px;border:1px solid var(--line-2);background:#fff;font-family:inherit;font-size:14px;min-width:230px}
+  .search input:focus{outline:none;border-color:var(--red)}
+  .search .mag{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted)}
+  select,.btn{padding:10px 14px;border-radius:10px;border:1px solid var(--line-2);background:#fff;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer}
+  .btn-primary{background:#22202e;color:#fff;border-color:#22202e}
+  .btn:hover,select:hover{background:#fff7ea}
+  .auto{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700;color:var(--muted);border:1px solid var(--line-2);background:#fff;border-radius:10px;padding:9px 12px;cursor:pointer}
+  .auto input{accent-color:#1f9e6e;width:15px;height:15px;cursor:pointer}
+  #updated{font-size:12px;color:var(--muted);padding:0 20px 4px}
+  .toast{position:fixed;right:20px;bottom:20px;z-index:80;background:#1f9e6e;color:#fff;font-weight:700;font-size:14px;padding:13px 18px;border-radius:12px;box-shadow:0 12px 30px -10px rgba(0,0,0,.4);opacity:0;transform:translateY(14px);transition:.3s;pointer-events:none}
+  .toast.show{opacity:1;transform:none}
+  .newbar{position:fixed;top:78px;left:50%;transform:translateX(-50%);z-index:75;background:#ff7a1a;color:#fff;font-weight:600;font-size:14px;padding:11px 18px;border-radius:999px;box-shadow:0 14px 34px -10px rgba(224,90,20,.6);display:none;align-items:center;gap:14px}
+  .newbar.show{display:flex;animation:drop .35s ease}
+  @keyframes drop{from{opacity:0;transform:translate(-50%,-12px)}to{opacity:1;transform:translate(-50%,0)}}
+  .newbar button{background:#fff;color:#d6571a;border:none;border-radius:999px;padding:7px 15px;font-weight:800;font-size:13px;cursor:pointer}
+  .newbar button:hover{background:#fff3e8}
+
+  .board-wrap{overflow-x:auto;overflow-y:hidden;padding:10px 20px 28px}
+  .board{display:flex;gap:16px;align-items:flex-start;min-height:60vh}
+  .col{flex:0 0 320px;width:320px;display:flex;flex-direction:column;max-height:calc(100vh - 200px)}
+  .col-head{border-radius:12px;padding:14px 16px;color:#fff;display:flex;align-items:center;justify-content:space-between;font-weight:800;box-shadow:0 8px 22px -12px rgba(0,0,0,.4)}
+  .col-head .cnt{background:rgba(255,255,255,.25);padding:2px 11px;border-radius:999px;font-size:13px}
+  .col-body{margin-top:12px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;padding:2px 2px 10px;flex:1}
+  .col-body::-webkit-scrollbar{width:8px}
+  .col-body::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:8px}
+
+  .ccard{background:#fff;border:1px solid var(--line);border-left:3px solid #37b36b;border-radius:12px;padding:14px;box-shadow:0 8px 22px -18px rgba(40,28,60,.5);transition:transform .12s,box-shadow .12s}
+  .ccard.blk{border-left-color:#d05a4f}
+  .ccard:hover{transform:translateY(-2px);box-shadow:0 14px 30px -18px rgba(40,28,60,.6)}
+  .ccard .top{display:flex;align-items:center;gap:11px;margin-bottom:10px}
+  .ccard .av{width:42px;height:42px;border-radius:50%;flex:none;display:grid;place-items:center;color:#fff;font-weight:800;font-size:15px}
+  .ccard .nm{font-weight:800;font-size:15px;line-height:1.2}
+  .ccard .bday{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:5px;margin-top:2px}
+  .badge{display:inline-block;font-size:12px;font-weight:700;padding:3px 11px;border-radius:7px;border:1px solid;margin-bottom:10px}
+  .rows{display:grid;gap:7px}
+  .row{display:grid;grid-template-columns:96px 1fr;gap:8px;font-size:12.5px}
+  .row .k{color:var(--muted)}
+  .row .v{color:var(--txt);word-break:break-word}
+  .row .v.hl{background:#e6f3ff;color:#1565c0;font-weight:700;padding:1px 8px;border-radius:6px;justify-self:start}
+  .ccard .foot{display:flex;align-items:center;justify-content:space-between;margin-top:11px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+  .ccard .foot .grp{display:flex;gap:12px}
+
+  .state{padding:60px 20px;text-align:center;color:var(--muted);width:100%}
+  .spinner{width:38px;height:38px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--red);animation:spin .8s linear infinite;margin:0 auto 14px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .err{color:var(--red)}
+  .warn-box{background:#fff;border:1px dashed rgba(224,52,43,.4);border-radius:12px;padding:16px;max-width:620px;margin:14px auto 0;text-align:left;font-size:14px}
+  code{background:#fff2e6;padding:1px 7px;border-radius:6px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a href="index.html" class="brand"><img src="images/logo-ttvh.jpg" alt="TTVH" /><div>Thịnh Thế Vinh Hoa<small>Phân loại hồ sơ</small></div></a>
+    <div class="links">
+      <a href="index.html">Trang tuyển dụng</a>
+      <a href="tuyen-dung.html">Bảng dữ liệu</a>
+      <a href="kanban.html" class="active">Kanban</a>
+    </div>
+  </div>
+</header>
+
+<div class="topbar">
+  <div>
+    <h1>📋 Phân loại hồ sơ ứng viên</h1>
+    <div class="sub" id="sub">Kéo ngang để xem các giai đoạn · dữ liệu từ 1Office</div>
+  </div>
+  <div class="controls">
+    <div class="search"><span class="mag">🔍</span><input id="search" type="text" placeholder="Tìm tên / SĐT / email..." /></div>
+    <select id="view" title="Lọc theo trạng thái mở/chặn">
+      <option value="open" selected>🟢 Đang mở</option>
+      <option value="blocked">⛔ Đã chặn / loại</option>
+      <option value="all">Tất cả</option>
+    </select>
+    <select id="limit" title="Số hồ sơ tải về">
+      <option value="300">300 hồ sơ</option>
+      <option value="500" selected>500 hồ sơ</option>
+      <option value="1000">1000 hồ sơ</option>
+      <option value="2000">2000 hồ sơ</option>
+    </select>
+    <label class="auto"><input type="checkbox" id="auto" checked /> 🔔 Báo dữ liệu mới</label>
+    <button class="btn btn-primary" id="reload">↻ Tải lại</button>
+  </div>
+</div>
+
+<div id="updated"></div>
+
+<div class="board-wrap">
+  <div class="board" id="board"><div class="state"><div class="spinner"></div>Đang tải hồ sơ…</div></div>
+</div>
+
+<div class="newbar" id="newbar">🔔 1Office vừa có dữ liệu mới — bấm <b>Tải lại</b> hoặc F5 để xem.<button id="reloadNow">↻ Tải lại ngay</button></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// Cột (giai đoạn) theo đúng bố cục pipeline 1Office.
+const STAGES = [
+  { key:'ungtuyen',     label:'Ứng tuyển',      color:'#e6197f' },
+  { key:'phongvan',     label:'Phỏng vấn',      color:'#7b3df0' },
+  { key:'thumoi',       label:'Thư mời',        color:'#3d52e0' },
+  { key:'trungtuyen',   label:'Trúng tuyển',    color:'#1f9e6e' },
+  { key:'loai',         label:'Loại / Khác',    color:'#6b7280' },
+];
+const STAGE_BY_KEY = Object.fromEntries(STAGES.map(s=>[s.key, s]));
+
+// Map CHÍNH XÁC từng trạng thái chi tiết -> cột (theo cách 1Office gom nhóm).
+const STATUS_MAP = {
+  'ứng tuyển':'ungtuyen', 'lọc cv':'ungtuyen',
+  'chờ hr sơ vấn':'phongvan', 'hr sơ vấn - đạt':'phongvan',
+  'chờ sm/am phỏng vấn':'phongvan', 'sm pv - đạt':'phongvan', 'am pv - đạt':'phongvan', 'om pv - đạt':'phongvan',
+  'chờ nhận việc':'thumoi', 'đồng ý offer':'thumoi',
+  'trúng tuyển':'trungtuyen', 'đồng ý nhận việc':'trungtuyen',
+  'hr sơ vấn - loại':'loai', 'sm pv - loại':'loai', 'am pv - loại':'loai', 'om pv - loại':'loai',
+  'không đến phỏng vấn':'loai', 'không liên hệ được':'loai', 'từ chối nhận việc':'loai',
+  'từ chối offer':'loai', 'khu vực chưa tuyển dụng':'loai', 'blacklist':'loai',
+};
+function stageKeyOf(status){
+  const s = (status||'').toString().trim().toLowerCase();
+  if (STATUS_MAP[s]) return STATUS_MAP[s];
+  // dự phòng cho trạng thái mới chưa có trong map
+  if (s.includes('loại')||s.includes('từ chối')||s.startsWith('không')||s.includes('blacklist')||s.includes('chưa tuyển')||s.includes('hủy')||s.includes('huỷ')) return 'loai';
+  if (s.includes('đồng ý nhận việc')||s.includes('trúng tuyển')) return 'trungtuyen';
+  if (s.includes('nhận việc')||s.includes('offer')||s.includes('thư mời')) return 'thumoi';
+  if (s.includes('phỏng vấn')||s.includes('sơ vấn')||/\bpv\b/.test(s)) return 'phongvan';
+  if (s.includes('ứng tuyển')||s.includes('lọc')) return 'ungtuyen';
+  return 'loai';
+}
+
+// Trạng thái "CHẶN" (đã dừng / loại / không còn trong quy trình tuyển). Sửa danh sách này nếu cần.
+const BLOCKED_STATUSES = new Set([
+  'hr sơ vấn - loại','sm pv - loại','am pv - loại','om pv - loại',
+  'không đến phỏng vấn','không liên hệ được','từ chối nhận việc','từ chối offer',
+  'khu vực chưa tuyển dụng','blacklist'
+]);
+function isBlocked(status){
+  const s=(status||'').toString().trim().toLowerCase();
+  if (BLOCKED_STATUSES.has(s)) return true;
+  return s.includes('loại')||s.includes('từ chối')||s.startsWith('không')||s.includes('blacklist')||s.includes('chưa tuyển')||s.includes('hủy')||s.includes('huỷ');
+}
+
+let allRows = [];
+let filter = '';
+let lastSig = null, autoTimer = null;
+const $ = s => document.querySelector(s);
+
+function stageOf(status){ return STAGE_BY_KEY[stageKeyOf(status)] || STAGE_BY_KEY['loai']; }
+
+// dd/mm/yyyy | epoch | ISO -> timestamp (để sắp xếp & tính thời gian)
+function dateVal(v){
+  if (v==null || v==='') return 0;
+  const s = String(v).trim();
+  const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (m) return new Date(+m[3], +m[2]-1, +m[1]).getTime();
+  if (/^\d+$/.test(s)) { const n=+s; return n<1e12 ? n*1000 : n; }
+  const t = Date.parse(s); return isNaN(t) ? 0 : t;
+}
+function escapeHtml(s){return (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function initials(name){return (name||'?').trim().split(/\s+/).slice(-2).map(w=>w[0]).join('').toUpperCase();}
+function avatarColor(name){let h=0;for(const c of (name||'')) h=(h*31+c.charCodeAt(0))%360;return `hsl(${h},55%,55%)`;}
+
+function relTime(v){
+  const t = dateVal(v); if(!t) return '';
+  // API chỉ có độ chính xác theo NGÀY (dd/mm/yyyy) -> tính theo ngày, không hiển thị giờ/phút.
+  const today = new Date(); today.setHours(0,0,0,0);
+  const days = Math.round((today.getTime() - t)/86400000);
+  if(days<=0) return 'Hôm nay';
+  if(days===1) return 'Hôm qua';
+  if(days<7) return days+' ngày trước';
+  if(days<30) return Math.floor(days/7)+' tuần trước';
+  if(days<365) return Math.floor(days/30)+' tháng trước';
+  return Math.floor(days/365)+' năm trước';
+}
+
+function card(r){
+  const status = r.status || r.state || '';
+  const st = stageOf(status);
+  const campaign = r.campaign_code || r.campaign_place || '—';
+  const interview = [r.interview_hour, r.interview_date].filter(Boolean).join(' ');
+  const rel = relTime(r.date_updated) || relTime(r.date_created);
+  const blk = isBlocked(status);
+  return `<div class="ccard${blk?' blk':''}">
+    <div class="top">
+      <div class="av" style="background:${avatarColor(r.name)}">${escapeHtml(initials(r.name))}</div>
+      <div><div class="nm">${escapeHtml(r.name||'(không tên)')}</div>
+      ${r.birthday?`<div class="bday">🎂 ${escapeHtml(r.birthday)}</div>`:''}</div>
+    </div>
+    <span class="badge" style="color:${st.color};border-color:${st.color}55;background:${st.color}11">${escapeHtml(status||'—')}</span>
+    <div class="rows">
+      <div class="row"><span class="k">Chiến dịch</span><span class="v">${escapeHtml(campaign)}</span></div>
+      <div class="row"><span class="k">Điện thoại</span><span class="v">${escapeHtml(r.phone||'—')}</span></div>
+      <div class="row"><span class="k">Email</span><span class="v">${escapeHtml(r.email||'—')}</span></div>
+      ${interview?`<div class="row"><span class="k">Lịch PV</span><span class="v hl">${escapeHtml(interview)}</span></div>`:''}
+    </div>
+    <div class="foot"><div class="grp"><span>💬 ${Array.isArray(r.last_comments)?r.last_comments.length:0}</span><span>📎 ${r.num_file||0}</span></div><span>🕒 ${escapeHtml(rel||'')}</span></div>
+  </div>`;
+}
+
+function render(){
+  const board = $('#board');
+  let rows = allRows;
+  const vm = $('#view').value;
+  if(vm==='open') rows = rows.filter(r=>!isBlocked(r.status||r.state));
+  else if(vm==='blocked') rows = rows.filter(r=>isBlocked(r.status||r.state));
+  if(filter){
+    const f=filter.toLowerCase();
+    rows = rows.filter(r=>((r.name||'')+' '+(r.phone||'')+' '+(r.email||'')+' '+(r.code||'')).toLowerCase().includes(f));
+  }
+  const cols = STAGES;
+  const buckets = {}; cols.forEach(c=>buckets[c.key]=[]);
+  rows.forEach(r=>{ buckets[stageOf(r.status||r.state).key].push(r); });
+
+  let html='';
+  cols.forEach(c=>{
+    const list = buckets[c.key];
+    html += `<div class="col">
+      <div class="col-head" style="background:${c.color}"><span>${c.label}</span><span class="cnt">${list.length}</span></div>
+      <div class="col-body">${list.map(card).join('')||'<div style="color:#9a98a8;font-size:13px;padding:14px;text-align:center">Trống</div>'}</div>
+    </div>`;
+  });
+  board.innerHTML = html || '<div class="state">Không có hồ sơ phù hợp.</div>';
+}
+
+async function fetchPage(page){
+  // Sắp theo ngày cập nhật giảm dần ngay trên 1Office => trang đầu là hồ sơ mới cập nhật nhất.
+  const res = await fetch('/api/candidates?page='+page+'&sort_by=date_updated&sort_type=desc');
+  const data = await res.json();
+  if(!res.ok || data.error || data.ok===false) throw new Error(data.error || ('HTTP '+res.status));
+  return { rows: data.rows || [], total: data.total };
+}
+
+async function load(){
+  const target = +$('#limit').value;       // 1Office trả 100 hồ sơ/trang
+  const want = Math.max(1, Math.ceil(target/100));
+  const setMsg = m => $('#board').innerHTML = '<div class="state"><div class="spinner"></div>'+m+'</div>';
+  setMsg('Đang tải hồ sơ…');
+  try{
+    const first = await fetchPage(1);
+    lastSig = sigFrom(first);
+    const total = first.total || first.rows.length;
+    const totalPages = Math.max(1, Math.ceil(total/100));
+    const pages = Math.min(want, totalPages);
+
+    // Lấy các trang ĐẦU (đã sắp theo ngày cập nhật giảm dần) => đúng danh sách mới nhất như 1Office
+    let rows = first.rows.slice();
+    for (let p=2; p<=pages; p++){
+      setMsg('Đang tải trang '+p+'/'+pages+' ('+rows.length+' hồ sơ)…');
+      try{ const r = await fetchPage(p); if(!r.rows.length) break; rows = rows.concat(r.rows); }catch(e){ break; }
+    }
+    const seen = new Set();
+    allRows = rows.filter(r=>{ const id=r.ID||r.code; if(seen.has(id))return false; seen.add(id); return true; });
+    // API chỉ có ngày cập nhật (không có giờ/phút). 1Office xếp trong cùng ngày theo ID hồ sơ giảm dần
+    // (hồ sơ mới nhất lên đầu) -> sắp: ngày cập nhật ↓, rồi ID ↓ để khớp thứ tự như 1Office.
+    allRows.sort((a,b)=>
+      (dateVal(b.date_updated)-dateVal(a.date_updated)) ||
+      ((+b.ID||0)-(+a.ID||0))
+    );
+    $('#sub').textContent = 'Hiển thị '+allRows.length+' hồ sơ MỚI CẬP NHẬT NHẤT trên tổng '+total+' (1Office). Số trên mỗi cột là trong nhóm đã tải.';
+    $('#updated').textContent = '🕒 Cập nhật lúc ' + new Date().toLocaleTimeString('vi-VN') + ' · tổng ' + total + ' hồ sơ';
+    $('#newbar').classList.remove('show');
+    render();
+  }catch(e){
+    $('#board').innerHTML = '<div class="state err">⚠️ '+escapeHtml(e.message||'Không gọi được server')+
+      '<div class="warn-box">Hãy mở qua <code>http://localhost:3000/kanban.html</code> và đảm bảo đang chạy <code>node server.js</code>. Kiểm tra token trong <code>config.json</code>.</div></div>';
+  }
+}
+
+// ==== Tự động cập nhật khi 1Office có dữ liệu mới ====
+// Chữ ký = tổng số hồ sơ + ID lớn nhất ở trang 1 (trang mới nhất). Đổi => có dữ liệu mới.
+function sigFrom(page1){
+  // Trang đầu đã sắp theo ngày cập nhật giảm dần -> hồ sơ mới cập nhật nhất nằm đầu.
+  // Chữ ký đổi khi: có hồ sơ mới (total đổi) HOẶC có hồ sơ vừa được cập nhật (record đầu đổi).
+  const r0 = (page1.rows||[])[0] || {};
+  return (page1.total||0) + '|' + (r0.ID||'') + '|' + (r0.date_updated||'');
+}
+let toastTimer=null;
+function toast(msg){
+  const el=$('#toast'); el.textContent=msg; el.classList.add('show');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove('show'), 3500);
+}
+async function checkUpdate(){
+  if(!$('#auto').checked) return;
+  try{
+    const r = await fetchPage(1);
+    const sig = sigFrom(r);
+    // CHỈ THÔNG BÁO, không tự tải lại. Người dùng tự bấm Tải lại / F5 để xem dữ liệu mới.
+    if(lastSig && sig!==lastSig){
+      $('#newbar').classList.add('show');
+    }
+  }catch(e){ /* bỏ qua, thử lại lần sau */ }
+}
+function startAuto(){
+  clearInterval(autoTimer);
+  if($('#auto').checked) autoTimer = setInterval(checkUpdate, 60000); // kiểm tra mỗi 60 giây
+}
+
+$('#search').addEventListener('input', e=>{ filter=e.target.value.trim(); render(); });
+$('#view').addEventListener('change', render);
+$('#reload').addEventListener('click', load);
+$('#reloadNow').addEventListener('click', load);
+$('#limit').addEventListener('change', load);
+$('#auto').addEventListener('change', startAuto);
+
+load();
+startAuto();
+
+</script>
+</body>
+</html>
