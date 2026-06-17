@@ -69,7 +69,7 @@
   "chatbot": {
     "geminiApiKey": "PASTE_YOUR_GEMINI_API_KEY",
     "geminiModel": "gemini-2.0-flash",
-    "agentKey": "ttvh-agent",
-    "matchThreshold": 0.5
+    "matchThreshold": 0.5,
+    "zaloLink": "https://zalo.me/"
   }
 }

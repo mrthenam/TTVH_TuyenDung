@@ -3,56 +3,65 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Bảng nhân viên — Chat tuyển dụng TTVH</title>
+<title>Quản trị Chat — Tuyển dụng TTVH</title>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
 <style>
-  :root{--red:#e0342b;--line:rgba(40,28,18,.12);--muted:#8b7060}
+  :root{--blue:#155fc4;--line:rgba(20,40,70,.12);--muted:#6b7a8d}
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Be Vietnam Pro',system-ui,sans-serif;background:#f3f4fb;color:#22202e;height:100vh;display:flex;flex-direction:column}
-  header{background:#22202e;color:#fff;padding:12px 18px;display:flex;align-items:center;gap:12px}
-  header b{font-size:16px}header small{color:#bbb;font-size:12px}
-  header .right{margin-left:auto;font-size:13px;color:#cfcfe0}
-  .gate{margin:auto;background:#fff;padding:30px;border-radius:16px;box-shadow:0 20px 50px -20px rgba(0,0,0,.3);max-width:360px;text-align:center}
-  .gate h2{margin-bottom:6px}.gate p{color:var(--muted);font-size:14px;margin-bottom:18px}
-  .gate input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:10px;font-family:inherit;margin-bottom:12px}
-  .gate button{width:100%;padding:12px;border:none;border-radius:10px;background:var(--red);color:#fff;font-weight:700;cursor:pointer}
+  body{font-family:'Be Vietnam Pro',system-ui,sans-serif;background:#eef2f8;color:#1c2b3a;height:100vh;display:flex;flex-direction:column}
+  header{background:linear-gradient(135deg,#2f86f0,#155fc4);color:#fff;padding:12px 18px;display:flex;align-items:center;gap:12px}
+  header b{font-size:16px}header small{color:#dceaff;font-size:12px}
+  header .right{margin-left:auto;display:flex;align-items:center;gap:14px;font-size:13px}
+  header .right button{background:rgba(255,255,255,.18);border:none;color:#fff;border-radius:8px;padding:7px 12px;cursor:pointer;font-weight:700;font-family:inherit}
+  .gate{margin:auto;background:#fff;padding:34px;border-radius:18px;box-shadow:0 24px 60px -22px rgba(20,50,90,.35);max-width:380px;width:90%}
+  .gate .lg{width:60px;height:60px;border-radius:14px;background:linear-gradient(135deg,#2f86f0,#155fc4);display:grid;place-items:center;color:#fff;font-size:26px;margin:0 auto 14px}
+  .gate h2{text-align:center;margin-bottom:4px}.gate p{color:var(--muted);font-size:14px;margin-bottom:20px;text-align:center}
+  .gate label{font-size:13px;font-weight:600;color:var(--muted)}
+  .gate input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:10px;font-family:inherit;margin:5px 0 14px;font-size:14px}
+  .gate button.go{width:100%;padding:12px;border:none;border-radius:10px;background:var(--blue);color:#fff;font-weight:700;cursor:pointer;font-size:15px}
+  .gate .err{color:#e0342b;font-size:13px;text-align:center;margin-bottom:10px;display:none}
   .wrap{flex:1;display:flex;overflow:hidden}
-  .list{width:320px;border-right:1px solid var(--line);background:#fff;overflow-y:auto}
+  .list{width:330px;border-right:1px solid var(--line);background:#fff;overflow-y:auto}
   .conv{padding:13px 16px;border-bottom:1px solid var(--line);cursor:pointer}
-  .conv:hover{background:#fff7ea}.conv.sel{background:#fff1e1}
-  .conv .top{display:flex;align-items:center;gap:8px}
-  .conv .nm{font-weight:700;font-size:14px}
-  .conv .badge{font-size:10px;font-weight:800;padding:2px 7px;border-radius:99px;margin-left:auto}
-  .badge.h{background:#e7f8ee;color:#1f9e6e}.badge.b{background:#eef0ff;color:#5b3df0}
+  .conv:hover{background:#f4f8ff}.conv.sel{background:#e9f2ff}
+  .conv .top{display:flex;align-items:center;gap:8px}.conv .nm{font-weight:700;font-size:14px}
+  .conv .badge{font-size:10px;font-weight:800;padding:2px 8px;border-radius:99px;margin-left:auto}
+  .badge.h{background:#fff3df;color:#c47b00}.badge.b{background:#e9f2ff;color:#155fc4}
   .conv .last{font-size:12px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .main{flex:1;display:flex;flex-direction:column;background:#fff8f0}
-  .mhd{padding:12px 18px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
+  .main{flex:1;display:flex;flex-direction:column;background:#f4f7fb}
+  .mhd{padding:12px 18px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
   .mhd b{font-size:15px}
-  .toggle{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700}
-  .toggle button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 12px;cursor:pointer;font-weight:700;font-size:13px}
-  .toggle button.act{background:var(--red);color:#fff;border-color:var(--red)}
+  .toggle{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700}
+  .toggle button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 12px;cursor:pointer;font-weight:700;font-size:13px;font-family:inherit}
+  .toggle button.act{background:var(--blue);color:#fff;border-color:var(--blue)}
   .msgs{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:10px}
   .m{max-width:72%;padding:9px 13px;border-radius:13px;font-size:14px;line-height:1.45;white-space:pre-wrap;word-break:break-word}
+  .m .who{font-size:10px;opacity:.65;display:block;margin-bottom:2px}
   .m.user{align-self:flex-start;background:#fff;border:1px solid var(--line)}
-  .m.bot{align-self:flex-end;background:#eef0ff;border:1px solid #d8dcff}
-  .m.agent{align-self:flex-end;background:linear-gradient(135deg,#ff7a1a,#e0342b);color:#fff}
-  .m .who{font-size:10px;opacity:.6;display:block;margin-bottom:2px}
+  .m.bot{align-self:flex-end;background:#e9f2ff;border:1px solid #d3e4ff}
+  .m.agent{align-self:flex-end;background:linear-gradient(135deg,#2f86f0,#155fc4);color:#fff}
   .ft{display:flex;gap:10px;padding:14px;border-top:1px solid var(--line);background:#fff}
   .ft input{flex:1;border:1px solid var(--line);border-radius:10px;padding:11px 14px;font-family:inherit;font-size:14px}
-  .ft button{border:none;background:var(--red);color:#fff;border-radius:10px;padding:0 20px;font-weight:700;cursor:pointer}
+  .ft button{border:none;background:var(--blue);color:#fff;border-radius:10px;padding:0 20px;font-weight:700;cursor:pointer;font-family:inherit}
   .empty{margin:auto;color:var(--muted)}
 </style>
 </head>
 <body>
 <div id="gate" class="gate">
-  <h2>Bảng nhân viên</h2>
-  <p>Nhập mã nhân viên để vào trả lời chat khách hàng.</p>
-  <input id="key" type="password" placeholder="Mã nhân viên (AGENT_KEY)" />
-  <button id="enter">Vào</button>
+  <div class="lg">💬</div>
+  <h2>Quản trị Chat</h2>
+  <p>Đăng nhập để trả lời khách hàng trực tiếp</p>
+  <div class="err" id="err">Sai tài khoản hoặc mật khẩu</div>
+  <label>Tài khoản</label>
+  <input id="u" type="text" autocomplete="username" placeholder="Tên đăng nhập" />
+  <label>Mật khẩu</label>
+  <input id="p" type="password" autocomplete="current-password" placeholder="Mật khẩu" />
+  <button class="go" id="login">Đăng nhập</button>
 </div>
 
 <div id="app" style="display:none;flex:1;flex-direction:column">
-  <header><b>💬 Chat tuyển dụng</b><small>Thịnh Thế Vinh Hoa</small><span class="right" id="me"></span></header>
+  <header><b>💬 Quản trị Chat tuyển dụng</b><small>Thịnh Thế Vinh Hoa</small>
+    <span class="right"><span id="me"></span><button id="logout">Đăng xuất</button></span></header>
   <div class="wrap">
     <div class="list" id="list"></div>
     <div class="main">
@@ -73,70 +82,78 @@
 </div>
 
 <script>
-var KEY = localStorage.getItem('ttvh_agent_key') || new URLSearchParams(location.search).get('key') || '';
+var TOKEN = localStorage.getItem('ttvh_agent_token') || '';
 var sel = null, listTimer = null, msgTimer = null;
-var $ = function(s){return document.querySelector(s);};
+var $ = function (s) { return document.querySelector(s); };
 
-function api(path, opts){ var sep=path.indexOf('?')>=0?'&':'?'; return fetch(path+sep+'key='+encodeURIComponent(KEY), opts).then(function(r){ if(r.status===401) throw new Error('401'); return r.json(); }); }
-
-function enter(){
-  KEY = $('#key').value.trim() || KEY;
-  api('/api/agent/conversations').then(function(){
-    localStorage.setItem('ttvh_agent_key', KEY);
-    $('#gate').style.display='none'; $('#app').style.display='flex'; $('#me').textContent='Đã đăng nhập';
-    refreshList(); listTimer=setInterval(refreshList, 3000);
-  }).catch(function(){ alert('Sai mã nhân viên.'); });
+function api(path, opts) {
+  var sep = path.indexOf('?') >= 0 ? '&' : '?';
+  return fetch(path + sep + 'token=' + encodeURIComponent(TOKEN), opts).then(function (r) {
+    if (r.status === 401) { throw new Error('401'); } return r.json();
+  });
 }
-$('#enter').addEventListener('click', enter);
-$('#key').addEventListener('keydown', function(e){ if(e.key==='Enter') enter(); });
 
-function timeAgo(ts){ var s=(Date.now()-ts)/1000; if(s<60)return 'vừa xong'; if(s<3600)return Math.floor(s/60)+' phút'; if(s<86400)return Math.floor(s/3600)+' giờ'; return Math.floor(s/86400)+' ngày'; }
+function doLogin() {
+  var u = $('#u').value.trim(), p = $('#p').value;
+  fetch('/api/agent/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: u, password: p }) })
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (d.token) { TOKEN = d.token; localStorage.setItem('ttvh_agent_token', TOKEN); showApp(d.displayName || u); }
+      else { $('#err').style.display = 'block'; }
+    }).catch(function () { $('#err').style.display = 'block'; });
+}
+$('#login').addEventListener('click', doLogin);
+$('#p').addEventListener('keydown', function (e) { if (e.key === 'Enter') doLogin(); });
 
-function refreshList(){
-  api('/api/agent/conversations').then(function(d){
-    var html=''; (d.conversations||[]).forEach(function(c){
-      html += '<div class="conv'+(c.id===sel?' sel':'')+'" data-id="'+c.id+'">'
-        + '<div class="top"><span class="nm">'+esc(c.name)+'</span><span class="badge '+(c.humanMode?'h':'b')+'">'+(c.humanMode?'Nhân viên':'Bot')+'</span></div>'
-        + '<div class="last">'+(c.lastRole==='user'?'👤 ':(c.lastRole==='agent'?'🧑‍💼 ':'🤖 '))+esc(c.last||'')+' · '+timeAgo(c.updatedAt)+'</div></div>';
+function showApp(name) {
+  $('#gate').style.display = 'none'; $('#app').style.display = 'flex'; $('#me').textContent = '👤 ' + (name || '');
+  refreshList(); if (!listTimer) listTimer = setInterval(refreshList, 3000);
+}
+function logout() { TOKEN = ''; localStorage.removeItem('ttvh_agent_token'); clearInterval(listTimer); clearInterval(msgTimer); location.reload(); }
+$('#logout').addEventListener('click', logout);
+
+function timeAgo(ts) { var s = (Date.now() - ts) / 1000; if (s < 60) return 'vừa xong'; if (s < 3600) return Math.floor(s / 60) + ' phút'; if (s < 86400) return Math.floor(s / 3600) + ' giờ'; return Math.floor(s / 86400) + ' ngày'; }
+function esc(s) { return (s == null ? '' : String(s)).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+function refreshList() {
+  api('/api/agent/conversations').then(function (d) {
+    var html = ''; (d.conversations || []).forEach(function (c) {
+      html += '<div class="conv' + (c.id === sel ? ' sel' : '') + '" data-id="' + c.id + '">'
+        + '<div class="top"><span class="nm">' + esc(c.name) + '</span><span class="badge ' + (c.humanMode ? 'h' : 'b') + '">' + (c.humanMode ? 'Nhân viên' : 'Bot') + '</span></div>'
+        + '<div class="last">' + (c.lastRole === 'user' ? '👤 ' : (c.lastRole === 'agent' ? '🧑‍💼 ' : '🤖 ')) + esc(c.last || '') + ' · ' + timeAgo(c.updatedAt) + '</div></div>';
     });
-    $('#list').innerHTML = html || '<div style="padding:20px;color:#8b7060">Chưa có hội thoại nào.</div>';
-    [].forEach.call(document.querySelectorAll('.conv'), function(el){ el.onclick=function(){ selectConv(el.getAttribute('data-id')); }; });
-  }).catch(function(){});
+    $('#list').innerHTML = html || '<div style="padding:20px;color:#6b7a8d">Chưa có hội thoại nào.</div>';
+    [].forEach.call(document.querySelectorAll('.conv'), function (el) { el.onclick = function () { selectConv(el.getAttribute('data-id')); }; });
+  }).catch(function (e) { if (e.message === '401') logout(); });
 }
-
-function selectConv(id){ sel=id; refreshList(); $('#mhd').style.display='flex'; $('#ft').style.display='flex'; loadMsgs(); if(!msgTimer) msgTimer=setInterval(loadMsgs,2500); }
-
-function loadMsgs(){
-  if(!sel) return;
-  api('/api/agent/messages?sessionId='+encodeURIComponent(sel)).then(function(d){
-    $('#mname').textContent = d.name||'Khách'; $('#mid').textContent = ' · '+sel.slice(0,16);
+function selectConv(id) { sel = id; refreshList(); $('#mhd').style.display = 'flex'; $('#ft').style.display = 'flex'; loadMsgs(); if (!msgTimer) msgTimer = setInterval(loadMsgs, 2500); }
+function loadMsgs() {
+  if (!sel) return;
+  api('/api/agent/messages?sessionId=' + encodeURIComponent(sel)).then(function (d) {
+    $('#mname').textContent = d.name || 'Khách'; $('#mid').textContent = ' · ' + sel.slice(0, 16);
     $('#modeBot').classList.toggle('act', !d.humanMode); $('#modeHuman').classList.toggle('act', d.humanMode);
-    var html=''; (d.messages||[]).forEach(function(m){
-      var who = m.role==='user'?'Khách':(m.role==='agent'?'Nhân viên':'Bot'+(m.from?(' · '+m.from):''));
-      html += '<div class="m '+m.role+'"><span class="who">'+who+'</span>'+esc(m.text)+'</div>';
+    var html = ''; (d.messages || []).forEach(function (m) {
+      var who = m.role === 'user' ? 'Khách' : (m.role === 'agent' ? 'Nhân viên' : 'Bot' + (m.from ? (' · ' + m.from) : ''));
+      html += '<div class="m ' + m.role + '"><span class="who">' + who + '</span>' + esc(m.text) + '</div>';
     });
-    var box=$('#msgs'); var atBottom = box.scrollHeight-box.scrollTop-box.clientHeight < 60;
+    var box = $('#msgs'); var atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 60;
     box.innerHTML = html || '<div class="empty">Chưa có tin nhắn.</div>';
-    if(atBottom) box.scrollTop = box.scrollHeight;
-  }).catch(function(){});
+    if (atBottom) box.scrollTop = box.scrollHeight;
+  }).catch(function () {});
 }
-
-function setMode(human){ if(!sel) return; api('/api/agent/mode',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:sel,humanMode:human})}).then(function(){ loadMsgs(); refreshList(); }); }
-$('#modeBot').addEventListener('click', function(){ setMode(false); });
-$('#modeHuman').addEventListener('click', function(){ setMode(true); });
-
-function sendReply(){
-  var t=$('#reply').value.trim(); if(!t||!sel) return; $('#reply').value='';
-  api('/api/agent/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:sel,text:t})}).then(function(){ loadMsgs(); refreshList(); });
+function setMode(human) { if (!sel) return; api('/api/agent/mode', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sel, humanMode: human }) }).then(function () { loadMsgs(); refreshList(); }); }
+$('#modeBot').addEventListener('click', function () { setMode(false); });
+$('#modeHuman').addEventListener('click', function () { setMode(true); });
+function sendReply() {
+  var t = $('#reply').value.trim(); if (!t || !sel) return; $('#reply').value = '';
+  api('/api/agent/send', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sel, text: t }) }).then(function () { loadMsgs(); refreshList(); });
 }
 $('#rsend').addEventListener('click', sendReply);
-$('#reply').addEventListener('keydown', function(e){ if(e.key==='Enter') sendReply(); });
-$('#reply').addEventListener('input', function(){ if(sel) api('/api/agent/typing',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:sel})}).catch(function(){}); });
+$('#reply').addEventListener('keydown', function (e) { if (e.key === 'Enter') sendReply(); });
+$('#reply').addEventListener('input', function () { if (sel) api('/api/agent/typing', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sel }) }).catch(function () {}); });
 
-function esc(s){return (s==null?'':String(s)).replace(/[&<>\"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
-
-// tự đăng nhập nếu đã có key
-if(KEY){ $('#key').value=KEY; enter(); }
+// tự vào nếu đã có token
+if (TOKEN) { api('/api/agent/me').then(function (d) { showApp(d.displayName); }).catch(function () { localStorage.removeItem('ttvh_agent_token'); }); }
 </script>
 </body>
 </html>

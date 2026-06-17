@@ -305,6 +305,7 @@ const server = http.createServer(async (req, res) => {
 
 const cfg = loadConfig() || { port: 3000 };
 const PORT = process.env.PORT || cfg.port || 3000;
+chatbot.init().catch((e) => console.error(' [db] init lỗi:', e.message));
 server.listen(PORT, () => {
   console.log('--------------------------------------------------');
   console.log(' Thịnh Thế Vinh Hoa — server đang chạy');
