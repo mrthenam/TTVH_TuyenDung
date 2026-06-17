@@ -304,6 +304,20 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 500, { error: e.message });
     }
   }
+  // Sửa / xóa đăng ký đào tạo (cần token đăng nhập agent)
+  if (url.pathname.startsWith('/api/training/') && (req.method === 'PUT' || req.method === 'DELETE')) {
+    const token = (req.headers['authorization'] || '').replace(/^Bearer\s+/i, '') || url.searchParams.get('token');
+    if (!db.getSession(token)) return sendJson(res, 401, { error: 'Cần đăng nhập nhân viên.' });
+    const id = decodeURIComponent(url.pathname.slice('/api/training/'.length));
+    if (req.method === 'DELETE') {
+      try { const n = await db.deleteTraining(id); return sendJson(res, 200, { ok: n > 0, deleted: n }); }
+      catch (e) { return sendJson(res, 500, { error: e.message }); }
+    }
+    const form = await readBody(req);
+    if (!form) return sendJson(res, 400, { error: 'Dữ liệu không hợp lệ.' });
+    try { const n = await db.updateTraining(id, form); return sendJson(res, 200, { ok: n > 0, updated: n }); }
+    catch (e) { return sendJson(res, 500, { error: e.message }); }
+  }
 
   // Nhận hồ sơ ứng tuyển từ form -> tạo ứng viên trên 1Office
   if (url.pathname === '/api/apply' && req.method === 'POST') {

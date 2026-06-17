@@ -186,6 +186,26 @@ async function listTraining() {
   }
   return [...memTraining].sort((a, b) => b.ts - a.ts);
 }
+const TRAIN_COLS = ['name', 'phone', 'email', 'province', 'district', 'brand', 'position', 'store', 'course', 'sess_date', 'sess_time', 'mode', 'note'];
+async function updateTraining(id, r) {
+  if (HAS_PG) {
+    const sets = [], vals = []; let i = 1;
+    TRAIN_COLS.forEach(c => { if (c in r) { sets.push(c + '=$' + (++i)); vals.push(r[c]); } });
+    if (!sets.length) return 0;
+    const res = await pool.query('UPDATE training SET ' + sets.join(',') + ' WHERE id=$1', [id, ...vals]);
+    return res.rowCount;
+  }
+  const row = memTraining.find(x => String(x.id) === String(id));
+  if (!row) return 0;
+  TRAIN_COLS.forEach(c => { if (c in r) row[c] = r[c]; });
+  return 1;
+}
+async function deleteTraining(id) {
+  if (HAS_PG) { const r = await pool.query('DELETE FROM training WHERE id=$1', [id]); return r.rowCount; }
+  const idx = memTraining.findIndex(x => String(x.id) === String(id));
+  if (idx >= 0) { memTraining.splice(idx, 1); return 1; }
+  return 0;
+}
 
 module.exports = {
   init, HAS_PG,
@@ -193,5 +213,5 @@ module.exports = {
   createSession, getSession,
   ensureConv, addMessage, getMessages, setHumanMode, getConv, listConversations,
   setTyping, isTyping,
-  addTraining, listTraining
+  addTraining, listTraining, updateTraining, deleteTraining
 };

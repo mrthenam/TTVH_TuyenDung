@@ -3,73 +3,145 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Quản trị Chat — Tuyển dụng TTVH</title>
+<title>Quản trị tuyển dụng — Thịnh Thế Vinh Hoa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
 <style>
-  :root{--blue:#155fc4;--line:rgba(20,40,70,.12);--muted:#6b7a8d}
+  :root{
+    --bg:#fff8f0;--bg-soft:#fff1e1;--card:#fff;--card-2:#fff6ec;
+    --line:rgba(54,28,18,.10);--line-2:rgba(54,28,18,.18);
+    --txt:#2a1810;--muted:#8b7060;--red:#e0342b;--red-2:#c52820;
+    --gold:#f4a521;--amber:#ff7a1a;--green:#2faa5e;
+    --grad:linear-gradient(135deg,#ff7a1a 0%,#e0342b 100%);
+    --grad-soft:linear-gradient(135deg,rgba(244,165,33,.16),rgba(224,52,43,.06));
+    --shadow:0 18px 50px -24px rgba(224,52,43,.4);
+  }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Be Vietnam Pro',system-ui,sans-serif;background:#eef2f8;color:#1c2b3a;height:100vh;display:flex;flex-direction:column}
-  header{background:linear-gradient(135deg,#2f86f0,#155fc4);color:#fff;padding:12px 18px;display:flex;align-items:center;gap:12px}
-  header b{font-size:16px}header small{color:#dceaff;font-size:12px}
-  header .right{margin-left:auto;display:flex;align-items:center;gap:14px;font-size:13px}
-  header .right button{background:rgba(255,255,255,.18);border:none;color:#fff;border-radius:8px;padding:7px 12px;cursor:pointer;font-weight:700;font-family:inherit}
-  .gate{margin:auto;background:#fff;padding:34px;border-radius:18px;box-shadow:0 24px 60px -22px rgba(20,50,90,.35);max-width:380px;width:90%}
-  .gate .lg{width:60px;height:60px;border-radius:14px;background:linear-gradient(135deg,#2f86f0,#155fc4);display:grid;place-items:center;color:#fff;font-size:26px;margin:0 auto 14px}
-  .gate h2{text-align:center;margin-bottom:4px}.gate p{color:var(--muted);font-size:14px;margin-bottom:20px;text-align:center}
-  .gate label{font-size:13px;font-weight:600;color:var(--muted)}
-  .gate input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:10px;font-family:inherit;margin:5px 0 14px;font-size:14px}
-  .gate button.go{width:100%;padding:12px;border:none;border-radius:10px;background:var(--blue);color:#fff;font-weight:700;cursor:pointer;font-size:15px}
-  .gate .err{color:#e0342b;font-size:13px;text-align:center;margin-bottom:10px;display:none}
-  .wrap{flex:1;display:flex;overflow:hidden}
-  .list{width:330px;border-right:1px solid var(--line);background:#fff;overflow-y:auto}
+  body{font-family:'Be Vietnam Pro',system-ui,sans-serif;background:var(--bg);color:var(--txt);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+  button{font-family:inherit}
+
+  /* ===== LOGIN ===== */
+  .gate{margin:auto;background:var(--card);padding:36px;border-radius:20px;box-shadow:var(--shadow);max-width:390px;width:92%;border:1px solid var(--line)}
+  .gate .lg{width:64px;height:64px;border-radius:16px;overflow:hidden;margin:0 auto 16px;box-shadow:0 12px 28px -14px rgba(224,52,43,.6)}
+  .gate .lg img{width:100%;height:100%;object-fit:cover}
+  .gate h2{text-align:center;margin-bottom:4px;font-weight:900}
+  .gate p{color:var(--muted);font-size:14px;margin-bottom:22px;text-align:center}
+  .gate label{font-size:13px;font-weight:700;color:var(--muted)}
+  .gate input{width:100%;padding:13px 15px;border:1px solid var(--line-2);border-radius:11px;font-family:inherit;margin:6px 0 15px;font-size:14px;background:var(--bg)}
+  .gate input:focus{outline:none;border-color:var(--red)}
+  .gate button.go{width:100%;padding:13px;border:none;border-radius:11px;background:var(--grad);color:#fff;font-weight:800;cursor:pointer;font-size:15px;box-shadow:0 12px 28px -12px rgba(224,52,43,.6)}
+  .gate .err{color:var(--red);font-size:13px;text-align:center;margin-bottom:12px;display:none;font-weight:600}
+
+  /* ===== APP SHELL ===== */
+  #app{flex:1;flex-direction:column;min-height:0}
+  header.bar{display:flex;align-items:center;gap:13px;padding:0 20px;height:64px;background:rgba(255,248,240,.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);position:relative;z-index:5}
+  header.bar::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--grad);opacity:.85}
+  header.bar .logo{height:42px;width:42px;border-radius:10px;object-fit:cover}
+  header.bar .ttl b{font-size:16px;font-weight:900;display:block;line-height:1.1}
+  header.bar .ttl small{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.04em}
+  header.bar .right{margin-left:auto;display:flex;align-items:center;gap:14px}
+  header.bar .who{font-size:13px;font-weight:700;color:var(--txt);display:flex;align-items:center;gap:7px}
+  header.bar .who .dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
+  header.bar .logout{background:var(--card);border:1px solid var(--line-2);color:var(--txt);border-radius:9px;padding:8px 14px;cursor:pointer;font-weight:700;font-size:13px}
+  header.bar .logout:hover{background:var(--card-2)}
+
+  .shell{flex:1;display:flex;min-height:0}
+  aside.side{width:218px;background:var(--card);border-right:1px solid var(--line);padding:16px 12px;display:flex;flex-direction:column;gap:6px}
+  aside.side .lbl{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:8px 10px 6px}
+  .navbtn{display:flex;align-items:center;gap:12px;padding:12px 14px;border:none;background:none;border-radius:12px;cursor:pointer;font-weight:700;font-size:14.5px;color:var(--txt);text-align:left;width:100%;transition:background .15s}
+  .navbtn .ic{font-size:18px;width:22px;text-align:center}
+  .navbtn:hover{background:var(--card-2)}
+  .navbtn.act{background:var(--grad);color:#fff;box-shadow:0 10px 24px -12px rgba(224,52,43,.6)}
+  .navbtn .cnt{margin-left:auto;font-size:11px;font-weight:800;background:rgba(224,52,43,.12);color:var(--red);padding:2px 9px;border-radius:99px}
+  .navbtn.act .cnt{background:rgba(255,255,255,.25);color:#fff}
+  aside.side .foot{margin-top:auto;padding:10px;color:var(--muted);font-size:11px;text-align:center}
+
+  .content{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--bg)}
+
+  /* ===== CHAT ===== */
+  .chatwrap{flex:1;display:flex;min-height:0}
+  .list{width:320px;border-right:1px solid var(--line);background:var(--card);overflow-y:auto}
   .conv{padding:13px 16px;border-bottom:1px solid var(--line);cursor:pointer}
-  .conv:hover{background:#f4f8ff}.conv.sel{background:#e9f2ff}
-  .conv .top{display:flex;align-items:center;gap:8px}.conv .nm{font-weight:700;font-size:14px}
-  .conv .badge{font-size:10px;font-weight:800;padding:2px 8px;border-radius:99px;margin-left:auto}
-  .badge.h{background:#fff3df;color:#c47b00}.badge.b{background:#e9f2ff;color:#155fc4}
+  .conv:hover{background:var(--card-2)}.conv.sel{background:var(--grad-soft)}
+  .conv .top{display:flex;align-items:center;gap:8px}.conv .nm{font-weight:800;font-size:14px}
+  .conv .badge{font-size:10px;font-weight:800;padding:2px 9px;border-radius:99px;margin-left:auto}
+  .badge.h{background:rgba(244,165,33,.18);color:#b9740a}.badge.b{background:rgba(224,52,43,.1);color:var(--red)}
   .conv .last{font-size:12px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .main{flex:1;display:flex;flex-direction:column;background:#f4f7fb}
-  .mhd{padding:12px 18px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+  .cmain{flex:1;display:flex;flex-direction:column;background:var(--bg-soft);min-width:0}
+  .mhd{padding:13px 18px;background:var(--card);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
   .mhd b{font-size:15px}
-  .toggle{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700}
-  .toggle button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 12px;cursor:pointer;font-weight:700;font-size:13px;font-family:inherit}
-  .toggle button.act{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .toggle{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--muted)}
+  .toggle button{border:1px solid var(--line-2);background:var(--card);border-radius:9px;padding:7px 12px;cursor:pointer;font-weight:700;font-size:13px}
+  .toggle button.act{background:var(--grad);color:#fff;border-color:transparent}
   .msgs{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:10px}
-  .m{max-width:72%;padding:9px 13px;border-radius:13px;font-size:14px;line-height:1.45;white-space:pre-wrap;word-break:break-word}
-  .m .who{font-size:10px;opacity:.65;display:block;margin-bottom:2px}
-  .m.user{align-self:flex-start;background:#fff;border:1px solid var(--line)}
-  .m.bot{align-self:flex-end;background:#e9f2ff;border:1px solid #d3e4ff}
-  .m.agent{align-self:flex-end;background:linear-gradient(135deg,#2f86f0,#155fc4);color:#fff}
-  .ft{display:flex;gap:10px;padding:14px;border-top:1px solid var(--line);background:#fff}
-  .ft input{flex:1;border:1px solid var(--line);border-radius:10px;padding:11px 14px;font-family:inherit;font-size:14px}
-  .ft button{border:none;background:var(--blue);color:#fff;border-radius:10px;padding:0 20px;font-weight:700;cursor:pointer;font-family:inherit}
+  .m{max-width:72%;padding:9px 13px;border-radius:14px;font-size:14px;line-height:1.45;white-space:pre-wrap;word-break:break-word}
+  .m .who{font-size:10px;opacity:.65;display:block;margin-bottom:2px;font-weight:700}
+  .m.user{align-self:flex-start;background:var(--card);border:1px solid var(--line)}
+  .m.bot{align-self:flex-end;background:var(--card-2);border:1px solid var(--line-2)}
+  .m.agent{align-self:flex-end;background:var(--grad);color:#fff}
+  .ft{display:flex;gap:10px;padding:14px;border-top:1px solid var(--line);background:var(--card)}
+  .ft input{flex:1;border:1px solid var(--line-2);border-radius:11px;padding:12px 15px;font-family:inherit;font-size:14px;background:var(--bg)}
+  .ft input:focus{outline:none;border-color:var(--red)}
+  .ft button{border:none;background:var(--grad);color:#fff;border-radius:11px;padding:0 22px;font-weight:800;cursor:pointer}
   .empty{margin:auto;color:var(--muted)}
-  /* tabs trên header */
-  .tabs{margin-left:22px;display:flex;gap:8px}
-  .tabs button{background:rgba(255,255,255,.16);border:none;color:#fff;border-radius:8px;padding:7px 14px;cursor:pointer;font-weight:700;font-family:inherit;font-size:13px;opacity:.8}
-  .tabs button.act{background:#fff;color:var(--blue);opacity:1}
-  /* khung đào tạo */
-  .trainview{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#f4f7fb}
-  .tbar{display:flex;align-items:center;gap:12px;padding:12px 18px;background:#fff;border-bottom:1px solid var(--line);flex-wrap:wrap}
-  .tbar b{font-size:15px}
-  .tcount{color:var(--muted);font-size:13px}
-  .tbar input{margin-left:auto;border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-family:inherit;font-size:13px;width:260px;max-width:48vw}
-  .tbar button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:700;font-size:13px;font-family:inherit}
-  .tbar button:hover{background:#f4f8ff}
-  .ttable-wrap{flex:1;overflow:auto}
-  .ttable{border-collapse:collapse;width:100%;font-size:13px;background:#fff}
-  .ttable th,.ttable td{border-bottom:1px solid var(--line);padding:9px 12px;text-align:left;white-space:nowrap;vertical-align:top}
-  .ttable th{position:sticky;top:0;background:#eef4ff;font-weight:800;z-index:1}
-  .ttable tbody tr:hover td{background:#f8fbff}
-  .ttable td.wr{white-space:normal;max-width:260px}
-  .ttable td.idx{color:var(--muted)}
+
+  /* ===== TRAINING ===== */
+  .trainview{flex:1;display:flex;flex-direction:column;min-height:0;padding:20px 22px;gap:16px}
+  .pagehd{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .pagehd h1{font-size:22px;font-weight:900}
+  .pagehd .sub{color:var(--muted);font-size:13px;font-weight:600}
+  .pagehd .spacer{flex:1}
+  .tbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .tbar input.search{border:1px solid var(--line-2);border-radius:11px;padding:10px 14px;font-family:inherit;font-size:13.5px;width:300px;max-width:60vw;background:var(--card)}
+  .tbar input.search:focus{outline:none;border-color:var(--red)}
+  .btn{border:1px solid var(--line-2);background:var(--card);border-radius:11px;padding:10px 16px;cursor:pointer;font-weight:700;font-size:13.5px;color:var(--txt);display:inline-flex;align-items:center;gap:7px}
+  .btn:hover{background:var(--card-2)}
+  .btn.primary{background:var(--grad);color:#fff;border-color:transparent;box-shadow:0 12px 26px -14px rgba(224,52,43,.6)}
+  .btn.primary:hover{filter:brightness(1.03)}
+  .tablecard{flex:1;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:auto;box-shadow:0 18px 50px -34px rgba(224,52,43,.4)}
+  table.tt{border-collapse:collapse;width:100%;font-size:13px}
+  table.tt th,table.tt td{border-bottom:1px solid var(--line);padding:11px 13px;text-align:left;white-space:nowrap;vertical-align:top}
+  table.tt th{position:sticky;top:0;background:var(--card-2);font-weight:800;z-index:1;color:var(--txt)}
+  table.tt tbody tr:hover td{background:var(--bg-soft)}
+  table.tt td.wr{white-space:normal;max-width:250px}
+  table.tt td.idx{color:var(--muted);font-weight:700}
+  .rowact{display:flex;gap:6px}
+  .iconbtn{border:1px solid var(--line-2);background:var(--card);border-radius:8px;padding:5px 10px;cursor:pointer;font-weight:700;font-size:12px}
+  .iconbtn.edit{color:var(--amber)}.iconbtn.edit:hover{background:rgba(255,122,26,.1)}
+  .iconbtn.del{color:var(--red)}.iconbtn.del:hover{background:rgba(224,52,43,.1)}
+  .norows{padding:34px;color:var(--muted);text-align:center}
+
+  /* ===== MODAL ===== */
+  .overlay{position:fixed;inset:0;background:rgba(42,24,16,.45);backdrop-filter:blur(2px);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+  .overlay.show{display:flex}
+  .modal{background:var(--card);border-radius:18px;box-shadow:0 30px 80px -20px rgba(42,24,16,.55);width:680px;max-width:100%;max-height:90vh;overflow:auto}
+  .modal .mh{display:flex;align-items:center;gap:10px;padding:20px 24px;border-bottom:1px solid var(--line)}
+  .modal .mh h3{font-size:18px;font-weight:900}
+  .modal .mh .x{margin-left:auto;border:none;background:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1}
+  .modal .mb{padding:22px 24px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:560px){.grid2{grid-template-columns:1fr}}
+  .fld{display:flex;flex-direction:column;gap:6px}
+  .fld.full{grid-column:1/-1}
+  .fld label{font-size:12.5px;font-weight:700;color:var(--muted)}
+  .fld label .req{color:var(--red)}
+  .fld input,.fld select{padding:11px 13px;border:1px solid var(--line-2);border-radius:10px;font-family:inherit;font-size:14px;background:var(--bg);color:var(--txt)}
+  .fld input:focus,.fld select:focus{outline:none;border-color:var(--red)}
+  .modal .mf{display:flex;gap:10px;justify-content:flex-end;padding:18px 24px;border-top:1px solid var(--line)}
+  #tmErr{display:none;color:var(--red);font-weight:600;font-size:13px;margin-bottom:14px;background:rgba(224,52,43,.08);border:1px solid rgba(224,52,43,.3);padding:10px 12px;border-radius:9px}
+
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--txt);color:#fff;padding:12px 22px;border-radius:12px;font-weight:700;font-size:14px;opacity:0;transition:.25s;z-index:60;pointer-events:none}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  @media(max-width:820px){aside.side{width:60px}.navbtn span.t{display:none}.navbtn .cnt{display:none}aside.side .lbl,aside.side .foot{display:none}.list{width:240px}}
 </style>
 </head>
 <body>
+
 <div id="gate" class="gate">
-  <div class="lg">💬</div>
-  <h2>Quản trị Chat</h2>
-  <p>Đăng nhập để trả lời khách hàng trực tiếp</p>
+  <div class="lg"><img src="images/logo-ttvh.jpg" alt="TTVH" /></div>
+  <h2>Quản trị tuyển dụng</h2>
+  <p>Đăng nhập để quản lý chat & đào tạo</p>
   <div class="err" id="err">Sai tài khoản hoặc mật khẩu</div>
   <label>Tài khoản</label>
   <input id="u" type="text" autocomplete="username" placeholder="Tên đăng nhập" />
@@ -78,46 +150,113 @@
   <button class="go" id="login">Đăng nhập</button>
 </div>
 
-<div id="app" style="display:none;flex:1;flex-direction:column">
-  <header><b>📊 Quản trị tuyển dụng</b><small>Thịnh Thế Vinh Hoa</small>
-    <span class="tabs">
-      <button id="tabChat" class="act">💬 Chat</button>
-      <button id="tabTrain">📋 Đào tạo</button>
-    </span>
-    <span class="right"><span id="me"></span><button id="logout">Đăng xuất</button></span></header>
-  <div class="wrap" id="viewChat">
-    <div class="list" id="list"></div>
-    <div class="main">
-      <div class="mhd" id="mhd" style="display:none">
-        <b id="mname"></b><span id="mid" style="font-size:11px;color:var(--muted)"></span>
-        <div class="toggle">Chế độ:
-          <button id="modeBot">🤖 Bot</button>
-          <button id="modeHuman">👤 Nhân viên</button>
+<div id="app" style="display:none">
+  <header class="bar">
+    <img class="logo" src="images/logo-ttvh.jpg" alt="TTVH" />
+    <div class="ttl"><b>Quản trị tuyển dụng</b><small>THỊNH THẾ VINH HOA F&B GROUP</small></div>
+    <div class="right">
+      <span class="who"><span class="dot"></span><span id="me"></span></span>
+      <button class="logout" id="logout">Đăng xuất</button>
+    </div>
+  </header>
+
+  <div class="shell">
+    <aside class="side">
+      <div class="lbl">Quản lý</div>
+      <button class="navbtn act" id="tabChat"><span class="ic">💬</span><span class="t">Chat khách hàng</span></button>
+      <button class="navbtn" id="tabTrain"><span class="ic">📋</span><span class="t">Đăng ký đào tạo</span><span class="cnt" id="navTrainCnt">0</span></button>
+      <div class="foot">© 2026 TTVH F&B</div>
+    </aside>
+
+    <div class="content">
+
+      <!-- CHAT -->
+      <div class="chatwrap" id="viewChat">
+        <div class="list" id="list"></div>
+        <div class="cmain">
+          <div class="mhd" id="mhd" style="display:none">
+            <b id="mname"></b><span id="mid" style="font-size:11px;color:var(--muted)"></span>
+            <div class="toggle">Chế độ:
+              <button id="modeBot">🤖 Bot</button>
+              <button id="modeHuman">👤 Nhân viên</button>
+            </div>
+          </div>
+          <div class="msgs" id="msgs"><div class="empty">Chọn một hội thoại bên trái để trả lời.</div></div>
+          <div class="ft" id="ft" style="display:none">
+            <input id="reply" type="text" placeholder="Nhập câu trả lời… (gửi sẽ tự chuyển sang chế độ Nhân viên)" />
+            <button id="rsend">Gửi</button>
+          </div>
         </div>
       </div>
-      <div class="msgs" id="msgs"><div class="empty">Chọn một hội thoại bên trái để trả lời.</div></div>
-      <div class="ft" id="ft" style="display:none">
-        <input id="reply" type="text" placeholder="Nhập câu trả lời… (gửi sẽ tự chuyển sang chế độ Nhân viên)" />
-        <button id="rsend">Gửi</button>
-      </div>
-    </div>
-  </div>
 
-  <div class="trainview" id="viewTraining" style="display:none">
-    <div class="tbar">
-      <b>📋 Đăng ký lịch đào tạo</b>
-      <span class="tcount" id="tcount"></span>
-      <input id="tsearch" type="text" placeholder="Tìm theo tên, SĐT, email, cửa hàng…" />
-      <button id="treload">↻ Tải lại</button>
-      <button id="tcsv">⬇ Xuất CSV</button>
+      <!-- ĐÀO TẠO -->
+      <div class="trainview" id="viewTraining" style="display:none">
+        <div class="pagehd">
+          <div>
+            <h1>📋 Đăng ký lịch đào tạo</h1>
+            <div class="sub" id="tcount">0 đăng ký</div>
+          </div>
+          <div class="spacer"></div>
+          <div class="tbar">
+            <input id="tsearch" class="search" type="text" placeholder="Tìm theo tên, SĐT, email, cửa hàng…" />
+            <button class="btn" id="treload">↻ Tải lại</button>
+            <button class="btn" id="tcsv">⬇ Xuất CSV</button>
+            <button class="btn primary" id="tadd">＋ Thêm đăng ký</button>
+          </div>
+        </div>
+        <div class="tablecard"><table class="tt" id="ttable"></table></div>
+      </div>
+
     </div>
-    <div class="ttable-wrap"><table class="ttable" id="ttable"></table></div>
   </div>
 </div>
 
+<!-- MODAL THÊM/SỬA -->
+<div class="overlay" id="tmodal">
+  <div class="modal">
+    <div class="mh"><h3 id="tmTitle">Thêm đăng ký đào tạo</h3><button class="x" id="tmX">×</button></div>
+    <div class="mb">
+      <div id="tmErr"></div>
+      <div class="grid2">
+        <div class="fld"><label>Họ tên <span class="req">*</span></label><input id="f_name" type="text" placeholder="Nguyễn Văn A" /></div>
+        <div class="fld"><label>Số điện thoại <span class="req">*</span></label><input id="f_phone" type="tel" placeholder="0901234567" /></div>
+        <div class="fld"><label>Email</label><input id="f_email" type="email" placeholder="ban@gmail.com" /></div>
+        <div class="fld"><label>Tỉnh thành</label><input id="f_province" type="text" placeholder="TP. Hồ Chí Minh" /></div>
+        <div class="fld"><label>Quận huyện</label><input id="f_district" type="text" placeholder="Quận 1" /></div>
+        <div class="fld"><label>Vị trí trúng tuyển</label>
+          <select id="f_position">
+            <option value="">— Chọn —</option>
+            <option>Quản Lý (SM)</option>
+            <option>Giám Sát (SL)</option>
+            <option>Tổ Trưởng (ASF)</option>
+            <option>Nhân Viên Full-time (SF)</option>
+            <option>Nhân Viên Part-time (Staff)</option>
+          </select>
+        </div>
+        <div class="fld full"><label>Hình thức đào tạo</label>
+          <select id="f_mode">
+            <option value="">— Chọn —</option>
+            <option>Tham gia trực tiếp toàn bộ</option>
+            <option>Tham gia Online ngày đầu - trực tiếp ngày thứ hai</option>
+            <option>Tham gia Online toàn bộ</option>
+          </select>
+        </div>
+        <div class="fld"><label>Ngày dự kiến đào tạo</label><input id="f_sess_date" type="date" /></div>
+        <div class="fld"><label>Cửa hàng làm việc</label><input id="f_store" type="text" placeholder="VD: MC005-65 Ngô Tất Tố" /></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn" id="tmCancel">Hủy</button>
+      <button class="btn primary" id="tmSave">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script>
 var TOKEN = localStorage.getItem('ttvh_agent_token') || '';
-var sel = null, listTimer = null, msgTimer = null;
+var sel = null, listTimer = null, msgTimer = null, editingId = null;
 var $ = function (s) { return document.querySelector(s); };
 
 function api(path, opts) {
@@ -126,7 +265,10 @@ function api(path, opts) {
     if (r.status === 401) { throw new Error('401'); } return r.json();
   });
 }
+function esc(s) { return (s == null ? '' : String(s)).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+function toast(t) { var el = $('#toast'); el.textContent = t; el.classList.add('show'); clearTimeout(el._t); el._t = setTimeout(function () { el.classList.remove('show'); }, 2200); }
 
+/* ===== LOGIN ===== */
 function doLogin() {
   var u = $('#u').value.trim(), p = $('#p').value;
   fetch('/api/agent/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: u, password: p }) })
@@ -140,15 +282,15 @@ $('#login').addEventListener('click', doLogin);
 $('#p').addEventListener('keydown', function (e) { if (e.key === 'Enter') doLogin(); });
 
 function showApp(name) {
-  $('#gate').style.display = 'none'; $('#app').style.display = 'flex'; $('#me').textContent = '👤 ' + (name || '');
+  $('#gate').style.display = 'none'; $('#app').style.display = 'flex'; $('#app').style.flexDirection = 'column'; $('#me').textContent = name || 'Nhân viên';
   refreshList(); if (!listTimer) listTimer = setInterval(refreshList, 3000);
 }
 function logout() { TOKEN = ''; localStorage.removeItem('ttvh_agent_token'); clearInterval(listTimer); clearInterval(msgTimer); location.reload(); }
 $('#logout').addEventListener('click', logout);
 
 function timeAgo(ts) { var s = (Date.now() - ts) / 1000; if (s < 60) return 'vừa xong'; if (s < 3600) return Math.floor(s / 60) + ' phút'; if (s < 86400) return Math.floor(s / 3600) + ' giờ'; return Math.floor(s / 86400) + ' ngày'; }
-function esc(s) { return (s == null ? '' : String(s)).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 
+/* ===== CHAT ===== */
 function refreshList() {
   api('/api/agent/conversations').then(function (d) {
     var html = ''; (d.conversations || []).forEach(function (c) {
@@ -156,7 +298,7 @@ function refreshList() {
         + '<div class="top"><span class="nm">' + esc(c.name) + '</span><span class="badge ' + (c.humanMode ? 'h' : 'b') + '">' + (c.humanMode ? 'Nhân viên' : 'Bot') + '</span></div>'
         + '<div class="last">' + (c.lastRole === 'user' ? '👤 ' : (c.lastRole === 'agent' ? '🧑‍💼 ' : '🤖 ')) + esc(c.last || '') + ' · ' + timeAgo(c.updatedAt) + '</div></div>';
     });
-    $('#list').innerHTML = html || '<div style="padding:20px;color:#6b7a8d">Chưa có hội thoại nào.</div>';
+    $('#list').innerHTML = html || '<div style="padding:20px;color:#8b7060">Chưa có hội thoại nào.</div>';
     [].forEach.call(document.querySelectorAll('.conv'), function (el) { el.onclick = function () { selectConv(el.getAttribute('data-id')); }; });
   }).catch(function (e) { if (e.message === '401') logout(); });
 }
@@ -186,7 +328,7 @@ $('#rsend').addEventListener('click', sendReply);
 $('#reply').addEventListener('keydown', function (e) { if (e.key === 'Enter') sendReply(); });
 $('#reply').addEventListener('input', function () { if (sel) api('/api/agent/typing', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sel }) }).catch(function () {}); });
 
-// ===== Tab Chat / Đào tạo =====
+/* ===== TAB SWITCH ===== */
 function switchView(v) {
   var train = v === 'train';
   $('#viewChat').style.display = train ? 'none' : 'flex';
@@ -198,9 +340,10 @@ function switchView(v) {
 $('#tabChat').addEventListener('click', function () { switchView('chat'); });
 $('#tabTrain').addEventListener('click', function () { switchView('train'); });
 
+/* ===== TRAINING LIST ===== */
 var trainRows = [];
 function loadTraining() {
-  api('/api/training').then(function (d) { trainRows = d.rows || []; renderTraining(); })
+  api('/api/training').then(function (d) { trainRows = d.rows || []; $('#navTrainCnt').textContent = trainRows.length; renderTraining(); })
     .catch(function (e) { if (e.message === '401') logout(); });
 }
 function pad2(n) { return (n < 10 ? '0' : '') + n; }
@@ -213,16 +356,21 @@ function renderTraining() {
     return [r.name, r.phone, r.email, r.province, r.district, r.position, r.mode, r.store].join(' ').toLowerCase().indexOf(q) >= 0;
   });
   $('#tcount').textContent = rows.length + (q ? ' / ' + trainRows.length : '') + ' đăng ký';
-  if (!rows.length) { $('#ttable').innerHTML = '<tbody><tr><td style="padding:30px;color:#6b7a8d">' + (trainRows.length ? 'Không có kết quả phù hợp.' : 'Chưa có đăng ký đào tạo nào.') + '</td></tr></tbody>'; return; }
-  var html = '<thead><tr><th>#</th><th>Thời gian gửi</th><th>Họ tên</th><th>SĐT</th><th>Email</th><th>Tỉnh thành</th><th>Quận huyện</th><th>Vị trí trúng tuyển</th><th>Hình thức đào tạo</th><th>Ngày dự kiến</th><th>Cửa hàng làm việc</th></tr></thead><tbody>';
+  if (!rows.length) { $('#ttable').innerHTML = '<tbody><tr><td class="norows">' + (trainRows.length ? 'Không có kết quả phù hợp.' : 'Chưa có đăng ký đào tạo nào. Bấm “Thêm đăng ký”.') + '</td></tr></tbody>'; return; }
+  var html = '<thead><tr><th>#</th><th>Thời gian gửi</th><th>Họ tên</th><th>SĐT</th><th>Email</th><th>Tỉnh thành</th><th>Quận huyện</th><th>Vị trí</th><th>Hình thức</th><th>Ngày dự kiến</th><th>Cửa hàng</th><th>Thao tác</th></tr></thead><tbody>';
   rows.forEach(function (r, i) {
-    html += '<tr><td class="idx">' + (i + 1) + '</td><td>' + esc(fmtTs(r.ts)) + '</td><td>' + esc(r.name) + '</td><td>' + esc(r.phone) + '</td><td>' + esc(r.email) + '</td><td>' + esc(r.province) + '</td><td>' + esc(r.district) + '</td><td>' + esc(r.position) + '</td><td class="wr">' + esc(r.mode) + '</td><td>' + esc(fmtDate(r.sess_date)) + '</td><td class="wr">' + esc(r.store) + '</td></tr>';
+    html += '<tr><td class="idx">' + (i + 1) + '</td><td>' + esc(fmtTs(r.ts)) + '</td><td>' + esc(r.name) + '</td><td>' + esc(r.phone) + '</td><td>' + esc(r.email) + '</td><td>' + esc(r.province) + '</td><td>' + esc(r.district) + '</td><td>' + esc(r.position) + '</td><td class="wr">' + esc(r.mode) + '</td><td>' + esc(fmtDate(r.sess_date)) + '</td><td class="wr">' + esc(r.store) + '</td>'
+      + '<td><div class="rowact"><button class="iconbtn edit" data-edit="' + r.id + '">✎ Sửa</button><button class="iconbtn del" data-del="' + r.id + '">🗑 Xóa</button></div></td></tr>';
   });
   html += '</tbody>';
   $('#ttable').innerHTML = html;
+  [].forEach.call(document.querySelectorAll('[data-edit]'), function (b) { b.onclick = function () { openEdit(b.getAttribute('data-edit')); }; });
+  [].forEach.call(document.querySelectorAll('[data-del]'), function (b) { b.onclick = function () { delRow(b.getAttribute('data-del')); }; });
 }
 $('#tsearch').addEventListener('input', renderTraining);
 $('#treload').addEventListener('click', loadTraining);
+
+/* ===== CSV ===== */
 $('#tcsv').addEventListener('click', function () {
   var head = ['Thời gian gửi', 'Họ tên', 'SĐT', 'Email', 'Tỉnh thành', 'Quận huyện', 'Vị trí trúng tuyển', 'Hình thức đào tạo', 'Ngày dự kiến', 'Cửa hàng làm việc'];
   var lines = [head.join(',')];
@@ -234,7 +382,71 @@ $('#tcsv').addEventListener('click', function () {
   var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'dangky-daotao.csv'; a.click();
 });
 
-// tự vào nếu đã có token
+/* ===== CRUD MODAL ===== */
+function setSelectValue(id, value) {
+  var sel = $(id); value = value || '';
+  // nếu giá trị không có trong options thì thêm vào để giữ nguyên dữ liệu cũ
+  var found = false;
+  [].forEach.call(sel.options, function (o) { if (o.value === value) found = true; });
+  if (value && !found) { var o = document.createElement('option'); o.textContent = value; sel.appendChild(o); }
+  sel.value = value;
+}
+function openModal(title) { $('#tmTitle').textContent = title; $('#tmErr').style.display = 'none'; $('#tmodal').classList.add('show'); }
+function closeModal() { $('#tmodal').classList.remove('show'); }
+function openAdd() {
+  editingId = null;
+  ['name', 'phone', 'email', 'province', 'district', 'sess_date', 'store'].forEach(function (k) { $('#f_' + k).value = ''; });
+  setSelectValue('#f_position', ''); setSelectValue('#f_mode', '');
+  openModal('Thêm đăng ký đào tạo'); $('#f_name').focus();
+}
+function openEdit(id) {
+  var r = trainRows.filter(function (x) { return String(x.id) === String(id); })[0]; if (!r) return;
+  editingId = id;
+  $('#f_name').value = r.name || ''; $('#f_phone').value = r.phone || ''; $('#f_email').value = r.email || '';
+  $('#f_province').value = r.province || ''; $('#f_district').value = r.district || '';
+  $('#f_sess_date').value = /^\d{4}-\d{2}-\d{2}$/.test(r.sess_date || '') ? r.sess_date : '';
+  $('#f_store').value = r.store || '';
+  setSelectValue('#f_position', r.position || ''); setSelectValue('#f_mode', r.mode || '');
+  openModal('Sửa đăng ký đào tạo'); $('#f_name').focus();
+}
+$('#tadd').addEventListener('click', openAdd);
+$('#tmX').addEventListener('click', closeModal);
+$('#tmCancel').addEventListener('click', closeModal);
+$('#tmodal').addEventListener('click', function (e) { if (e.target === $('#tmodal')) closeModal(); });
+
+$('#tmSave').addEventListener('click', function () {
+  var data = {
+    name: $('#f_name').value.trim(), phone: $('#f_phone').value.trim(), email: $('#f_email').value.trim(),
+    province: $('#f_province').value.trim(), district: $('#f_district').value.trim(),
+    position: $('#f_position').value, mode: $('#f_mode').value,
+    sess_date: $('#f_sess_date').value, store: $('#f_store').value.trim()
+  };
+  if (!data.name || !data.phone) { var e = $('#tmErr'); e.textContent = 'Vui lòng nhập ít nhất Họ tên và Số điện thoại.'; e.style.display = 'block'; return; }
+  var btn = $('#tmSave'); btn.disabled = true; var old = btn.textContent; btn.textContent = 'Đang lưu…';
+  var req = editingId
+    ? api('/api/training/' + encodeURIComponent(editingId), { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+    : fetch('/api/training', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(function (r) { return r.json(); });
+  req.then(function (res) {
+    btn.disabled = false; btn.textContent = old;
+    if (res && res.ok) { closeModal(); toast(editingId ? 'Đã cập nhật đăng ký.' : 'Đã thêm đăng ký.'); loadTraining(); }
+    else { var e = $('#tmErr'); e.textContent = 'Lưu thất bại: ' + ((res && res.error) || 'lỗi'); e.style.display = 'block'; }
+  }).catch(function (err) {
+    btn.disabled = false; btn.textContent = old;
+    if (err.message === '401') return logout();
+    var e = $('#tmErr'); e.textContent = 'Lỗi kết nối, vui lòng thử lại.'; e.style.display = 'block';
+  });
+});
+
+function delRow(id) {
+  var r = trainRows.filter(function (x) { return String(x.id) === String(id); })[0];
+  if (!confirm('Xóa đăng ký của "' + (r ? r.name : '') + '"? Hành động không thể hoàn tác.')) return;
+  api('/api/training/' + encodeURIComponent(id), { method: 'DELETE' }).then(function (res) {
+    if (res && res.ok) { toast('Đã xóa đăng ký.'); loadTraining(); }
+    else { toast('Xóa thất bại.'); }
+  }).catch(function (e) { if (e.message === '401') logout(); else toast('Lỗi kết nối.'); });
+}
+
+/* tự vào nếu đã có token */
 if (TOKEN) { api('/api/agent/me').then(function (d) { showApp(d.displayName); }).catch(function () { localStorage.removeItem('ttvh_agent_token'); }); }
 </script>
 </body>
