@@ -97,7 +97,12 @@
   select.ans{max-width:420px;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23666' stroke-width='1.6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:38px}
   input.ans.long{max-width:100%}
   .q.firstbox .ans{min-height:96px}
-  .ans.err{border-color:var(--red);box-shadow:0 0 0 1px var(--red)}
+  /* trạng thái hợp lệ / chưa hợp lệ */
+  .ans.err{border-color:var(--red);box-shadow:0 0 0 1px var(--red);background:#fff6f5}
+  .ans.valid{border-color:#2faa5e;box-shadow:0 0 0 1px #2faa5e;background:#f4fcf6}
+  .fieldmsg{font-size:13.5px;font-weight:600;margin-top:7px;display:none}
+  .fieldmsg.ok{display:block;color:#1f9a52}
+  .fieldmsg.no{display:block;color:var(--red)}
 
   /* radio kiểu MS Forms */
   .opts{display:grid;gap:14px;margin-top:6px}
@@ -154,11 +159,13 @@
 
       <div class="q">
         <div class="qlabel"><span class="num">2.</span>Số Điện Thoại <span class="req">*</span></div>
+        <div class="hint">(Bạn vui lòng nhập số điện thoại chứa 10 hoặc 11 ký tự. Số điện thoại dùng để liên hệ/zalo)</div>
         <input type="tel" id="phone" class="ans long" placeholder="Nhập câu trả lời của bạn" />
       </div>
 
       <div class="q">
         <div class="qlabel"><span class="num">3.</span>Email Cá Nhân <span class="req">*</span></div>
+        <div class="hint">(Bạn vui lòng nhập đúng định dạng email có đuôi @gmail.com)</div>
         <input type="email" id="email" class="ans long" placeholder="Nhập câu trả lời của bạn" />
       </div>
 
@@ -379,16 +386,44 @@
   function val(id){ var el=document.getElementById(id); return el?(el.value||'').trim():''; }
   function radio(name){ var el=form.querySelector('input[name="'+name+'"]:checked'); return el?el.value:''; }
 
+  // ===== Bộ kiểm tra định dạng cho các ô text bắt buộc =====
+  var validators={
+    name:    { test:function(v){ return v.trim().length>=2; },           bad:'Vui lòng nhập họ tên.' },
+    phone:   { test:function(v){ return /^[0-9]{10,11}$/.test(v.trim()); }, bad:'Số điện thoại phải gồm 10 hoặc 11 chữ số.' },
+    email:   { test:function(v){ return /^[^\s@]+@gmail\.com$/i.test(v.trim()); }, bad:'Email phải đúng định dạng và có đuôi @gmail.com.' },
+    province:{ test:function(v){ return v.trim().length>=2; },            bad:'Vui lòng nhập tỉnh thành.' },
+    district:{ test:function(v){ return v.trim().length>=1; },            bad:'Vui lòng nhập quận huyện.' },
+    sess_date:{ test:function(v){ return !!v.trim(); },                   bad:'Vui lòng chọn ngày dự kiến.' }
+  };
+  // tạo ô thông báo dưới mỗi input + gắn sự kiện kiểm tra trực tiếp
+  Object.keys(validators).forEach(function(id){
+    var el=document.getElementById(id);
+    var m=document.createElement('div'); m.className='fieldmsg'; m.id='msg-'+id;
+    el.parentNode.insertBefore(m, el.nextSibling);
+    el.addEventListener('input', function(){ evalField(id,false); });
+    el.addEventListener('blur',  function(){ evalField(id,false); });
+  });
+  function setMsg(id,text,good){
+    var m=document.getElementById('msg-'+id); if(!m) return;
+    m.textContent=text||''; m.className='fieldmsg '+(text?(good?'ok':'no'):'');
+  }
+  // forSubmit=true: ô trống cũng coi là lỗi (bắt buộc); trả về true nếu hợp lệ
+  function evalField(id, forSubmit){
+    var el=document.getElementById(id), v=el.value, empty=!v.trim();
+    if(empty && !forSubmit){ el.classList.remove('valid','err'); setMsg(id,''); return false; }
+    if(validators[id].test(v)){ el.classList.add('valid'); el.classList.remove('err'); setMsg(id,'✓ Hợp lệ', true); return true; }
+    el.classList.add('err'); el.classList.remove('valid');
+    setMsg(id, '✗ '+(empty?'Vui lòng điền mục này. ':'Chưa hợp lệ. ')+validators[id].bad, false);
+    return false;
+  }
+
   form.addEventListener('submit',function(e){
     e.preventDefault();
     var ok=true, firstBad=null;
 
-    [['name'],['phone'],['email'],['province'],['district'],['sess_date']].forEach(function(p){
-      var id=p[0], el=document.getElementById(id), v=(el.value||'').trim(), bad=!v;
-      if(id==='phone') bad=!/^[0-9\s().+-]{8,}$/.test(v);
-      if(id==='email') bad=!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-      el.classList.toggle('err',bad);
-      if(bad){ ok=false; if(!firstBad) firstBad=el; }
+    Object.keys(validators).forEach(function(id){
+      var good=evalField(id,true);
+      if(!good){ ok=false; if(!firstBad) firstBad=document.getElementById(id); }
     });
 
     // vị trí (radio, có Khác)
@@ -441,11 +476,13 @@
       });
   });
 
-  form.addEventListener('input',function(e){ if(e.target.classList&&e.target.classList.contains('err')) e.target.classList.remove('err'); });
-
   document.getElementById('againBtn').addEventListener('click',function(){
     form.reset();
     document.getElementById('store_other').style.display='none';
+    Object.keys(validators).forEach(function(id){ document.getElementById(id).classList.remove('valid','err'); setMsg(id,''); });
+    document.getElementById('opts-position').classList.remove('err');
+    document.getElementById('opts-mode').classList.remove('err');
+    document.getElementById('store').classList.remove('err');
     okPanel.style.display='none'; form.style.display='block';
     window.scrollTo({top:0,behavior:'smooth'});
   });
