@@ -14,6 +14,7 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const { URL } = require('url');
+const chatbot = require('./chatbot');
 
 const ROOT = __dirname;
 const CONFIG_PATH = path.join(ROOT, 'config.json');
@@ -41,6 +42,11 @@ function loadConfig() {
     if (process.env.APPLY_SOURCE) o.create.extra.source = process.env.APPLY_SOURCE;
     if (process.env.APPLY_CAMPAIGN) o.create.extra.campaign_current_id = process.env.APPLY_CAMPAIGN;
   }
+  // Chatbot
+  const cb = cfg.chatbot || (cfg.chatbot = {});
+  if (process.env.GEMINI_API_KEY) cb.geminiApiKey = process.env.GEMINI_API_KEY;
+  if (process.env.GEMINI_MODEL) cb.geminiModel = process.env.GEMINI_MODEL;
+  if (process.env.AGENT_KEY) cb.agentKey = process.env.AGENT_KEY;
   return cfg;
 }
 
@@ -281,6 +287,11 @@ const server = http.createServer(async (req, res) => {
     const form = await readBody(req);
     if (!form) return sendJson(res, 400, { error: 'Dữ liệu form không hợp lệ.' });
     return createCandidate(form, cfg, res);
+  }
+
+  // Chatbot (khách + nhân viên)
+  if (url.pathname.startsWith('/api/chat/') || url.pathname.startsWith('/api/agent/')) {
+    return chatbot.handleChat(req, res, url, loadConfig);
   }
 
   if (url.pathname.startsWith('/api/')) {

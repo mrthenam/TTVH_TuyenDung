@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bảng nhân viên — Chat tuyển dụng TTVH</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+  :root{--red:#e0342b;--line:rgba(40,28,18,.12);--muted:#8b7060}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Be Vietnam Pro',system-ui,sans-serif;background:#f3f4fb;color:#22202e;height:100vh;display:flex;flex-direction:column}
+  header{background:#22202e;color:#fff;padding:12px 18px;display:flex;align-items:center;gap:12px}
+  header b{font-size:16px}header small{color:#bbb;font-size:12px}
+  header .right{margin-left:auto;font-size:13px;color:#cfcfe0}
+  .gate{margin:auto;background:#fff;padding:30px;border-radius:16px;box-shadow:0 20px 50px -20px rgba(0,0,0,.3);max-width:360px;text-align:center}
+  .gate h2{margin-bottom:6px}.gate p{color:var(--muted);font-size:14px;margin-bottom:18px}
+  .gate input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:10px;font-family:inherit;margin-bottom:12px}
+  .gate button{width:100%;padding:12px;border:none;border-radius:10px;background:var(--red);color:#fff;font-weight:700;cursor:pointer}
+  .wrap{flex:1;display:flex;overflow:hidden}
+  .list{width:320px;border-right:1px solid var(--line);background:#fff;overflow-y:auto}
+  .conv{padding:13px 16px;border-bottom:1px solid var(--line);cursor:pointer}
+  .conv:hover{background:#fff7ea}.conv.sel{background:#fff1e1}
+  .conv .top{display:flex;align-items:center;gap:8px}
+  .conv .nm{font-weight:700;font-size:14px}
+  .conv .badge{font-size:10px;font-weight:800;padding:2px 7px;border-radius:99px;margin-left:auto}
+  .badge.h{background:#e7f8ee;color:#1f9e6e}.badge.b{background:#eef0ff;color:#5b3df0}
+  .conv .last{font-size:12px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .main{flex:1;display:flex;flex-direction:column;background:#fff8f0}
+  .mhd{padding:12px 18px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
+  .mhd b{font-size:15px}
+  .toggle{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700}
+  .toggle button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 12px;cursor:pointer;font-weight:700;font-size:13px}
+  .toggle button.act{background:var(--red);color:#fff;border-color:var(--red)}
+  .msgs{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:10px}
+  .m{max-width:72%;padding:9px 13px;border-radius:13px;font-size:14px;line-height:1.45;white-space:pre-wrap;word-break:break-word}
+  .m.user{align-self:flex-start;background:#fff;border:1px solid var(--line)}
+  .m.bot{align-self:flex-end;background:#eef0ff;border:1px solid #d8dcff}
+  .m.agent{align-self:flex-end;background:linear-gradient(135deg,#ff7a1a,#e0342b);color:#fff}
+  .m .who{font-size:10px;opacity:.6;display:block;margin-bottom:2px}
+  .ft{display:flex;gap:10px;padding:14px;border-top:1px solid var(--line);background:#fff}
+  .ft input{flex:1;border:1px solid var(--line);border-radius:10px;padding:11px 14px;font-family:inherit;font-size:14px}
+  .ft button{border:none;background:var(--red);color:#fff;border-radius:10px;padding:0 20px;font-weight:700;cursor:pointer}
+  .empty{margin:auto;color:var(--muted)}
+</style>
+</head>
+<body>
+<div id="gate" class="gate">
+  <h2>Bảng nhân viên</h2>
+  <p>Nhập mã nhân viên để vào trả lời chat khách hàng.</p>
+  <input id="key" type="password" placeholder="Mã nhân viên (AGENT_KEY)" />
+  <button id="enter">Vào</button>
+</div>
+
+<div id="app" style="display:none;flex:1;flex-direction:column">
+  <header><b>💬 Chat tuyển dụng</b><small>Thịnh Thế Vinh Hoa</small><span class="right" id="me"></span></header>
+  <div class="wrap">
+    <div class="list" id="list"></div>
+    <div class="main">
+      <div class="mhd" id="mhd" style="display:none">
+        <b id="mname"></b><span id="mid" style="font-size:11px;color:var(--muted)"></span>
+        <div class="toggle">Chế độ:
+          <button id="modeBot">🤖 Bot</button>
+          <button id="modeHuman">👤 Nhân viên</button>
+        </div>
+      </div>
+      <div class="msgs" id="msgs"><div class="empty">Chọn một hội thoại bên trái để trả lời.</div></div>
+      <div class="ft" id="ft" style="display:none">
+        <input id="reply" type="text" placeholder="Nhập câu trả lời… (gửi sẽ tự chuyển sang chế độ Nhân viên)" />
+        <button id="rsend">Gửi</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var KEY = localStorage.getItem('ttvh_agent_key') || new URLSearchParams(location.search).get('key') || '';
+var sel = null, listTimer = null, msgTimer = null;
+var $ = function(s){return document.querySelector(s);};
+
+function api(path, opts){ var sep=path.indexOf('?')>=0?'&':'?'; return fetch(path+sep+'key='+encodeURIComponent(KEY), opts).then(function(r){ if(r.status===401) throw new Error('401'); return r.json(); }); }
+
+function enter(){
+  KEY = $('#key').value.trim() || KEY;
+  api('/api/agent/conversations').then(function(){
+    localStorage.setItem('ttvh_agent_key', KEY);
+    $('#gate').style.display='none'; $('#app').style.display='flex'; $('#me').textContent='Đã đăng nhập';
+    refreshList(); listTimer=setInterval(refreshList, 3000);
+  }).catch(function(){ alert('Sai mã nhân viên.'); });
+}
+$('#enter').addEventListener('click', enter);
+$('#key').addEventListener('keydown', function(e){ if(e.key==='Enter') enter(); });
+
+function timeAgo(ts){ var s=(Date.now()-ts)/1000; if(s<60)return 'vừa xong'; if(s<3600)return Math.floor(s/60)+' phút'; if(s<86400)return Math.floor(s/3600)+' giờ'; return Math.floor(s/86400)+' ngày'; }
+
+function refreshList(){
+  api('/api/agent/conversations').then(function(d){
+    var html=''; (d.conversations||[]).forEach(function(c){
+      html += '<div class="conv'+(c.id===sel?' sel':'')+'" data-id="'+c.id+'">'
+        + '<div class="top"><span class="nm">'+esc(c.name)+'</span><span class="badge '+(c.humanMode?'h':'b')+'">'+(c.humanMode?'Nhân viên':'Bot')+'</span></div>'
+        + '<div class="last">'+(c.lastRole==='user'?'👤 ':(c.lastRole==='agent'?'🧑‍💼 ':'🤖 '))+esc(c.last||'')+' · '+timeAgo(c.updatedAt)+'</div></div>';
+    });
+    $('#list').innerHTML = html || '<div style="padding:20px;color:#8b7060">Chưa có hội thoại nào.</div>';
+    [].forEach.call(document.querySelectorAll('.conv'), function(el){ el.onclick=function(){ selectConv(el.getAttribute('data-id')); }; });
+  }).catch(function(){});
+}
+
+function selectConv(id){ sel=id; refreshList(); $('#mhd').style.display='flex'; $('#ft').style.display='flex'; loadMsgs(); if(!msgTimer) msgTimer=setInterval(loadMsgs,2500); }
+
+function loadMsgs(){
+  if(!sel) return;
+  api('/api/agent/messages?sessionId='+encodeURIComponent(sel)).then(function(d){
+    $('#mname').textContent = d.name||'Khách'; $('#mid').textContent = ' · '+sel.slice(0,16);
+    $('#modeBot').classList.toggle('act', !d.humanMode); $('#modeHuman').classList.toggle('act', d.humanMode);
+    var html=''; (d.messages||[]).forEach(function(m){
+      var who = m.role==='user'?'Khách':(m.role==='agent'?'Nhân viên':'Bot'+(m.from?(' · '+m.from):''));
+      html += '<div class="m '+m.role+'"><span class="who">'+who+'</span>'+esc(m.text)+'</div>';
+    });
+    var box=$('#msgs'); var atBottom = box.scrollHeight-box.scrollTop-box.clientHeight < 60;
+    box.innerHTML = html || '<div class="empty">Chưa có tin nhắn.</div>';
+    if(atBottom) box.scrollTop = box.scrollHeight;
+  }).catch(function(){});
+}
+
+function setMode(human){ if(!sel) return; api('/api/agent/mode',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:sel,humanMode:human})}).then(function(){ loadMsgs(); refreshList(); }); }
+$('#modeBot').addEventListener('click', function(){ setMode(false); });
+$('#modeHuman').addEventListener('click', function(){ setMode(true); });
+
+function sendReply(){
+  var t=$('#reply').value.trim(); if(!t||!sel) return; $('#reply').value='';
+  api('/api/agent/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:sel,text:t})}).then(function(){ loadMsgs(); refreshList(); });
+}
+$('#rsend').addEventListener('click', sendReply);
+$('#reply').addEventListener('keydown', function(e){ if(e.key==='Enter') sendReply(); });
+$('#reply').addEventListener('input', function(){ if(sel) api('/api/agent/typing',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:sel})}).catch(function(){}); });
+
+function esc(s){return (s==null?'':String(s)).replace(/[&<>\"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+// tự đăng nhập nếu đã có key
+if(KEY){ $('#key').value=KEY; enter(); }
+</script>
+</body>
+</html>
