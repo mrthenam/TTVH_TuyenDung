@@ -53,14 +53,12 @@
         "brand": "cf63",
         "referrer": "note",
         "source_id": "source",
-        "campaign_current_id": "campaign_current_id",
-        "campaign_code": "campaign_code"
+        "campaign_current_id": "campaign_current_id"
       },
-      "_note_extra": "Giá trị MẶC ĐỊNH. source = mã nguồn. campaign_current_id = TÊN chiến dịch (hiện trên Kanban). campaign_code = MÃ chiến dịch.",
+      "_note_extra": "Giá trị MẶC ĐỊNH. source = mã nguồn. campaign_current_id = MÃ CHIẾN DỊCH (theo doc: 'Nhập: Mã chiến dịch'), vd CTV01881706266787.",
       "extra": {
         "source": "49",
-        "campaign_current_id": "23852",
-        "campaign_code": "CTV01881706266787"
+        "campaign_current_id": "CTV01881706266787"
       },
       "_note_codePrefix": "Tiền tố cho mã ứng viên tự sinh (code bắt buộc & duy nhất).",
       "codePrefix": "HSUV_WEB"
