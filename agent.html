@@ -342,9 +342,32 @@ $('#tabTrain').addEventListener('click', function () { switchView('train'); });
 
 /* ===== TRAINING LIST ===== */
 var trainRows = [];
+// Chuẩn hóa "Vị trí trúng tuyển": sửa dữ liệu cũ bị lỗi font (vd "T? Tru?ng (ASF)")
+var POS_CANON = { SM: 'Quản Lý (SM)', SL: 'Giám Sát (SL)', ASF: 'Tổ Trưởng (ASF)', SF: 'Nhân Viên Full-time (SF)', Staff: 'Nhân Viên Part-time (Staff)' };
+function normPos(v) {
+  v = v || '';
+  for (var k in POS_CANON) { if (v === POS_CANON[k]) return v; }
+  var m = v.match(/\((SM|SL|ASF|SF|Staff)\)/);
+  if (m && POS_CANON[m[1]]) return POS_CANON[m[1]];
+  return v;
+}
 function loadTraining() {
-  api('/api/training').then(function (d) { trainRows = d.rows || []; $('#navTrainCnt').textContent = trainRows.length; renderTraining(); })
-    .catch(function (e) { if (e.message === '401') logout(); });
+  api('/api/training').then(function (d) {
+    trainRows = d.rows || []; $('#navTrainCnt').textContent = trainRows.length;
+    healPositions();
+    renderTraining();
+  }).catch(function (e) { if (e.message === '401') logout(); });
+}
+// Tự sửa các bản ghi có vị trí bị lỗi font (chạy 1 lần khi dữ liệu còn lỗi)
+function healPositions() {
+  trainRows.forEach(function (r) {
+    var fixed = normPos(r.position);
+    if (r.position && fixed !== r.position) {
+      var old = r.position; r.position = fixed; // cập nhật ngay trên giao diện
+      api('/api/training/' + encodeURIComponent(r.id), { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ position: fixed }) })
+        .catch(function () { r.position = old; });
+    }
+  });
 }
 function pad2(n) { return (n < 10 ? '0' : '') + n; }
 function fmtTs(ts) { var d = new Date(Number(ts)); return pad2(d.getDate()) + '/' + pad2(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()); }
@@ -359,7 +382,7 @@ function renderTraining() {
   if (!rows.length) { $('#ttable').innerHTML = '<tbody><tr><td class="norows">' + (trainRows.length ? 'Không có kết quả phù hợp.' : 'Chưa có đăng ký đào tạo nào. Bấm “Thêm đăng ký”.') + '</td></tr></tbody>'; return; }
   var html = '<thead><tr><th>#</th><th>Thời gian gửi</th><th>Họ tên</th><th>SĐT</th><th>Email</th><th>Tỉnh thành</th><th>Quận huyện</th><th>Vị trí</th><th>Hình thức</th><th>Ngày dự kiến</th><th>Cửa hàng</th><th>Thao tác</th></tr></thead><tbody>';
   rows.forEach(function (r, i) {
-    html += '<tr><td class="idx">' + (i + 1) + '</td><td>' + esc(fmtTs(r.ts)) + '</td><td>' + esc(r.name) + '</td><td>' + esc(r.phone) + '</td><td>' + esc(r.email) + '</td><td>' + esc(r.province) + '</td><td>' + esc(r.district) + '</td><td>' + esc(r.position) + '</td><td class="wr">' + esc(r.mode) + '</td><td>' + esc(fmtDate(r.sess_date)) + '</td><td class="wr">' + esc(r.store) + '</td>'
+    html += '<tr><td class="idx">' + (i + 1) + '</td><td>' + esc(fmtTs(r.ts)) + '</td><td>' + esc(r.name) + '</td><td>' + esc(r.phone) + '</td><td>' + esc(r.email) + '</td><td>' + esc(r.province) + '</td><td>' + esc(r.district) + '</td><td>' + esc(normPos(r.position)) + '</td><td class="wr">' + esc(r.mode) + '</td><td>' + esc(fmtDate(r.sess_date)) + '</td><td class="wr">' + esc(r.store) + '</td>'
       + '<td><div class="rowact"><button class="iconbtn edit" data-edit="' + r.id + '">✎ Sửa</button><button class="iconbtn del" data-del="' + r.id + '">🗑 Xóa</button></div></td></tr>';
   });
   html += '</tbody>';
@@ -375,7 +398,7 @@ $('#tcsv').addEventListener('click', function () {
   var head = ['Thời gian gửi', 'Họ tên', 'SĐT', 'Email', 'Tỉnh thành', 'Quận huyện', 'Vị trí trúng tuyển', 'Hình thức đào tạo', 'Ngày dự kiến', 'Cửa hàng làm việc'];
   var lines = [head.join(',')];
   trainRows.forEach(function (r) {
-    var row = [fmtTs(r.ts), r.name, r.phone, r.email, r.province, r.district, r.position, r.mode, fmtDate(r.sess_date), r.store];
+    var row = [fmtTs(r.ts), r.name, r.phone, r.email, r.province, r.district, normPos(r.position), r.mode, fmtDate(r.sess_date), r.store];
     lines.push(row.map(function (c) { c = (c == null ? '' : String(c)); return '"' + c.replace(/"/g, '""') + '"'; }).join(','));
   });
   var blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
@@ -406,7 +429,7 @@ function openEdit(id) {
   $('#f_province').value = r.province || ''; $('#f_district').value = r.district || '';
   $('#f_sess_date').value = /^\d{4}-\d{2}-\d{2}$/.test(r.sess_date || '') ? r.sess_date : '';
   $('#f_store').value = r.store || '';
-  setSelectValue('#f_position', r.position || ''); setSelectValue('#f_mode', r.mode || '');
+  setSelectValue('#f_position', normPos(r.position || '')); setSelectValue('#f_mode', r.mode || '');
   openModal('Sửa đăng ký đào tạo'); $('#f_name').focus();
 }
 $('#tadd').addEventListener('click', openAdd);
