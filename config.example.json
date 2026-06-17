@@ -53,12 +53,14 @@
         "brand": "cf63",
         "referrer": "note",
         "source_id": "source",
-        "campaign_current_id": "campaign_current_id"
+        "campaign_current_id": "campaign_current_id",
+        "campaign_code": "campaign_code"
       },
-      "_note_extra": "Giá trị MẶC ĐỊNH khi form không kèm tham số URL. source = mã nguồn/kênh (BẮT BUỘC). campaign_current_id không bắt buộc.",
+      "_note_extra": "Giá trị MẶC ĐỊNH. source = mã nguồn. campaign_current_id = TÊN chiến dịch (hiện trên Kanban). campaign_code = MÃ chiến dịch.",
       "extra": {
         "source": "49",
-        "campaign_current_id": ""
+        "campaign_current_id": "[Hiring Web] Tuyển dụng nhân viên mới",
+        "campaign_code": "CTV01881706266787"
       },
       "_note_codePrefix": "Tiền tố cho mã ứng viên tự sinh (code bắt buộc & duy nhất).",
       "codePrefix": "HSUV_WEB"

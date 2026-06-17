@@ -699,8 +699,10 @@ document.querySelectorAll('[data-brand]').forEach(function(b){
     // Lấy chiến dịch & nguồn từ URL (vd mở form qua link/QR: ?campaign=123&source_id=49)
     var qs=new URLSearchParams(location.search);
     var camp=qs.get('campaign_current_id')||qs.get('campaign');
+    var campCode=qs.get('campaign_code');
     var src=qs.get('source_id')||qs.get('source');
     if(camp) data.campaign_current_id=camp;
+    if(campCode) data.campaign_code=campCode;
     if(src) data.source_id=src;
 
     var btn=form.querySelector('button[type="submit"]'); var oldTxt=btn.textContent;
