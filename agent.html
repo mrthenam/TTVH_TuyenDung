@@ -44,6 +44,25 @@
   .ft input{flex:1;border:1px solid var(--line);border-radius:10px;padding:11px 14px;font-family:inherit;font-size:14px}
   .ft button{border:none;background:var(--blue);color:#fff;border-radius:10px;padding:0 20px;font-weight:700;cursor:pointer;font-family:inherit}
   .empty{margin:auto;color:var(--muted)}
+  /* tabs trên header */
+  .tabs{margin-left:22px;display:flex;gap:8px}
+  .tabs button{background:rgba(255,255,255,.16);border:none;color:#fff;border-radius:8px;padding:7px 14px;cursor:pointer;font-weight:700;font-family:inherit;font-size:13px;opacity:.8}
+  .tabs button.act{background:#fff;color:var(--blue);opacity:1}
+  /* khung đào tạo */
+  .trainview{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#f4f7fb}
+  .tbar{display:flex;align-items:center;gap:12px;padding:12px 18px;background:#fff;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tbar b{font-size:15px}
+  .tcount{color:var(--muted);font-size:13px}
+  .tbar input{margin-left:auto;border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-family:inherit;font-size:13px;width:260px;max-width:48vw}
+  .tbar button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:700;font-size:13px;font-family:inherit}
+  .tbar button:hover{background:#f4f8ff}
+  .ttable-wrap{flex:1;overflow:auto}
+  .ttable{border-collapse:collapse;width:100%;font-size:13px;background:#fff}
+  .ttable th,.ttable td{border-bottom:1px solid var(--line);padding:9px 12px;text-align:left;white-space:nowrap;vertical-align:top}
+  .ttable th{position:sticky;top:0;background:#eef4ff;font-weight:800;z-index:1}
+  .ttable tbody tr:hover td{background:#f8fbff}
+  .ttable td.wr{white-space:normal;max-width:260px}
+  .ttable td.idx{color:var(--muted)}
 </style>
 </head>
 <body>
@@ -60,9 +79,13 @@
 </div>
 
 <div id="app" style="display:none;flex:1;flex-direction:column">
-  <header><b>💬 Quản trị Chat tuyển dụng</b><small>Thịnh Thế Vinh Hoa</small>
+  <header><b>📊 Quản trị tuyển dụng</b><small>Thịnh Thế Vinh Hoa</small>
+    <span class="tabs">
+      <button id="tabChat" class="act">💬 Chat</button>
+      <button id="tabTrain">📋 Đào tạo</button>
+    </span>
     <span class="right"><span id="me"></span><button id="logout">Đăng xuất</button></span></header>
-  <div class="wrap">
+  <div class="wrap" id="viewChat">
     <div class="list" id="list"></div>
     <div class="main">
       <div class="mhd" id="mhd" style="display:none">
@@ -78,6 +101,17 @@
         <button id="rsend">Gửi</button>
       </div>
     </div>
+  </div>
+
+  <div class="trainview" id="viewTraining" style="display:none">
+    <div class="tbar">
+      <b>📋 Đăng ký lịch đào tạo</b>
+      <span class="tcount" id="tcount"></span>
+      <input id="tsearch" type="text" placeholder="Tìm theo tên, SĐT, email, cửa hàng…" />
+      <button id="treload">↻ Tải lại</button>
+      <button id="tcsv">⬇ Xuất CSV</button>
+    </div>
+    <div class="ttable-wrap"><table class="ttable" id="ttable"></table></div>
   </div>
 </div>
 
@@ -151,6 +185,54 @@ function sendReply() {
 $('#rsend').addEventListener('click', sendReply);
 $('#reply').addEventListener('keydown', function (e) { if (e.key === 'Enter') sendReply(); });
 $('#reply').addEventListener('input', function () { if (sel) api('/api/agent/typing', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sel }) }).catch(function () {}); });
+
+// ===== Tab Chat / Đào tạo =====
+function switchView(v) {
+  var train = v === 'train';
+  $('#viewChat').style.display = train ? 'none' : 'flex';
+  $('#viewTraining').style.display = train ? 'flex' : 'none';
+  $('#tabTrain').classList.toggle('act', train);
+  $('#tabChat').classList.toggle('act', !train);
+  if (train) loadTraining();
+}
+$('#tabChat').addEventListener('click', function () { switchView('chat'); });
+$('#tabTrain').addEventListener('click', function () { switchView('train'); });
+
+var trainRows = [];
+function loadTraining() {
+  api('/api/training').then(function (d) { trainRows = d.rows || []; renderTraining(); })
+    .catch(function (e) { if (e.message === '401') logout(); });
+}
+function pad2(n) { return (n < 10 ? '0' : '') + n; }
+function fmtTs(ts) { var d = new Date(Number(ts)); return pad2(d.getDate()) + '/' + pad2(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()); }
+function fmtDate(s) { if (!s) return ''; if (/^\d{4}-\d{2}-\d{2}$/.test(s)) { var p = s.split('-'); return p[2] + '/' + p[1] + '/' + p[0]; } return s; }
+function renderTraining() {
+  var q = ($('#tsearch').value || '').trim().toLowerCase();
+  var rows = trainRows.filter(function (r) {
+    if (!q) return true;
+    return [r.name, r.phone, r.email, r.province, r.district, r.position, r.mode, r.store].join(' ').toLowerCase().indexOf(q) >= 0;
+  });
+  $('#tcount').textContent = rows.length + (q ? ' / ' + trainRows.length : '') + ' đăng ký';
+  if (!rows.length) { $('#ttable').innerHTML = '<tbody><tr><td style="padding:30px;color:#6b7a8d">' + (trainRows.length ? 'Không có kết quả phù hợp.' : 'Chưa có đăng ký đào tạo nào.') + '</td></tr></tbody>'; return; }
+  var html = '<thead><tr><th>#</th><th>Thời gian gửi</th><th>Họ tên</th><th>SĐT</th><th>Email</th><th>Tỉnh thành</th><th>Quận huyện</th><th>Vị trí trúng tuyển</th><th>Hình thức đào tạo</th><th>Ngày dự kiến</th><th>Cửa hàng làm việc</th></tr></thead><tbody>';
+  rows.forEach(function (r, i) {
+    html += '<tr><td class="idx">' + (i + 1) + '</td><td>' + esc(fmtTs(r.ts)) + '</td><td>' + esc(r.name) + '</td><td>' + esc(r.phone) + '</td><td>' + esc(r.email) + '</td><td>' + esc(r.province) + '</td><td>' + esc(r.district) + '</td><td>' + esc(r.position) + '</td><td class="wr">' + esc(r.mode) + '</td><td>' + esc(fmtDate(r.sess_date)) + '</td><td class="wr">' + esc(r.store) + '</td></tr>';
+  });
+  html += '</tbody>';
+  $('#ttable').innerHTML = html;
+}
+$('#tsearch').addEventListener('input', renderTraining);
+$('#treload').addEventListener('click', loadTraining);
+$('#tcsv').addEventListener('click', function () {
+  var head = ['Thời gian gửi', 'Họ tên', 'SĐT', 'Email', 'Tỉnh thành', 'Quận huyện', 'Vị trí trúng tuyển', 'Hình thức đào tạo', 'Ngày dự kiến', 'Cửa hàng làm việc'];
+  var lines = [head.join(',')];
+  trainRows.forEach(function (r) {
+    var row = [fmtTs(r.ts), r.name, r.phone, r.email, r.province, r.district, r.position, r.mode, fmtDate(r.sess_date), r.store];
+    lines.push(row.map(function (c) { c = (c == null ? '' : String(c)); return '"' + c.replace(/"/g, '""') + '"'; }).join(','));
+  });
+  var blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'dangky-daotao.csv'; a.click();
+});
 
 // tự vào nếu đã có token
 if (TOKEN) { api('/api/agent/me').then(function (d) { showApp(d.displayName); }).catch(function () { localStorage.removeItem('ttvh_agent_token'); }); }
