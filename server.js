@@ -15,6 +15,7 @@ const fs = require('fs');
 const path = require('path');
 const { URL } = require('url');
 const chatbot = require('./chatbot');
+const db = require('./db');
 
 const ROOT = __dirname;
 const CONFIG_PATH = path.join(ROOT, 'config.json');
@@ -279,6 +280,30 @@ async function createCandidate(form, cfg, res) {
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost');
+
+  // Đăng ký lịch đào tạo (lưu DB / RAM)
+  if (url.pathname === '/api/training' && req.method === 'POST') {
+    const form = await readBody(req);
+    if (!form || !((form.name || '').trim()) || !((form.phone || '').trim())) {
+      return sendJson(res, 400, { error: 'Thiếu họ tên hoặc số điện thoại.' });
+    }
+    try {
+      const id = await db.addTraining(form);
+      return sendJson(res, 200, { ok: true, id });
+    } catch (e) {
+      return sendJson(res, 500, { error: 'Không lưu được đăng ký: ' + e.message });
+    }
+  }
+  // Danh sách đăng ký đào tạo cho nhân viên (cần token đăng nhập agent)
+  if (url.pathname === '/api/training' && req.method === 'GET') {
+    const token = (req.headers['authorization'] || '').replace(/^Bearer\s+/i, '') || url.searchParams.get('token');
+    if (!db.getSession(token)) return sendJson(res, 401, { error: 'Cần đăng nhập nhân viên.' });
+    try {
+      return sendJson(res, 200, { ok: true, rows: await db.listTraining() });
+    } catch (e) {
+      return sendJson(res, 500, { error: e.message });
+    }
+  }
 
   // Nhận hồ sơ ứng tuyển từ form -> tạo ứng viên trên 1Office
   if (url.pathname === '/api/apply' && req.method === 'POST') {

@@ -13,6 +13,7 @@ let pool = null;
 const memConv = new Map();   // id -> {id,name,human_mode,created_at,updated_at}
 const memMsg = new Map();    // id -> [{role,text,from_src,ts}]
 const memAgents = new Map(); // username -> {username,pass_hash,salt,display_name}
+const memTraining = [];      // [{...registration, id, ts}]  (fallback RAM)
 // dùng chung cho cả 2 chế độ:
 const typing = new Map();    // convId -> ts
 const sessions = new Map();  // token -> {username, displayName, ts}
@@ -32,6 +33,10 @@ async function init() {
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_msg_conv ON messages(conv_id, ts)`);
     await pool.query(`CREATE TABLE IF NOT EXISTS agents(
       username text PRIMARY KEY, pass_hash text, salt text, display_name text, created_at bigint)`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS training(
+      id bigserial PRIMARY KEY, name text, phone text, email text, brand text,
+      position text, store text, course text, sess_date text, sess_time text,
+      mode text, note text, ts bigint)`);
     console.log(' [db] Đã kết nối PostgreSQL — lưu chat bền vững.');
   } else {
     console.log(' [db] Không có DATABASE_URL/pg — lưu chat tạm trong RAM.');
@@ -152,10 +157,38 @@ async function listConversations() {
 function setTyping(id) { typing.set(id, Date.now()); }
 function isTyping(id) { return (Date.now() - (typing.get(id) || 0)) < 8000; }
 
+// ----- đăng ký đào tạo -----
+async function addTraining(r) {
+  const ts = Date.now();
+  const row = {
+    name: r.name || '', phone: r.phone || '', email: r.email || '', brand: r.brand || '',
+    position: r.position || '', store: r.store || '', course: r.course || '',
+    sess_date: r.sess_date || '', sess_time: r.sess_time || '', mode: r.mode || '', note: r.note || ''
+  };
+  if (HAS_PG) {
+    const r2 = await pool.query(
+      `INSERT INTO training(name,phone,email,brand,position,store,course,sess_date,sess_time,mode,note,ts)
+       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id`,
+      [row.name, row.phone, row.email, row.brand, row.position, row.store, row.course, row.sess_date, row.sess_time, row.mode, row.note, ts]);
+    return r2.rows[0].id;
+  }
+  const id = memTraining.length + 1;
+  memTraining.push(Object.assign({ id, ts }, row));
+  return id;
+}
+async function listTraining() {
+  if (HAS_PG) {
+    const r = await pool.query('SELECT * FROM training ORDER BY ts DESC LIMIT 500');
+    return r.rows.map(x => Object.assign({}, x, { ts: Number(x.ts) }));
+  }
+  return [...memTraining].sort((a, b) => b.ts - a.ts);
+}
+
 module.exports = {
   init, HAS_PG,
   verifyAgent, createAgent, listAgents,
   createSession, getSession,
   ensureConv, addMessage, getMessages, setHumanMode, getConv, listConversations,
-  setTyping, isTyping
+  setTyping, isTyping,
+  addTraining, listTraining
 };

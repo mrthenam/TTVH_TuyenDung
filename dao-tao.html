@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Đăng ký lịch đào tạo — Thịnh Thế Vinh Hoa F&B Group</title>
+<meta name="description" content="Đăng ký tham gia các buổi đào tạo của Thịnh Thế Vinh Hoa F&B Group: hội nhập, pha chế, vận hành ca, quản lý cửa hàng, an toàn vệ sinh thực phẩm." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#f3f2f1;            /* nền xám nhạt kiểu Microsoft Forms */
+    --card:#ffffff;
+    --line:rgba(54,28,18,.12);
+    --line-2:rgba(54,28,18,.20);
+    --txt:#2a1810;
+    --muted:#7a6456;
+    --red:#e0342b;
+    --red-2:#c52820;
+    --gold:#f4a521;
+    --amber:#ff7a1a;
+    --green:#2faa5e;
+    --grad:linear-gradient(135deg,#ff7a1a 0%,#e0342b 100%);
+    --radius:12px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Be Vietnam Pro',system-ui,sans-serif;
+    background:var(--bg);color:var(--txt);line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;text-decoration:none}
+  img{max-width:100%;display:block}
+
+  /* HEADER giống trang chính */
+  header{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:rgba(255,255,255,.9);border-bottom:1px solid var(--line)}
+  .nav{max-width:980px;margin:0 auto;padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:64px}
+  .brand{display:flex;align-items:center;gap:12px;font-weight:900}
+  .brand .logo-img{height:44px;width:auto;border-radius:9px;display:block}
+  .brand .nm{font-size:15px;line-height:1.1}
+  .brand small{display:block;font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.04em}
+  .nav a.link{font-size:14px;font-weight:700;color:var(--muted)}
+  .nav a.link:hover{color:var(--red)}
+  @media(max-width:560px){.brand small{display:none}.brand .nm{font-size:14px}}
+
+  /* FORM kiểu Microsoft Forms — 1 cột, mỗi câu hỏi 1 thẻ */
+  .formwrap{max-width:720px;margin:26px auto 60px;padding:0 16px}
+  /* dải màu trên cùng của thẻ tiêu đề */
+  .banner{height:10px;border-radius:12px 12px 0 0;background:var(--grad)}
+  .card{background:var(--card);border:1px solid var(--line);border-top:none;border-radius:0 0 var(--radius) var(--radius);padding:26px 28px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+  .head-logo{height:54px;width:auto;margin-bottom:16px;border-radius:10px}
+  .form-title{font-size:26px;font-weight:900;line-height:1.2;margin-bottom:10px}
+  .form-desc{color:var(--muted);font-size:15px}
+  .form-desc b{color:var(--txt)}
+  .req-note{margin-top:14px;color:var(--red);font-size:13px;font-weight:700}
+
+  .q{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px;margin-top:16px;box-shadow:0 2px 8px rgba(0,0,0,.05);transition:border-color .2s,box-shadow .2s}
+  .q:focus-within{border-color:var(--red);box-shadow:0 6px 18px -8px rgba(224,52,43,.35)}
+  .q .qlabel{font-size:15.5px;font-weight:700;margin-bottom:12px}
+  .q .qlabel .req{color:var(--red);margin-left:3px}
+  .q .qsub{display:block;font-weight:500;color:var(--muted);font-size:13px;margin-top:3px}
+  .q input[type=text],.q input[type=tel],.q input[type=email],.q input[type=date],.q select,.q textarea{
+    width:100%;padding:11px 14px;border:1px solid var(--line-2);border-radius:10px;
+    background:#fff;color:var(--txt);font-family:inherit;font-size:15px;transition:border-color .2s
+  }
+  .q input:focus,.q select:focus,.q textarea:focus{outline:none;border-color:var(--red)}
+  .q input.err,.q select.err,.q .opts.err{border-color:var(--red)}
+  .q textarea{resize:vertical;min-height:78px}
+  .opts{display:grid;gap:10px}
+  .opt{display:flex;align-items:flex-start;gap:11px;padding:11px 14px;border:1px solid var(--line-2);border-radius:10px;cursor:pointer;transition:border-color .15s,background .15s}
+  .opt:hover{background:#fff7ef;border-color:var(--gold)}
+  .opt input{margin-top:3px;accent-color:var(--red);width:17px;height:17px;flex:none}
+  .opt.sel{border-color:var(--red);background:rgba(224,52,43,.05)}
+  .opt b{font-weight:700}
+  .opt span{display:block;font-size:13px;color:var(--muted)}
+
+  .submit-row{margin-top:22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;font-weight:800;font-size:16px;cursor:pointer;border:none;padding:14px 34px;border-radius:12px;transition:transform .18s,box-shadow .18s;font-family:inherit}
+  .btn-primary{background:var(--grad);color:#fff;box-shadow:0 12px 30px -10px rgba(224,52,43,.55)}
+  .btn-primary:hover{transform:translateY(-2px)}
+  .btn-primary:disabled{opacity:.6;cursor:default;transform:none}
+  .clearbtn{background:none;border:none;color:var(--muted);font-weight:700;font-size:14px;cursor:pointer;font-family:inherit}
+  .clearbtn:hover{color:var(--red)}
+
+  #formErr{display:none;background:rgba(224,52,43,.08);border:1px solid rgba(224,52,43,.3);color:var(--red);font-size:13px;font-weight:600;padding:12px 14px;border-radius:10px;margin-top:16px}
+
+  .ok-card{display:none;background:var(--card);border:1px solid var(--line);border-top:4px solid var(--green);border-radius:var(--radius);padding:42px 26px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+  .ok-card .ic{width:72px;height:72px;border-radius:50%;background:rgba(47,170,94,.14);color:var(--green);display:grid;place-items:center;font-size:38px;margin:0 auto 18px}
+  .ok-card h3{font-size:23px;font-weight:900;margin-bottom:10px}
+  .ok-card p{color:var(--muted);max-width:440px;margin:0 auto}
+  .ok-card .again{margin-top:22px}
+
+  footer{border-top:1px solid var(--line);padding:30px 0;text-align:center;background:#fff;margin-top:30px}
+  footer .nm{font-weight:900;margin-bottom:8px}
+  footer p{color:var(--muted);font-size:13px;margin:4px 0}
+  footer .tagline{color:var(--red);font-weight:800;margin-top:10px}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="nav">
+    <a href="index.html" class="brand">
+      <img src="images/logo-ttvh.jpg" alt="Thịnh Thế Vinh Hoa" class="logo-img" />
+      <div class="nm">Thịnh Thế Vinh Hoa<small>F&amp;B Group</small></div>
+    </a>
+    <a href="index.html#ungtuyen" class="link">← Trang tuyển dụng</a>
+  </div>
+</header>
+
+<div class="formwrap">
+
+  <!-- THẺ TIÊU ĐỀ -->
+  <div class="banner"></div>
+  <div class="card">
+    <img src="images/logo-ttvh.jpg" alt="Thịnh Thế Vinh Hoa" class="head-logo" />
+    <h1 class="form-title">Đăng ký lịch đào tạo</h1>
+    <p class="form-desc">
+      Chào mừng bạn đến với chương trình đào tạo của <b>Thịnh Thế Vinh Hoa F&amp;B Group</b>
+      (MayCha · Hồng Trà Sữa Tam Hảo · Gà Giòn Sốt Ba Cô Gái · Trà Hú).
+      Vui lòng điền thông tin để đăng ký buổi đào tạo phù hợp. Bộ phận Đào tạo sẽ xác nhận lịch với bạn qua điện thoại/Zalo.
+    </p>
+    <div class="req-note">* Bắt buộc</div>
+  </div>
+
+  <!-- FORM -->
+  <form id="trainForm" novalidate>
+
+    <div class="q">
+      <label class="qlabel" for="name">1. Họ và tên <span class="req">*</span></label>
+      <input type="text" id="name" name="name" placeholder="Nguyễn Văn A" />
+    </div>
+
+    <div class="q">
+      <label class="qlabel" for="phone">2. Số điện thoại <span class="req">*</span>
+        <span class="qsub">Dùng để xác nhận lịch đào tạo qua gọi/Zalo</span>
+      </label>
+      <input type="tel" id="phone" name="phone" placeholder="0901 234 567" />
+    </div>
+
+    <div class="q">
+      <label class="qlabel" for="email">3. Email</label>
+      <input type="email" id="email" name="email" placeholder="ban@email.com" />
+    </div>
+
+    <div class="q">
+      <label class="qlabel">4. Thương hiệu bạn đang làm / ứng tuyển <span class="req">*</span></label>
+      <div class="opts" id="opts-brand">
+        <label class="opt"><input type="radio" name="brand" value="MayCha" /><span><b>MayCha</b></span></label>
+        <label class="opt"><input type="radio" name="brand" value="Hồng Trà Sữa Tam Hảo" /><span><b>Hồng Trà Sữa Tam Hảo</b></span></label>
+        <label class="opt"><input type="radio" name="brand" value="Gà Giòn Sốt Ba Cô Gái" /><span><b>Gà Giòn Sốt Ba Cô Gái</b></span></label>
+        <label class="opt"><input type="radio" name="brand" value="Trà Hú" /><span><b>Trà Hú</b></span></label>
+        <label class="opt"><input type="radio" name="brand" value="Chưa xác định" /><span><b>Chưa xác định / Khác</b></span></label>
+      </div>
+    </div>
+
+    <div class="q">
+      <label class="qlabel" for="position">5. Vị trí / Chức danh <span class="req">*</span></label>
+      <select id="position" name="position">
+        <option value="" disabled selected>Chọn vị trí</option>
+        <option>Nhân viên Part-time</option>
+        <option>Nhân viên Full-time</option>
+        <option>Trưởng ca</option>
+        <option>Quản lý cửa hàng</option>
+        <option>Nhân viên mới (chưa nhận việc)</option>
+        <option>Khác</option>
+      </select>
+    </div>
+
+    <div class="q">
+      <label class="qlabel" for="store">6. Cửa hàng / Chi nhánh
+        <span class="qsub">Nơi bạn đang làm việc (nếu có)</span>
+      </label>
+      <input type="text" id="store" name="store" placeholder="VD: MayCha Huỳnh Tịnh Của" />
+    </div>
+
+    <div class="q">
+      <label class="qlabel" for="course">7. Khóa / Nội dung đào tạo muốn tham gia <span class="req">*</span></label>
+      <select id="course" name="course">
+        <option value="" disabled selected>Chọn nội dung đào tạo</option>
+        <option>Đào tạo hội nhập (nhân viên mới)</option>
+        <option>Pha chế cơ bản</option>
+        <option>Pha chế nâng cao</option>
+        <option>Vận hành ca &amp; quy trình cửa hàng</option>
+        <option>Kỹ năng phục vụ &amp; chăm sóc khách hàng</option>
+        <option>An toàn vệ sinh thực phẩm</option>
+        <option>Đào tạo Trưởng ca / Quản lý cửa hàng</option>
+      </select>
+    </div>
+
+    <div class="q">
+      <label class="qlabel" for="sess_date">8. Ngày mong muốn tham gia <span class="req">*</span></label>
+      <input type="date" id="sess_date" name="sess_date" />
+    </div>
+
+    <div class="q">
+      <label class="qlabel">9. Ca đào tạo mong muốn <span class="req">*</span></label>
+      <div class="opts" id="opts-time">
+        <label class="opt"><input type="radio" name="sess_time" value="Sáng (08:00 – 12:00)" /><span><b>Buổi sáng</b><span>08:00 – 12:00</span></span></label>
+        <label class="opt"><input type="radio" name="sess_time" value="Chiều (13:30 – 17:30)" /><span><b>Buổi chiều</b><span>13:30 – 17:30</span></span></label>
+        <label class="opt"><input type="radio" name="sess_time" value="Tối (18:00 – 21:00)" /><span><b>Buổi tối</b><span>18:00 – 21:00</span></span></label>
+      </div>
+    </div>
+
+    <div class="q">
+      <label class="qlabel">10. Hình thức đào tạo <span class="req">*</span></label>
+      <div class="opts" id="opts-mode">
+        <label class="opt"><input type="radio" name="mode" value="Trực tiếp tại cửa hàng/văn phòng" /><span><b>Trực tiếp</b><span>Tại cửa hàng / văn phòng</span></span></label>
+        <label class="opt"><input type="radio" name="mode" value="Online" /><span><b>Online</b><span>Học qua Zoom/Google Meet</span></span></label>
+      </div>
+    </div>
+
+    <div class="q">
+      <label class="qlabel" for="note">11. Ghi chú thêm
+        <span class="qsub">Mong muốn riêng, khung giờ bận, câu hỏi… (nếu có)</span>
+      </label>
+      <textarea id="note" name="note" placeholder="Nhập ghi chú của bạn…"></textarea>
+    </div>
+
+    <div id="formErr">Vui lòng điền đầy đủ các mục bắt buộc có dấu (*).</div>
+
+    <div class="submit-row">
+      <button type="submit" class="btn btn-primary">Gửi đăng ký →</button>
+      <button type="reset" class="clearbtn">Xóa hết lựa chọn</button>
+    </div>
+  </form>
+
+  <!-- THÔNG BÁO THÀNH CÔNG -->
+  <div class="ok-card" id="okCard">
+    <div class="ic">✓</div>
+    <h3>ĐĂNG KÝ THÀNH CÔNG</h3>
+    <p>Bạn đã đăng ký lịch đào tạo thành công. Bộ phận Đào tạo sẽ liên hệ xác nhận thời gian cụ thể với bạn trong thời gian sớm nhất. Xin chân thành cảm ơn!</p>
+    <div class="again"><button type="button" class="btn btn-primary" id="againBtn">Gửi đăng ký khác</button></div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="nm">Thịnh Thế Vinh Hoa F&amp;B Group</div>
+  <p>© 2026 · 35 Huỳnh Tịnh Của, P. Xuân Hòa, TP.HCM · ✉ hr@maycha.com.vn</p>
+  <p>MayCha · Hồng Trà Sữa Tam Hảo · Gà Giòn Sốt Ba Cô Gái · Trà Hú</p>
+  <p class="tagline">Vững thời · Sáng vận · Đẹp danh</p>
+</footer>
+
+<script src="chat.js"></script>
+<script>
+(function(){
+  var form=document.getElementById('trainForm');
+  var fe=document.getElementById('formErr');
+  var okCard=document.getElementById('okCard');
+
+  // tô đậm lựa chọn radio đang chọn
+  document.querySelectorAll('.opts').forEach(function(group){
+    group.addEventListener('change',function(){
+      group.classList.remove('err');
+      group.querySelectorAll('.opt').forEach(function(o){
+        o.classList.toggle('sel', o.querySelector('input').checked);
+      });
+    });
+  });
+
+  // không cho chọn ngày trong quá khứ
+  var dateEl=document.getElementById('sess_date');
+  var t=new Date(); t.setDate(t.getDate());
+  dateEl.min=t.toISOString().slice(0,10);
+
+  function val(id){ var el=document.getElementById(id); return el?(el.value||'').trim():''; }
+  function radio(name){ var el=form.querySelector('input[name="'+name+'"]:checked'); return el?el.value:''; }
+
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    var ok=true, firstBad=null;
+
+    // text/select bắt buộc
+    [['name',true],['phone',true],['position',true],['course',true],['sess_date',true]].forEach(function(p){
+      var id=p[0], el=document.getElementById(id), v=(el.value||'').trim(), bad=!v;
+      if(id==='phone') bad=!/^[0-9\s().+-]{8,}$/.test(v);
+      el.classList.toggle('err',bad);
+      if(bad){ ok=false; if(!firstBad) firstBad=el; }
+    });
+    // radio bắt buộc
+    [['brand','opts-brand'],['sess_time','opts-time'],['mode','opts-mode']].forEach(function(p){
+      var bad=!radio(p[0]); var box=document.getElementById(p[1]);
+      box.classList.toggle('err',bad);
+      if(bad){ ok=false; if(!firstBad) firstBad=box; }
+    });
+
+    if(!ok){
+      fe.textContent='Vui lòng điền đầy đủ các mục bắt buộc có dấu (*).';
+      fe.style.display='block';
+      if(firstBad){ firstBad.scrollIntoView({behavior:'smooth',block:'center'}); if(firstBad.focus) firstBad.focus(); }
+      return;
+    }
+    fe.style.display='none';
+
+    var data={
+      name:val('name'), phone:val('phone'), email:val('email'),
+      brand:radio('brand'), position:val('position'), store:val('store'),
+      course:val('course'), sess_date:val('sess_date'),
+      sess_time:radio('sess_time'), mode:radio('mode'), note:val('note')
+    };
+
+    var btn=form.querySelector('button[type="submit"]'); var old=btn.textContent;
+    btn.disabled=true; btn.textContent='Đang gửi…';
+    fetch('/api/training',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
+      .then(function(r){return r.json();})
+      .then(function(res){
+        btn.disabled=false; btn.textContent=old;
+        if(res && res.ok){
+          form.style.display='none';
+          okCard.style.display='block';
+          okCard.scrollIntoView({behavior:'smooth',block:'center'});
+        } else {
+          fe.textContent='Gửi đăng ký chưa thành công: '+((res&&res.error)||'lỗi không xác định')+'. Vui lòng thử lại.';
+          fe.style.display='block'; fe.scrollIntoView({behavior:'smooth',block:'center'});
+        }
+      })
+      .catch(function(){
+        btn.disabled=false; btn.textContent=old;
+        fe.textContent='Không gửi được đăng ký (lỗi mạng / server chưa chạy). Vui lòng thử lại.';
+        fe.style.display='block';
+      });
+  });
+
+  form.addEventListener('input',function(e){ if(e.target.classList&&e.target.classList.contains('err')) e.target.classList.remove('err'); });
+
+  document.getElementById('againBtn').addEventListener('click',function(){
+    form.reset();
+    document.querySelectorAll('.opt.sel').forEach(function(o){o.classList.remove('sel');});
+    okCard.style.display='none'; form.style.display='block';
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+})();
+</script>
+</body>
+</html>
