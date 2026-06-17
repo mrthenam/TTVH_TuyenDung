@@ -37,6 +37,8 @@ async function init() {
       id bigserial PRIMARY KEY, name text, phone text, email text, brand text,
       position text, store text, course text, sess_date text, sess_time text,
       mode text, note text, ts bigint)`);
+    await pool.query(`ALTER TABLE training ADD COLUMN IF NOT EXISTS province text`);
+    await pool.query(`ALTER TABLE training ADD COLUMN IF NOT EXISTS district text`);
     console.log(' [db] Đã kết nối PostgreSQL — lưu chat bền vững.');
   } else {
     console.log(' [db] Không có DATABASE_URL/pg — lưu chat tạm trong RAM.');
@@ -161,15 +163,16 @@ function isTyping(id) { return (Date.now() - (typing.get(id) || 0)) < 8000; }
 async function addTraining(r) {
   const ts = Date.now();
   const row = {
-    name: r.name || '', phone: r.phone || '', email: r.email || '', brand: r.brand || '',
+    name: r.name || '', phone: r.phone || '', email: r.email || '',
+    province: r.province || '', district: r.district || '', brand: r.brand || '',
     position: r.position || '', store: r.store || '', course: r.course || '',
     sess_date: r.sess_date || '', sess_time: r.sess_time || '', mode: r.mode || '', note: r.note || ''
   };
   if (HAS_PG) {
     const r2 = await pool.query(
-      `INSERT INTO training(name,phone,email,brand,position,store,course,sess_date,sess_time,mode,note,ts)
-       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id`,
-      [row.name, row.phone, row.email, row.brand, row.position, row.store, row.course, row.sess_date, row.sess_time, row.mode, row.note, ts]);
+      `INSERT INTO training(name,phone,email,province,district,brand,position,store,course,sess_date,sess_time,mode,note,ts)
+       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING id`,
+      [row.name, row.phone, row.email, row.province, row.district, row.brand, row.position, row.store, row.course, row.sess_date, row.sess_time, row.mode, row.note, ts]);
     return r2.rows[0].id;
   }
   const id = memTraining.length + 1;
