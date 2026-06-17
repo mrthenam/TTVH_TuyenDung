@@ -28,6 +28,96 @@ function norm(s) {
     .replace(/đ/g, 'd').replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
+/* ======================= LUỒNG "THAY ĐỔI LỊCH ĐÀO TẠO" ======================= */
+const flowState = new Map(); // sid -> {step, recordId, phone, name, ts}
+const FLOW_TTL = 2 * 3600 * 1000;
+const NOTE_DATE = '(Lưu ý: Ngày bắt đầu lớp đào tạo là cố định Thứ 2 hoặc Thứ 5 hàng tuần, bạn vui lòng xem lịch hiện tại rồi chọn một trong hai ngày này. Ví dụ: Bạn phỏng vấn đạt vào ngày Thứ 6 - 18/12, bạn có thể chọn đào tạo vào Thứ 2 - 21/12 HOẶC Thứ 5 - 24/12 tùy theo lịch rảnh của bạn)';
+
+function isChangeScheduleIntent(un) {
+  const hasDT = un.includes('dao tao') || un.includes('lich hoc') || un.includes('buoi hoc');
+  const hasChange = /(thay doi|doi lich|doi ngay|doi buoi|doi thoi gian|chuyen lich|chuyen ngay|thay lich|cap nhat lich|cap nhat ngay|dieu chinh lich)/.test(un);
+  return hasDT && hasChange;
+}
+function isCancel(un) { return /\b(huy|thoat|bo qua|dung lai|khong can nua)\b/.test(un); }
+function isYes(un) { return ['dung', 'chinh xac', 'chuan', 'phai', 'ok', 'oke', 'oki', 'yes', 'xac nhan', 'dung roi', 'chuan roi'].some((w) => un.includes(w)); }
+function isNo(un) { return ['sai', 'khong dung', 'khong phai', 'chua dung', 'chua chinh xac', 'nham', 'khong chinh xac'].some((w) => un.includes(w)) || /\bkhong\b/.test(un) || /\bko\b/.test(un); }
+function normPhone(p) { let d = (p || '').replace(/\D/g, ''); if (d.startsWith('84') && d.length >= 11) d = '0' + d.slice(2); return d; }
+function extractPhone(text) { const d = normPhone(text); return (d.length >= 9 && d.length <= 12) ? d : null; }
+function parseDmy(text) {
+  const m = (text || '').match(/(\d{1,2})\s*[\/\-.]\s*(\d{1,2})\s*[\/\-.]\s*(\d{2,4})/);
+  if (!m) return null;
+  let dd = +m[1], mm = +m[2], yy = +m[3];
+  if (yy < 100) yy += 2000;
+  if (dd < 1 || dd > 31 || mm < 1 || mm > 12 || yy < 2024 || yy > 2100) return null;
+  const p2 = (n) => (n < 10 ? '0' : '') + n;
+  return { iso: yy + '-' + p2(mm) + '-' + p2(dd), display: p2(dd) + '/' + p2(mm) + '/' + yy };
+}
+function fmtDate(s) { if (!s) return '(chưa có)'; const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s); return m ? (m[3] + '/' + m[2] + '/' + m[1]) : s; }
+function fmtTs(ts) { const d = new Date(Number(ts)); const p2 = (n) => (n < 10 ? '0' : '') + n; return p2(d.getDate()) + '/' + p2(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + p2(d.getHours()) + ':' + p2(d.getMinutes()); }
+async function findTrainingByPhone(phone) {
+  const np = normPhone(phone);
+  const rows = await db.listTraining(); // đã sắp xếp mới nhất trước
+  return rows.find((r) => normPhone(r.phone) === np) || null;
+}
+
+// Trả về chuỗi trả lời nếu luồng xử lý, hoặc null nếu không thuộc luồng (để KB/Gemini xử lý tiếp)
+async function handleTrainingFlow(sid, text) {
+  const un = norm(text);
+  let st = flowState.get(sid);
+  if (st && Date.now() - st.ts > FLOW_TTL) { flowState.delete(sid); st = null; }
+
+  // Bắt đầu luồng
+  if (!st) {
+    if (isChangeScheduleIntent(un)) {
+      flowState.set(sid, { step: 'ask_phone', ts: Date.now() });
+      return 'Dạ, bạn muốn thay đổi lịch đào tạo. Bạn vui lòng cho mình xin **số điện thoại** đã dùng khi đăng ký đào tạo để mình tra cứu nhé.';
+    }
+    return null;
+  }
+
+  // Cho phép hủy giữa chừng
+  if (isCancel(un)) { flowState.delete(sid); return 'Mình đã hủy yêu cầu thay đổi lịch đào tạo. Bạn cần hỗ trợ gì thêm không ạ?'; }
+  st.ts = Date.now();
+
+  if (st.step === 'ask_phone') {
+    const phone = extractPhone(text);
+    if (!phone) return 'Bạn vui lòng nhập đúng **số điện thoại** đã đăng ký (chỉ gồm chữ số, 10–11 số) để mình tra cứu giúp bạn nhé.';
+    const rec = await findTrainingByPhone(phone);
+    if (!rec) return 'Mình chưa tìm thấy đăng ký đào tạo nào với số điện thoại **' + phone + '**. Bạn kiểm tra lại và nhập lại **số điện thoại** đã đăng ký giúp mình nhé.';
+    st.recordId = rec.id; st.phone = rec.phone; st.name = rec.name; st.step = 'confirm';
+    flowState.set(sid, st);
+    return 'Mình tìm thấy thông tin đăng ký của bạn:\n'
+      + '• Họ và tên: ' + (rec.name || '(trống)') + '\n'
+      + '• Số điện thoại: ' + (rec.phone || '(trống)') + '\n'
+      + '• Ngày đào tạo đã đăng ký: ' + fmtDate(rec.sess_date) + '\n'
+      + '• Thời gian đăng ký: ' + fmtTs(rec.ts) + '\n\n'
+      + 'Thông tin trên đã **chính xác** chưa ạ? (trả lời "Đúng" hoặc "Sai")';
+  }
+
+  if (st.step === 'confirm') {
+    if (isYes(un)) {
+      st.step = 'ask_date'; flowState.set(sid, st);
+      return 'Bạn muốn đổi sang **ngày đào tạo** nào? Vui lòng nhập theo định dạng ngày/tháng/năm (ví dụ 21/12/2026).\n\n' + NOTE_DATE;
+    }
+    if (isNo(un)) {
+      st.step = 'ask_phone'; st.recordId = null; flowState.set(sid, st);
+      return 'Không sao ạ. Bạn vui lòng nhập lại **số điện thoại** đã đăng ký đào tạo để mình tra cứu lại nhé.';
+    }
+    return 'Bạn xác nhận giúp mình nhé: thông tin trên đã chính xác chưa ạ? Trả lời "Đúng" nếu chính xác, hoặc "Sai" nếu chưa đúng.';
+  }
+
+  if (st.step === 'ask_date') {
+    const d = parseDmy(text);
+    if (!d) return 'Bạn vui lòng nhập **ngày mong muốn** theo định dạng ngày/tháng/năm, ví dụ 21/12/2026.\n\n' + NOTE_DATE;
+    try { await db.updateTraining(st.recordId, { sess_date: d.iso }); }
+    catch (e) { return 'Xin lỗi, mình chưa cập nhật được lúc này. Bạn vui lòng thử lại sau ít phút hoặc liên hệ HR giúp mình nhé.'; }
+    const name = st.name; flowState.delete(sid);
+    return 'Mình đã cập nhật ngày đào tạo của bạn' + (name ? ' (' + name + ')' : '') + ' sang **' + d.display + '** thành công ✅.\nBộ phận Đào tạo sẽ liên hệ xác nhận lại với bạn. Cảm ơn bạn rất nhiều!';
+  }
+
+  return null;
+}
+
 let KB = null, KBmtime = 0;
 function loadKB() {
   try {
@@ -103,6 +193,13 @@ async function handleChat(req, res, url, loadConfig) {
 
       const conv = await db.getConv(sid);
       if (conv && conv.human_mode) return sendJson(res, 200, { ok: true, humanMode: true, userTs });
+
+      // Luồng đặc biệt: thay đổi lịch đào tạo (ưu tiên trước KB/Gemini)
+      const flowReply = await handleTrainingFlow(sid, text);
+      if (flowReply !== null) {
+        const ts = await db.addMessage(sid, 'bot', flowReply, 'flow');
+        return sendJson(res, 200, { ok: true, reply: flowReply, from: 'flow', ts, userTs });
+      }
 
       let reply = null, from = null;
       const kbHit = matchKB(text, cb.matchThreshold || 0.5);
