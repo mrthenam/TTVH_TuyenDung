@@ -56,15 +56,17 @@ function normVi(s) {
   return (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
     .replace(/đ/g, 'd').replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
 }
-// Chọn mã chiến dịch theo thương hiệu ứng tuyển
+// Lấy mã từ giá trị map (có thể là chuỗi code hoặc object {code,name})
+function codeOf(v) { return v == null ? null : (typeof v === 'string' ? v : v.code) || null; }
+// Chọn mã chiến dịch theo thương hiệu ứng tuyển (khớp không dấu/hoa thường)
 function pickBrandCampaign(map, brand) {
   if (!map || !brand) return null;
-  if (map[brand]) return map[brand];
+  if (map[brand]) return codeOf(map[brand]);
   const nb = normVi(brand);
-  for (const k in map) { if (normVi(k) === nb) return map[k]; }
-  if (nb.includes('maycha') || nb.includes('may cha')) return map['MayCha'] || null;
-  if (nb.includes('tam hao')) return map['Hồng Trà Sữa Tam Hảo'] || null;
-  if (nb.includes('ga gion') || nb.includes('ba co gai') || nb.includes('ga ran')) return map['Gà Giòn Sốt Ba Cô Gái'] || null;
+  for (const k in map) { if (normVi(k) === nb) return codeOf(map[k]); }
+  if (nb.includes('maycha') || nb.includes('may cha')) return codeOf(map['MayCha']);
+  if (nb.includes('tam hao')) return codeOf(map['Hồng Trà Sữa Tam Hảo']);
+  if (nb.includes('ga gion') || nb.includes('ba co gai') || nb.includes('ga ran')) return codeOf(map['Gà Giòn Sốt Ba Cô Gái']);
   return null;
 }
 
@@ -261,8 +263,10 @@ async function createCandidate(form, cfg, res) {
     const target = map[k];
     if (target) payload[target] = form[k];
   }
-  // Định tuyến CHIẾN DỊCH theo thương hiệu ứng tuyển (ghi đè mặc định)
-  const brandCode = pickBrandCampaign(c.brandCampaigns, form.brand);
+  // Định tuyến CHIẾN DỊCH theo thương hiệu ứng tuyển (ưu tiên cấu hình trong DB, fallback config)
+  let dbMap = null;
+  try { dbMap = await db.getBrandCampaignMap(); } catch (e) { dbMap = null; }
+  const brandCode = pickBrandCampaign(dbMap || {}, form.brand) || pickBrandCampaign(c.brandCampaigns, form.brand);
   if (brandCode) payload.campaign_current_id = brandCode;
 
   // Ngày sinh: input HTML là yyyy-mm-dd -> 1Office cần dd/mm/YYYY
@@ -365,7 +369,12 @@ const server = http.createServer(async (req, res) => {
 
 const cfg = loadConfig() || { port: 3000 };
 const PORT = process.env.PORT || cfg.port || 3000;
-chatbot.init().catch((e) => console.error(' [db] init lỗi:', e.message));
+chatbot.init()
+  .then(() => {
+    const bc = cfg.oneOffice && cfg.oneOffice.create && cfg.oneOffice.create.brandCampaigns;
+    if (bc) return db.seedBrandCampaigns(bc);
+  })
+  .catch((e) => console.error(' [db] init lỗi:', e.message));
 server.listen(PORT, () => {
   console.log('--------------------------------------------------');
   console.log(' Thịnh Thế Vinh Hoa — server đang chạy');

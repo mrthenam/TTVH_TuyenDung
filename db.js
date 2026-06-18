@@ -14,6 +14,7 @@ const memConv = new Map();   // id -> {id,name,human_mode,created_at,updated_at}
 const memMsg = new Map();    // id -> [{role,text,from_src,ts}]
 const memAgents = new Map(); // username -> {username,pass_hash,salt,display_name}
 const memTraining = [];      // [{...registration, id, ts}]  (fallback RAM)
+const memBrandCampaigns = new Map(); // brand -> {brand, code, name}
 // dùng chung cho cả 2 chế độ:
 const typing = new Map();    // convId -> ts
 const sessions = new Map();  // token -> {username, displayName, ts}
@@ -39,6 +40,8 @@ async function init() {
       mode text, note text, ts bigint)`);
     await pool.query(`ALTER TABLE training ADD COLUMN IF NOT EXISTS province text`);
     await pool.query(`ALTER TABLE training ADD COLUMN IF NOT EXISTS district text`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS brand_campaigns(
+      brand text PRIMARY KEY, code text, name text, updated_at bigint)`);
     console.log(' [db] Đã kết nối PostgreSQL — lưu chat bền vững.');
   } else {
     console.log(' [db] Không có DATABASE_URL/pg — lưu chat tạm trong RAM.');
@@ -207,11 +210,48 @@ async function deleteTraining(id) {
   return 0;
 }
 
+// ----- chiến dịch theo thương hiệu -----
+async function listBrandCampaigns() {
+  if (HAS_PG) { const r = await pool.query('SELECT brand, code, name FROM brand_campaigns ORDER BY brand'); return r.rows; }
+  return [...memBrandCampaigns.values()];
+}
+async function setBrandCampaign(brand, code, name) {
+  brand = (brand || '').trim(); if (!brand) return false;
+  const now = Date.now();
+  if (HAS_PG) {
+    await pool.query(
+      `INSERT INTO brand_campaigns(brand,code,name,updated_at) VALUES($1,$2,$3,$4)
+       ON CONFLICT (brand) DO UPDATE SET code=$2, name=$3, updated_at=$4`,
+      [brand, code || '', name || '', now]);
+  } else { memBrandCampaigns.set(brand, { brand, code: code || '', name: name || '' }); }
+  return true;
+}
+async function deleteBrandCampaign(brand) {
+  if (HAS_PG) { const r = await pool.query('DELETE FROM brand_campaigns WHERE brand=$1', [brand]); return r.rowCount; }
+  return memBrandCampaigns.delete(brand) ? 1 : 0;
+}
+async function getBrandCampaignMap() {
+  const rows = await listBrandCampaigns(); const m = {};
+  rows.forEach((r) => { m[r.brand] = { code: r.code, name: r.name }; });
+  return m;
+}
+// Seed lần đầu từ config (chỉ khi bảng trống) — obj: { brand: {code, name} }
+async function seedBrandCampaigns(obj) {
+  if (!obj) return;
+  const existing = await listBrandCampaigns();
+  if (existing.length) return;
+  for (const b in obj) {
+    const v = obj[b];
+    await setBrandCampaign(b, typeof v === 'string' ? v : v.code, typeof v === 'string' ? '' : v.name);
+  }
+}
+
 module.exports = {
   init, HAS_PG,
   verifyAgent, createAgent, listAgents,
   createSession, getSession,
   ensureConv, addMessage, getMessages, setHumanMode, getConv, listConversations,
   setTyping, isTyping,
-  addTraining, listTraining, updateTraining, deleteTraining
+  addTraining, listTraining, updateTraining, deleteTraining,
+  listBrandCampaigns, setBrandCampaign, deleteBrandCampaign, getBrandCampaignMap, seedBrandCampaigns
 };

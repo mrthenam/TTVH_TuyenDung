@@ -247,6 +247,22 @@ async function handleChat(req, res, url, loadConfig) {
         await db.createAgent(username, password, displayName);
         return sendJson(res, 200, { ok: true });
       }
+
+      // Quản lý chiến dịch theo thương hiệu
+      if (p === '/api/agent/campaigns' && req.method === 'GET') return sendJson(res, 200, { rows: await db.listBrandCampaigns() });
+      if (p === '/api/agent/campaigns' && req.method === 'POST') {
+        const b = await readBody(req) || {};
+        const brand = (b.brand || '').toString().trim();
+        if (!brand) return sendJson(res, 400, { error: 'Thiếu tên thương hiệu' });
+        await db.setBrandCampaign(brand, (b.code || '').toString().trim(), (b.name || '').toString().trim());
+        return sendJson(res, 200, { ok: true });
+      }
+      if (p === '/api/agent/campaigns' && req.method === 'DELETE') {
+        const brand = url.searchParams.get('brand') || '';
+        if (!brand) return sendJson(res, 400, { error: 'Thiếu tên thương hiệu' });
+        const n = await db.deleteBrandCampaign(brand);
+        return sendJson(res, 200, { ok: n > 0, deleted: n });
+      }
       if (p === '/api/agent/conversations' && req.method === 'GET') return sendJson(res, 200, { conversations: await db.listConversations() });
       if (p === '/api/agent/messages' && req.method === 'GET') {
         const sid = url.searchParams.get('sessionId') || '';

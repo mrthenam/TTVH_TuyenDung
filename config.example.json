@@ -60,11 +60,11 @@
         "source": "49",
         "campaign_current_id": "CTV01881706266787"
       },
-      "_note_brandCampaigns": "Định tuyến chiến dịch theo thương hiệu ứng tuyển (key = giá trị brand trên form, value = MÃ chiến dịch). Ghi đè campaign_current_id mặc định.",
+      "_note_brandCampaigns": "Định tuyến chiến dịch theo thương hiệu ứng tuyển (chỉ dùng để SEED lần đầu vào DB; sau đó quản trị sửa trong dashboard tab Chiến dịch). value = { code, name }.",
       "brandCampaigns": {
-        "MayCha": "CTV01881806266801",
-        "Hồng Trà Sữa Tam Hảo": "CTV01881806266804",
-        "Gà Giòn Sốt Ba Cô Gái": "CTV01881806266803"
+        "MayCha": { "code": "CTV01881806266801", "name": "[MAYCHA - Hiring Web] Tuyển dụng nhân viên mới" },
+        "Hồng Trà Sữa Tam Hảo": { "code": "CTV01881806266805", "name": "[TAMHAO - Hiring Web] Tuyển dụng nhân viên mới" },
+        "Gà Giòn Sốt Ba Cô Gái": { "code": "CTV01881806266803", "name": "[GARAN - Hiring Web] Tuyển dụng nhân viên mới" }
       },
       "_note_codePrefix": "Tiền tố cho mã ứng viên tự sinh (code bắt buộc & duy nhất).",
       "codePrefix": "HSUV_WEB"

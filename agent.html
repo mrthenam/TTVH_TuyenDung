@@ -121,6 +121,16 @@
   .boxmsg.err.show{display:block;color:var(--red);background:rgba(224,52,43,.08);border:1px solid rgba(224,52,43,.3)}
   .boxmsg.ok.show{display:block;color:#1f9a52;background:rgba(47,170,94,.1);border:1px solid rgba(47,170,94,.35)}
   .youtag{font-size:10px;font-weight:800;color:#fff;background:var(--green);padding:2px 8px;border-radius:99px;margin-left:6px}
+  /* chiến dịch */
+  .camplist{display:flex;flex-direction:column;gap:12px;margin-bottom:18px}
+  .camprow{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:0 14px 40px -32px rgba(224,52,43,.4);display:grid;grid-template-columns:200px 1fr 1fr auto;gap:14px;align-items:end}
+  .camprow .cb{font-weight:800;font-size:15px;align-self:center}
+  .camprow .cb small{display:block;font-weight:600;color:var(--muted);font-size:11px}
+  .camprow .fld label{font-size:11.5px}
+  .camprow input{padding:10px 12px;border:1px solid var(--line-2);border-radius:9px;font-family:inherit;font-size:13.5px;background:var(--bg);color:var(--txt);width:100%}
+  .camprow input:focus{outline:none;border-color:var(--red)}
+  .camprow .acts{display:flex;gap:6px}
+  @media(max-width:900px){.camprow{grid-template-columns:1fr 1fr;}.camprow .cb{grid-column:1/-1}}
 
   /* ===== MODAL ===== */
   .overlay{position:fixed;inset:0;background:rgba(42,24,16,.45);backdrop-filter:blur(2px);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
@@ -176,6 +186,7 @@
       <button class="navbtn act" id="tabChat"><span class="ic">💬</span><span class="t">Chat khách hàng</span></button>
       <button class="navbtn" id="tabTrain"><span class="ic">📋</span><span class="t">Đăng ký đào tạo</span><span class="cnt" id="navTrainCnt">0</span></button>
       <button class="navbtn" id="tabStaff"><span class="ic">👥</span><span class="t">Nhân viên</span><span class="cnt" id="navStaffCnt">0</span></button>
+      <button class="navbtn" id="tabCamp"><span class="ic">🎯</span><span class="t">Chiến dịch</span><span class="cnt" id="navCampCnt">0</span></button>
       <div class="foot">© 2026 TTVH F&B</div>
     </aside>
 
@@ -235,6 +246,26 @@
             <p class="hintnote">Nhân viên mới có thể đăng nhập trang quản trị để chat & quản lý đào tạo.</p>
           </div>
           <div class="tablecard" style="align-self:flex-start"><table class="tt" id="stable"></table></div>
+        </div>
+      </div>
+
+      <!-- CHIẾN DỊCH -->
+      <div class="trainview" id="viewCampaign" style="display:none">
+        <div class="pagehd">
+          <div><h1>🎯 Chiến dịch theo thương hiệu</h1><div class="sub">Khi ứng viên chọn thương hiệu, hồ sơ tự vào đúng chiến dịch 1Office bên dưới.</div></div>
+        </div>
+        <div id="campList" class="camplist"></div>
+        <div class="addbox" style="width:auto;max-width:640px">
+          <h3>＋ Thêm thương hiệu → chiến dịch</h3>
+          <div id="cErr" class="boxmsg err"></div>
+          <div id="cOk" class="boxmsg ok"></div>
+          <div class="grid2">
+            <div class="fld"><label>Thương hiệu <span class="req">*</span></label><input id="c_brand" type="text" placeholder="vd: Trà Hú" /></div>
+            <div class="fld"><label>Mã chiến dịch</label><input id="c_code" type="text" placeholder="vd: CTV01881806266805" /></div>
+            <div class="fld full"><label>Tên chiến dịch</label><input id="c_name" type="text" placeholder="vd: [TRAHU - Hiring Web] Tuyển dụng nhân viên mới" /></div>
+          </div>
+          <button class="btn primary" id="cAdd" style="justify-content:center;margin-top:6px">Thêm chiến dịch</button>
+          <p class="hintnote">Tên thương hiệu phải trùng đúng giá trị trong ô “Thương hiệu ứng tuyển” trên form ứng tuyển.</p>
         </div>
       </div>
 
@@ -364,15 +395,63 @@ function switchView(v) {
   $('#viewChat').style.display = v === 'chat' ? 'flex' : 'none';
   $('#viewTraining').style.display = v === 'train' ? 'flex' : 'none';
   $('#viewStaff').style.display = v === 'staff' ? 'flex' : 'none';
+  $('#viewCampaign').style.display = v === 'camp' ? 'flex' : 'none';
   $('#tabChat').classList.toggle('act', v === 'chat');
   $('#tabTrain').classList.toggle('act', v === 'train');
   $('#tabStaff').classList.toggle('act', v === 'staff');
+  $('#tabCamp').classList.toggle('act', v === 'camp');
   if (v === 'train') loadTraining();
   if (v === 'staff') loadStaff();
+  if (v === 'camp') loadCampaigns();
 }
 $('#tabChat').addEventListener('click', function () { switchView('chat'); });
 $('#tabTrain').addEventListener('click', function () { switchView('train'); });
 $('#tabStaff').addEventListener('click', function () { switchView('staff'); });
+$('#tabCamp').addEventListener('click', function () { switchView('camp'); });
+
+/* ===== CHIẾN DỊCH ===== */
+function loadCampaigns() {
+  api('/api/agent/campaigns').then(function (d) {
+    var rows = d.rows || []; $('#navCampCnt').textContent = rows.length;
+    var html = '';
+    rows.forEach(function (r) {
+      html += '<div class="camprow" data-brand="' + esc(r.brand) + '">'
+        + '<div class="cb">' + esc(r.brand) + '<small>Thương hiệu ứng tuyển</small></div>'
+        + '<div class="fld"><label>Mã chiến dịch</label><input class="ci_code" value="' + esc(r.code || '') + '" /></div>'
+        + '<div class="fld"><label>Tên chiến dịch</label><input class="ci_name" value="' + esc(r.name || '') + '" /></div>'
+        + '<div class="acts"><button class="btn primary cSave">Lưu</button><button class="iconbtn del cDel">🗑</button></div>'
+        + '</div>';
+    });
+    $('#campList').innerHTML = html || '<div class="norows">Chưa có cấu hình chiến dịch. Thêm bên dưới.</div>';
+    [].forEach.call(document.querySelectorAll('#campList .camprow'), function (row) {
+      var brand = row.getAttribute('data-brand');
+      row.querySelector('.cSave').onclick = function () { saveCampaign(brand, row.querySelector('.ci_code').value.trim(), row.querySelector('.ci_name').value.trim()); };
+      row.querySelector('.cDel').onclick = function () { if (confirm('Xóa định tuyến chiến dịch của "' + brand + '"?')) delCampaign(brand); };
+    });
+  }).catch(function (e) { if (e.message === '401') logout(); });
+}
+function saveCampaign(brand, code, name) {
+  api('/api/agent/campaigns', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ brand: brand, code: code, name: name }) })
+    .then(function (res) { if (res && res.ok) { toast('Đã lưu chiến dịch "' + brand + '".'); loadCampaigns(); } else toast('Lưu thất bại.'); })
+    .catch(function (e) { if (e.message === '401') logout(); else toast('Lỗi kết nối.'); });
+}
+function delCampaign(brand) {
+  api('/api/agent/campaigns?brand=' + encodeURIComponent(brand), { method: 'DELETE' })
+    .then(function (res) { if (res && res.ok) { toast('Đã xóa.'); loadCampaigns(); } else toast('Xóa thất bại.'); })
+    .catch(function (e) { if (e.message === '401') logout(); else toast('Lỗi kết nối.'); });
+}
+function cMsg(id, t) { var el = $(id); el.textContent = t || ''; el.classList.toggle('show', !!t); }
+$('#cAdd').addEventListener('click', function () {
+  cMsg('#cErr', ''); cMsg('#cOk', '');
+  var brand = $('#c_brand').value.trim();
+  if (!brand) { cMsg('#cErr', 'Vui lòng nhập tên thương hiệu.'); return; }
+  api('/api/agent/campaigns', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ brand: brand, code: $('#c_code').value.trim(), name: $('#c_name').value.trim() }) })
+    .then(function (res) {
+      if (res && res.ok) { cMsg('#cOk', 'Đã thêm "' + brand + '".'); $('#c_brand').value = ''; $('#c_code').value = ''; $('#c_name').value = ''; loadCampaigns(); }
+      else cMsg('#cErr', (res && res.error) || 'Thêm thất bại.');
+    })
+    .catch(function (e) { if (e.message === '401') return logout(); cMsg('#cErr', 'Lỗi kết nối.'); });
+});
 
 /* ===== NHÂN VIÊN ===== */
 var myUser = '';
