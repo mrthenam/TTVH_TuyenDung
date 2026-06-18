@@ -111,6 +111,16 @@
   .iconbtn.edit{color:var(--amber)}.iconbtn.edit:hover{background:rgba(255,122,26,.1)}
   .iconbtn.del{color:var(--red)}.iconbtn.del:hover{background:rgba(224,52,43,.1)}
   .norows{padding:34px;color:var(--muted);text-align:center}
+  /* nhân viên */
+  .staffgrid{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start;flex:1;min-height:0}
+  .addbox{width:320px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 22px;box-shadow:0 18px 50px -34px rgba(224,52,43,.4);display:flex;flex-direction:column;gap:12px}
+  .addbox h3{font-size:16px;font-weight:900}
+  .staffgrid .tablecard{flex:1;min-width:280px}
+  .hintnote{color:var(--muted);font-size:12px;margin-top:4px}
+  .boxmsg{display:none;font-size:13px;font-weight:600;padding:9px 12px;border-radius:9px}
+  .boxmsg.err.show{display:block;color:var(--red);background:rgba(224,52,43,.08);border:1px solid rgba(224,52,43,.3)}
+  .boxmsg.ok.show{display:block;color:#1f9a52;background:rgba(47,170,94,.1);border:1px solid rgba(47,170,94,.35)}
+  .youtag{font-size:10px;font-weight:800;color:#fff;background:var(--green);padding:2px 8px;border-radius:99px;margin-left:6px}
 
   /* ===== MODAL ===== */
   .overlay{position:fixed;inset:0;background:rgba(42,24,16,.45);backdrop-filter:blur(2px);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
@@ -165,6 +175,7 @@
       <div class="lbl">Quản lý</div>
       <button class="navbtn act" id="tabChat"><span class="ic">💬</span><span class="t">Chat khách hàng</span></button>
       <button class="navbtn" id="tabTrain"><span class="ic">📋</span><span class="t">Đăng ký đào tạo</span><span class="cnt" id="navTrainCnt">0</span></button>
+      <button class="navbtn" id="tabStaff"><span class="ic">👥</span><span class="t">Nhân viên</span><span class="cnt" id="navStaffCnt">0</span></button>
       <div class="foot">© 2026 TTVH F&B</div>
     </aside>
 
@@ -205,6 +216,26 @@
           </div>
         </div>
         <div class="tablecard"><table class="tt" id="ttable"></table></div>
+      </div>
+
+      <!-- NHÂN VIÊN -->
+      <div class="trainview" id="viewStaff" style="display:none">
+        <div class="pagehd">
+          <div><h1>👥 Quản lý nhân viên</h1><div class="sub" id="scount">0 tài khoản</div></div>
+        </div>
+        <div class="staffgrid">
+          <div class="addbox">
+            <h3>＋ Thêm nhân viên</h3>
+            <div id="sErr" class="boxmsg err"></div>
+            <div id="sOk" class="boxmsg ok"></div>
+            <div class="fld"><label>Tên đăng nhập <span class="req">*</span></label><input id="s_user" type="text" placeholder="vd: nhanvien01" autocomplete="off" /></div>
+            <div class="fld"><label>Tên hiển thị</label><input id="s_name" type="text" placeholder="vd: Nguyễn Văn A" autocomplete="off" /></div>
+            <div class="fld"><label>Mật khẩu <span class="req">*</span></label><input id="s_pass" type="text" placeholder="Tối thiểu 4 ký tự" autocomplete="new-password" /></div>
+            <button class="btn primary" id="sAdd" style="width:100%;justify-content:center;margin-top:6px">Thêm nhân viên</button>
+            <p class="hintnote">Nhân viên mới có thể đăng nhập trang quản trị để chat & quản lý đào tạo.</p>
+          </div>
+          <div class="tablecard" style="align-self:flex-start"><table class="tt" id="stable"></table></div>
+        </div>
       </div>
 
     </div>
@@ -330,15 +361,49 @@ $('#reply').addEventListener('input', function () { if (sel) api('/api/agent/typ
 
 /* ===== TAB SWITCH ===== */
 function switchView(v) {
-  var train = v === 'train';
-  $('#viewChat').style.display = train ? 'none' : 'flex';
-  $('#viewTraining').style.display = train ? 'flex' : 'none';
-  $('#tabTrain').classList.toggle('act', train);
-  $('#tabChat').classList.toggle('act', !train);
-  if (train) loadTraining();
+  $('#viewChat').style.display = v === 'chat' ? 'flex' : 'none';
+  $('#viewTraining').style.display = v === 'train' ? 'flex' : 'none';
+  $('#viewStaff').style.display = v === 'staff' ? 'flex' : 'none';
+  $('#tabChat').classList.toggle('act', v === 'chat');
+  $('#tabTrain').classList.toggle('act', v === 'train');
+  $('#tabStaff').classList.toggle('act', v === 'staff');
+  if (v === 'train') loadTraining();
+  if (v === 'staff') loadStaff();
 }
 $('#tabChat').addEventListener('click', function () { switchView('chat'); });
 $('#tabTrain').addEventListener('click', function () { switchView('train'); });
+$('#tabStaff').addEventListener('click', function () { switchView('staff'); });
+
+/* ===== NHÂN VIÊN ===== */
+var myUser = '';
+function loadStaff() {
+  api('/api/agent/staff').then(function (d) {
+    myUser = d.me || '';
+    var ag = d.agents || []; $('#navStaffCnt').textContent = ag.length; $('#scount').textContent = ag.length + ' tài khoản';
+    var html = '<thead><tr><th>#</th><th>Tên đăng nhập</th><th>Tên hiển thị</th></tr></thead><tbody>';
+    ag.forEach(function (a, i) {
+      html += '<tr><td class="idx">' + (i + 1) + '</td><td>' + esc(a.username) + (a.username === myUser ? '<span class="youtag">Bạn</span>' : '') + '</td><td>' + esc(a.display_name || '') + '</td></tr>';
+    });
+    $('#stable').innerHTML = html + '</tbody>';
+  }).catch(function (e) { if (e.message === '401') logout(); });
+}
+function sMsg(id, text) { var el = $(id); el.textContent = text || ''; el.classList.toggle('show', !!text); }
+$('#sAdd').addEventListener('click', function () {
+  sMsg('#sErr', ''); sMsg('#sOk', '');
+  var data = { username: $('#s_user').value.trim(), displayName: $('#s_name').value.trim(), password: $('#s_pass').value };
+  if (!data.username || !data.password) { sMsg('#sErr', 'Vui lòng nhập tên đăng nhập và mật khẩu.'); return; }
+  var btn = $('#sAdd'); btn.disabled = true; var old = btn.textContent; btn.textContent = 'Đang thêm…';
+  api('/api/agent/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+    .then(function (res) {
+      btn.disabled = false; btn.textContent = old;
+      if (res && res.ok) {
+        sMsg('#sOk', 'Đã thêm nhân viên "' + data.username + '".');
+        $('#s_user').value = ''; $('#s_name').value = ''; $('#s_pass').value = '';
+        loadStaff();
+      } else { sMsg('#sErr', (res && res.error) || 'Thêm thất bại.'); }
+    })
+    .catch(function (e) { btn.disabled = false; btn.textContent = old; if (e.message === '401') return logout(); sMsg('#sErr', 'Lỗi kết nối, vui lòng thử lại.'); });
+});
 
 /* ===== TRAINING LIST ===== */
 var trainRows = [];

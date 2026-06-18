@@ -232,6 +232,21 @@ async function handleChat(req, res, url, loadConfig) {
       if (!sess) return sendJson(res, 401, { error: 'Chưa đăng nhập' });
 
       if (p === '/api/agent/me' && req.method === 'GET') return sendJson(res, 200, { username: sess.username, displayName: sess.displayName });
+
+      // Quản lý nhân viên
+      if (p === '/api/agent/staff' && req.method === 'GET') return sendJson(res, 200, { agents: await db.listAgents(), me: sess.username });
+      if (p === '/api/agent/create' && req.method === 'POST') {
+        const b = await readBody(req) || {};
+        const username = (b.username || '').toString().trim().toLowerCase();
+        const password = (b.password || '').toString();
+        const displayName = (b.displayName || '').toString().trim() || username;
+        if (!/^[a-z0-9._-]{3,}$/.test(username)) return sendJson(res, 400, { error: 'Tên đăng nhập tối thiểu 3 ký tự, chỉ gồm chữ thường/số/._-' });
+        if (password.length < 4) return sendJson(res, 400, { error: 'Mật khẩu tối thiểu 4 ký tự' });
+        const list = await db.listAgents();
+        if (list.some((a) => a.username === username)) return sendJson(res, 409, { error: 'Tên đăng nhập "' + username + '" đã tồn tại' });
+        await db.createAgent(username, password, displayName);
+        return sendJson(res, 200, { ok: true });
+      }
       if (p === '/api/agent/conversations' && req.method === 'GET') return sendJson(res, 200, { conversations: await db.listConversations() });
       if (p === '/api/agent/messages' && req.method === 'GET') {
         const sid = url.searchParams.get('sessionId') || '';
