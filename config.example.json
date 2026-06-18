@@ -71,7 +71,7 @@
     }
   },
 
-  "_note_chatbot": "Chatbot: geminiApiKey (dùng khi KB không có câu trả lời), agentKey (mật khẩu trang nhân viên agent.html). Khi deploy đặt qua biến môi trường GEMINI_API_KEY / AGENT_KEY.",
+  "_note_chatbot": "Chatbot: geminiApiKey (dùng khi KB không có câu trả lời), agentKey (mật khẩu trang quản trị /admin). Khi deploy đặt qua biến môi trường GEMINI_API_KEY / AGENT_KEY.",
   "chatbot": {
     "geminiApiKey": "PASTE_YOUR_GEMINI_API_KEY",
     "geminiModel": "gemini-2.0-flash",

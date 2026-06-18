@@ -217,6 +217,9 @@ function proxyTo1Office(key, cfg, res, clientParams) {
 function serveStatic(req, res) {
   let pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
   if (pathname === '/') pathname = '/index.html';
+  // Đường dẫn thân thiện cho trang quản trị: /admin (và /agent, /agent.html cũ) -> admin.html
+  const lp = pathname.replace(/\/$/, '').toLowerCase();
+  if (lp === '/admin' || lp === '/agent' || lp === '/agent.html') pathname = '/admin.html';
   // chặn path traversal
   const safe = path.normalize(pathname).replace(/^(\.\.[/\\])+/, '');
   const filePath = path.join(ROOT, safe);
@@ -379,7 +382,7 @@ server.listen(PORT, () => {
   console.log('--------------------------------------------------');
   console.log(' Thịnh Thế Vinh Hoa — server đang chạy');
   console.log(' Trang tuyển dụng : http://localhost:' + PORT + '/');
-  console.log(' Trang dữ liệu    : http://localhost:' + PORT + '/tuyen-dung.html');
-  console.log(' Landing page     : http://localhost:' + PORT + '/index.html');
+  console.log(' Trang quản trị   : http://localhost:' + PORT + '/admin');
+  console.log(' Đăng ký đào tạo  : http://localhost:' + PORT + '/dao-tao.html');
   console.log('--------------------------------------------------');
 });
