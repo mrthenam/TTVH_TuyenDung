@@ -51,6 +51,23 @@ function loadConfig() {
   return cfg;
 }
 
+// Bỏ dấu tiếng Việt để so khớp thương hiệu linh hoạt
+function normVi(s) {
+  return (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/đ/g, 'd').replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+// Chọn mã chiến dịch theo thương hiệu ứng tuyển
+function pickBrandCampaign(map, brand) {
+  if (!map || !brand) return null;
+  if (map[brand]) return map[brand];
+  const nb = normVi(brand);
+  for (const k in map) { if (normVi(k) === nb) return map[k]; }
+  if (nb.includes('maycha') || nb.includes('may cha')) return map['MayCha'] || null;
+  if (nb.includes('tam hao')) return map['Hồng Trà Sữa Tam Hảo'] || null;
+  if (nb.includes('ga gion') || nb.includes('ba co gai') || nb.includes('ga ran')) return map['Gà Giòn Sốt Ba Cô Gái'] || null;
+  return null;
+}
+
 const MIME = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
@@ -244,6 +261,10 @@ async function createCandidate(form, cfg, res) {
     const target = map[k];
     if (target) payload[target] = form[k];
   }
+  // Định tuyến CHIẾN DỊCH theo thương hiệu ứng tuyển (ghi đè mặc định)
+  const brandCode = pickBrandCampaign(c.brandCampaigns, form.brand);
+  if (brandCode) payload.campaign_current_id = brandCode;
+
   // Ngày sinh: input HTML là yyyy-mm-dd -> 1Office cần dd/mm/YYYY
   if (payload.birthday && /^\d{4}-\d{2}-\d{2}$/.test(payload.birthday)) {
     const p = payload.birthday.split('-'); payload.birthday = p[2] + '/' + p[1] + '/' + p[0];

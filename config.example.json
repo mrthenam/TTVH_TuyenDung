@@ -55,10 +55,16 @@
         "source_id": "source",
         "campaign_current_id": "campaign_current_id"
       },
-      "_note_extra": "Giá trị MẶC ĐỊNH. source = mã nguồn. campaign_current_id = MÃ CHIẾN DỊCH (theo doc: 'Nhập: Mã chiến dịch'), vd CTV01881706266787.",
+      "_note_extra": "Giá trị MẶC ĐỊNH. source = mã nguồn. campaign_current_id = MÃ CHIẾN DỊCH mặc định (fallback khi không khớp thương hiệu).",
       "extra": {
         "source": "49",
         "campaign_current_id": "CTV01881706266787"
+      },
+      "_note_brandCampaigns": "Định tuyến chiến dịch theo thương hiệu ứng tuyển (key = giá trị brand trên form, value = MÃ chiến dịch). Ghi đè campaign_current_id mặc định.",
+      "brandCampaigns": {
+        "MayCha": "CTV01881806266801",
+        "Hồng Trà Sữa Tam Hảo": "CTV01881806266804",
+        "Gà Giòn Sốt Ba Cô Gái": "CTV01881806266803"
       },
       "_note_codePrefix": "Tiền tố cho mã ứng viên tự sinh (code bắt buộc & duy nhất).",
       "codePrefix": "HSUV_WEB"
