@@ -516,6 +516,9 @@ function healPositions() {
 function pad2(n) { return (n < 10 ? '0' : '') + n; }
 function fmtTs(ts) { var d = new Date(Number(ts)); return pad2(d.getDate()) + '/' + pad2(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()); }
 function fmtDate(s) { if (!s) return ''; if (/^\d{4}-\d{2}-\d{2}$/.test(s)) { var p = s.split('-'); return p[2] + '/' + p[1] + '/' + p[0]; } return s; }
+// Định dạng kiểu file Excel/Forms: M/D/YYYY H:MM (không số 0 thừa ở tháng/ngày/giờ)
+function fmtTsUS(ts) { var d = new Date(Number(ts)); return (d.getMonth() + 1) + '/' + d.getDate() + '/' + d.getFullYear() + ' ' + d.getHours() + ':' + pad2(d.getMinutes()); }
+function fmtDateUS(s) { var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ''); return m ? (+m[2]) + '/' + (+m[3]) + '/' + m[1] : (s || ''); }
 function renderTraining() {
   var q = ($('#tsearch').value || '').trim().toLowerCase();
   var rows = trainRows.filter(function (r) {
@@ -539,11 +542,13 @@ $('#treload').addEventListener('click', loadTraining);
 
 /* ===== CSV ===== */
 $('#tcsv').addEventListener('click', function () {
-  var head = ['Thời gian gửi', 'Họ tên', 'SĐT', 'Email', 'Tỉnh thành', 'Quận huyện', 'Vị trí trúng tuyển', 'Hình thức đào tạo', 'Ngày dự kiến', 'Cửa hàng làm việc'];
-  var lines = [head.join(',')];
-  trainRows.forEach(function (r) {
-    var row = [fmtTs(r.ts), r.name, r.phone, r.email, r.province, r.district, normPos(r.position), r.mode, fmtDate(r.sess_date), r.store];
-    lines.push(row.map(function (c) { c = (c == null ? '' : String(c)); return '"' + c.replace(/"/g, '""') + '"'; }).join(','));
+  var head = ['Id', 'Thời gian bắt đầu', 'Thời gian hoàn thành', 'Email', 'Tên', 'Họ Tên', 'Số Điện Thoại', 'Email Cá Nhân', 'Tỉnh Thành Bạn Đang Ở', 'Quận Huyện Bạn Đang Ở', 'Vị Trí Trúng Tuyển', 'Hình Thức Tham Gia Đào Tạo', 'Ngày Dự Kiến Bạn Có Thể Tham Gia Đào Tạo', 'Cửa Hàng Bạn Làm Việc'];
+  var esc = function (c) { c = (c == null ? '' : String(c)); return '"' + c.replace(/"/g, '""') + '"'; };
+  var lines = [head.map(esc).join(',')];
+  // xuất theo thứ tự thời gian tăng dần (cũ -> mới) giống file Forms
+  trainRows.slice().sort(function (a, b) { return a.ts - b.ts; }).forEach(function (r, i) {
+    var row = [r.id != null ? r.id : (i + 1), fmtTsUS(r.ts), fmtTsUS(r.ts), 'anonymous', '', r.name, r.phone, r.email, r.province, r.district, normPos(r.position), r.mode, fmtDateUS(r.sess_date), r.store];
+    lines.push(row.map(esc).join(','));
   });
   var blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
   var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'dangky-daotao.csv'; a.click();
