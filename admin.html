@@ -540,51 +540,121 @@ function renderTraining() {
 $('#tsearch').addEventListener('input', renderTraining);
 $('#treload').addEventListener('click', loadTraining);
 
-/* ===== CSV ===== */
+/* ===== XUẤT EXCEL (.xlsx thật) ===== */
 $('#tcsv').addEventListener('click', function () {
   var head = ['Id', 'Thời gian bắt đầu', 'Thời gian hoàn thành', 'Email', 'Tên', 'Họ Tên', 'Số Điện Thoại', 'Email Cá Nhân', 'Tỉnh Thành Bạn Đang Ở', 'Quận Huyện Bạn Đang Ở', 'Vị Trí Trúng Tuyển', 'Hình Thức Tham Gia Đào Tạo', 'Ngày Dự Kiến Bạn Có Thể Tham Gia Đào Tạo', 'Cửa Hàng Bạn Làm Việc'];
-  var widths = [38, 110, 122, 78, 60, 160, 95, 175, 135, 125, 150, 220, 175, 205];
+  var widths = [6, 18, 18, 12, 10, 26, 16, 28, 22, 20, 24, 38, 30, 34]; // đơn vị ký tự
   var rows = trainRows.slice().sort(function (a, b) { return a.ts - b.ts; }).map(function (r, i) {
     return [
-      { v: (r.id != null ? r.id : (i + 1)), t: 'Number' },
+      { v: (r.id != null ? r.id : (i + 1)), num: true },
       { v: fmtTsUS(r.ts) }, { v: fmtTsUS(r.ts) }, { v: 'anonymous' }, { v: '' },
       { v: r.name || '' }, { v: r.phone || '' }, { v: r.email || '' }, { v: r.province || '' }, { v: r.district || '' },
       { v: normPos(r.position) || '' }, { v: r.mode || '' }, { v: fmtDateUS(r.sess_date) || '' }, { v: r.store || '' }
     ];
   });
-  var xml = buildXls('Đăng ký đào tạo', head, widths, rows);
-  var blob = new Blob(['﻿' + xml], { type: 'application/vnd.ms-excel;charset=utf-8' });
-  var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'dangky-daotao.xls'; a.click();
+  var bytes = buildXlsx('Đăng ký đào tạo', head, widths, rows);
+  var blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'dangky-daotao.xlsx'; a.click();
 });
 
-// Tạo file Excel (XML Spreadsheet 2003) có sẵn màu sắc, header, độ rộng cột
 function xesc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
-function buildXls(sheetName, head, widths, rows) {
-  var styles =
-    '<Style ss:ID="hdr"><Font ss:Bold="1" ss:Color="#FFFFFF" ss:Size="11"/><Interior ss:Color="#4472C4" ss:Pattern="Solid"/><Alignment ss:Vertical="Center" ss:Horizontal="Left"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#FFFFFF"/><Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#FFFFFF"/></Borders></Style>' +
-    '<Style ss:ID="odd"><Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/><Alignment ss:Vertical="Center"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#C9D6EC"/></Borders></Style>' +
-    '<Style ss:ID="even"><Interior ss:Color="#D9E1F2" ss:Pattern="Solid"/><Alignment ss:Vertical="Center"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#C9D6EC"/></Borders></Style>';
-  var cols = widths.map(function (w) { return '<Column ss:AutoFitWidth="0" ss:Width="' + w + '"/>'; }).join('');
-  var hcells = head.map(function (h) { return '<Cell ss:StyleID="hdr"><Data ss:Type="String">' + xesc(h) + '</Data></Cell>'; }).join('');
-  var body = rows.map(function (row, ri) {
-    var sid = (ri % 2 === 0) ? 'odd' : 'even';
-    var cells = row.map(function (c) {
-      var t = c.t || 'String';
-      return '<Cell ss:StyleID="' + sid + '"><Data ss:Type="' + t + '">' + xesc(c.v) + '</Data></Cell>';
-    }).join('');
-    return '<Row ss:Height="17">' + cells + '</Row>';
-  }).join('');
-  var n = rows.length + 1, cc = head.length;
-  return '<?xml version="1.0" encoding="UTF-8"?>\n<?mso-application progid="Excel.Sheet"?>\n' +
-    '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">' +
-    '<Styles>' + styles + '</Styles>' +
-    '<Worksheet ss:Name="' + xesc(sheetName) + '">' +
-    '<Table ss:DefaultRowHeight="16">' + cols +
-    '<Row ss:Height="22">' + hcells + '</Row>' + body +
-    '</Table>' +
-    '<AutoFilter x:Range="R1C1:R' + n + 'C' + cc + '" xmlns="urn:schemas-microsoft-com:office:excel"/>' +
-    '<WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel"><FreezePanes/><FrozenNoSplit/><SplitHorizontal>1</SplitHorizontal><TopRowBottomPane>1</TopRowBottomPane><ActivePane>2</ActivePane></WorksheetOptions>' +
-    '</Worksheet></Workbook>';
+function colLetter(n) { var s = ''; n++; while (n > 0) { var m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = (n - m - 1) / 26; } return s; }
+
+// ---- ZIP (store, không nén) + CRC32 ----
+function crc32(buf) {
+  var t = crc32.t;
+  if (!t) { t = crc32.t = []; for (var n = 0; n < 256; n++) { var c = n; for (var k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1); t[n] = c >>> 0; } }
+  var crc = 0xFFFFFFFF;
+  for (var i = 0; i < buf.length; i++) crc = (crc >>> 8) ^ t[(crc ^ buf[i]) & 0xFF];
+  return (crc ^ 0xFFFFFFFF) >>> 0;
+}
+function zipStore(files) {
+  var enc = new TextEncoder();
+  var chunks = [], offset = 0, central = [];
+  var u16 = function (n) { return [n & 0xFF, (n >>> 8) & 0xFF]; };
+  var u32 = function (n) { return [n & 0xFF, (n >>> 8) & 0xFF, (n >>> 16) & 0xFF, (n >>> 24) & 0xFF]; };
+  files.forEach(function (f) {
+    var nameB = enc.encode(f.name), data = f.data, crc = crc32(data), sz = data.length, off = offset;
+    var local = [].concat(u32(0x04034b50), u16(20), u16(0x0800), u16(0), u16(0), u16(0), u32(crc), u32(sz), u32(sz), u16(nameB.length), u16(0));
+    chunks.push(new Uint8Array(local)); offset += local.length;
+    chunks.push(nameB); offset += nameB.length;
+    chunks.push(data); offset += sz;
+    var cen = [].concat(u32(0x02014b50), u16(20), u16(20), u16(0x0800), u16(0), u16(0), u16(0), u32(crc), u32(sz), u32(sz), u16(nameB.length), u16(0), u16(0), u16(0), u16(0), u32(0), u32(off));
+    central.push({ head: new Uint8Array(cen), name: nameB });
+  });
+  var cdStart = offset, cdSize = 0;
+  central.forEach(function (c) { chunks.push(c.head); offset += c.head.length; cdSize += c.head.length; chunks.push(c.name); offset += c.name.length; cdSize += c.name.length; });
+  chunks.push(new Uint8Array([].concat(u32(0x06054b50), u16(0), u16(0), u16(central.length), u16(central.length), u32(cdSize), u32(cdStart), u16(0))));
+  var total = chunks.reduce(function (a, c) { return a + c.length; }, 0), out = new Uint8Array(total), p = 0;
+  chunks.forEach(function (c) { out.set(c, p); p += c.length; });
+  return out;
+}
+
+// ---- Tạo gói .xlsx (OOXML) có style ----
+function buildXlsx(sheetName, head, widths, rows) {
+  var enc = new TextEncoder();
+  var nRows = rows.length + 1, lastRef = colLetter(head.length - 1) + nRows;
+
+  var cols = '<cols>' + widths.map(function (w, i) { return '<col min="' + (i + 1) + '" max="' + (i + 1) + '" width="' + w + '" customWidth="1"/>'; }).join('') + '</cols>';
+  function cellXml(ref, styleId, c) {
+    if (c.num && c.v !== '' && c.v != null && !isNaN(c.v)) return '<c r="' + ref + '" s="' + styleId + '"><v>' + c.v + '</v></c>';
+    return '<c r="' + ref + '" s="' + styleId + '" t="inlineStr"><is><t xml:space="preserve">' + xesc(c.v) + '</t></is></c>';
+  }
+  var sheetRows = '<row r="1" ht="22" customHeight="1">' + head.map(function (h, i) { return cellXml(colLetter(i) + '1', 1, { v: h }); }).join('') + '</row>';
+  rows.forEach(function (row, ri) {
+    var s = (ri % 2 === 0) ? 2 : 3, rn = ri + 2;
+    sheetRows += '<row r="' + rn + '">' + row.map(function (c, i) { return cellXml(colLetter(i) + rn, s, c); }).join('') + '</row>';
+  });
+  var sheet = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">' +
+    '<dimension ref="A1:' + lastRef + '"/>' +
+    '<sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/><selection pane="bottomLeft" activeCell="A2" sqref="A2"/></sheetView></sheetViews>' +
+    '<sheetFormatPr defaultRowHeight="15"/>' + cols +
+    '<sheetData>' + sheetRows + '</sheetData>' +
+    '<autoFilter ref="A1:' + lastRef + '"/></worksheet>';
+
+  var styles = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
+    '<fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font></fonts>' +
+    '<fills count="4"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill>' +
+    '<fill><patternFill patternType="solid"><fgColor rgb="FF4472C4"/></patternFill></fill>' +
+    '<fill><patternFill patternType="solid"><fgColor rgb="FFD9E1F2"/></patternFill></fill></fills>' +
+    '<borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border>' +
+    '<border><left/><right/><top/><bottom style="thin"><color rgb="FFC9D6EC"/></bottom><diagonal/></border></borders>' +
+    '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>' +
+    '<cellXfs count="4">' +
+    '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>' +
+    '<xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center"/></xf>' +
+    '<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment vertical="center"/></xf>' +
+    '<xf numFmtId="0" fontId="0" fillId="3" borderId="1" xfId="0" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center"/></xf>' +
+    '</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
+
+  var contentTypes = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+    '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+    '<Default Extension="xml" ContentType="application/xml"/>' +
+    '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
+    '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>' +
+    '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>';
+  var rels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+    '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>';
+  var wbRels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+    '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>' +
+    '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>';
+  var workbook = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">' +
+    '<sheets><sheet name="' + xesc(sheetName).slice(0, 31) + '" sheetId="1" r:id="rId1"/></sheets></workbook>';
+
+  return zipStore([
+    { name: '[Content_Types].xml', data: enc.encode(contentTypes) },
+    { name: '_rels/.rels', data: enc.encode(rels) },
+    { name: 'xl/workbook.xml', data: enc.encode(workbook) },
+    { name: 'xl/_rels/workbook.xml.rels', data: enc.encode(wbRels) },
+    { name: 'xl/styles.xml', data: enc.encode(styles) },
+    { name: 'xl/worksheets/sheet1.xml', data: enc.encode(sheet) }
+  ]);
 }
 
 /* ===== CRUD MODAL ===== */
