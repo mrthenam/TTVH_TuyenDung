@@ -222,7 +222,7 @@
           <div class="tbar">
             <input id="tsearch" class="search" type="text" placeholder="Tìm theo tên, SĐT, email, cửa hàng…" />
             <button class="btn" id="treload">↻ Tải lại</button>
-            <button class="btn" id="tcsv">⬇ Xuất CSV</button>
+            <button class="btn" id="tcsv">⬇ Xuất Excel</button>
             <button class="btn primary" id="tadd">＋ Thêm đăng ký</button>
           </div>
         </div>
@@ -543,16 +543,49 @@ $('#treload').addEventListener('click', loadTraining);
 /* ===== CSV ===== */
 $('#tcsv').addEventListener('click', function () {
   var head = ['Id', 'Thời gian bắt đầu', 'Thời gian hoàn thành', 'Email', 'Tên', 'Họ Tên', 'Số Điện Thoại', 'Email Cá Nhân', 'Tỉnh Thành Bạn Đang Ở', 'Quận Huyện Bạn Đang Ở', 'Vị Trí Trúng Tuyển', 'Hình Thức Tham Gia Đào Tạo', 'Ngày Dự Kiến Bạn Có Thể Tham Gia Đào Tạo', 'Cửa Hàng Bạn Làm Việc'];
-  var esc = function (c) { c = (c == null ? '' : String(c)); return '"' + c.replace(/"/g, '""') + '"'; };
-  var lines = [head.map(esc).join(',')];
-  // xuất theo thứ tự thời gian tăng dần (cũ -> mới) giống file Forms
-  trainRows.slice().sort(function (a, b) { return a.ts - b.ts; }).forEach(function (r, i) {
-    var row = [r.id != null ? r.id : (i + 1), fmtTsUS(r.ts), fmtTsUS(r.ts), 'anonymous', '', r.name, r.phone, r.email, r.province, r.district, normPos(r.position), r.mode, fmtDateUS(r.sess_date), r.store];
-    lines.push(row.map(esc).join(','));
+  var widths = [38, 110, 122, 78, 60, 160, 95, 175, 135, 125, 150, 220, 175, 205];
+  var rows = trainRows.slice().sort(function (a, b) { return a.ts - b.ts; }).map(function (r, i) {
+    return [
+      { v: (r.id != null ? r.id : (i + 1)), t: 'Number' },
+      { v: fmtTsUS(r.ts) }, { v: fmtTsUS(r.ts) }, { v: 'anonymous' }, { v: '' },
+      { v: r.name || '' }, { v: r.phone || '' }, { v: r.email || '' }, { v: r.province || '' }, { v: r.district || '' },
+      { v: normPos(r.position) || '' }, { v: r.mode || '' }, { v: fmtDateUS(r.sess_date) || '' }, { v: r.store || '' }
+    ];
   });
-  var blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
-  var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'dangky-daotao.csv'; a.click();
+  var xml = buildXls('Đăng ký đào tạo', head, widths, rows);
+  var blob = new Blob(['﻿' + xml], { type: 'application/vnd.ms-excel;charset=utf-8' });
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'dangky-daotao.xls'; a.click();
 });
+
+// Tạo file Excel (XML Spreadsheet 2003) có sẵn màu sắc, header, độ rộng cột
+function xesc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+function buildXls(sheetName, head, widths, rows) {
+  var styles =
+    '<Style ss:ID="hdr"><Font ss:Bold="1" ss:Color="#FFFFFF" ss:Size="11"/><Interior ss:Color="#4472C4" ss:Pattern="Solid"/><Alignment ss:Vertical="Center" ss:Horizontal="Left"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#FFFFFF"/><Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#FFFFFF"/></Borders></Style>' +
+    '<Style ss:ID="odd"><Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/><Alignment ss:Vertical="Center"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#C9D6EC"/></Borders></Style>' +
+    '<Style ss:ID="even"><Interior ss:Color="#D9E1F2" ss:Pattern="Solid"/><Alignment ss:Vertical="Center"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#C9D6EC"/></Borders></Style>';
+  var cols = widths.map(function (w) { return '<Column ss:AutoFitWidth="0" ss:Width="' + w + '"/>'; }).join('');
+  var hcells = head.map(function (h) { return '<Cell ss:StyleID="hdr"><Data ss:Type="String">' + xesc(h) + '</Data></Cell>'; }).join('');
+  var body = rows.map(function (row, ri) {
+    var sid = (ri % 2 === 0) ? 'odd' : 'even';
+    var cells = row.map(function (c) {
+      var t = c.t || 'String';
+      return '<Cell ss:StyleID="' + sid + '"><Data ss:Type="' + t + '">' + xesc(c.v) + '</Data></Cell>';
+    }).join('');
+    return '<Row ss:Height="17">' + cells + '</Row>';
+  }).join('');
+  var n = rows.length + 1, cc = head.length;
+  return '<?xml version="1.0" encoding="UTF-8"?>\n<?mso-application progid="Excel.Sheet"?>\n' +
+    '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">' +
+    '<Styles>' + styles + '</Styles>' +
+    '<Worksheet ss:Name="' + xesc(sheetName) + '">' +
+    '<Table ss:DefaultRowHeight="16">' + cols +
+    '<Row ss:Height="22">' + hcells + '</Row>' + body +
+    '</Table>' +
+    '<AutoFilter x:Range="R1C1:R' + n + 'C' + cc + '" xmlns="urn:schemas-microsoft-com:office:excel"/>' +
+    '<WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel"><FreezePanes/><FrozenNoSplit/><SplitHorizontal>1</SplitHorizontal><TopRowBottomPane>1</TopRowBottomPane><ActivePane>2</ActivePane></WorksheetOptions>' +
+    '</Worksheet></Workbook>';
+}
 
 /* ===== CRUD MODAL ===== */
 function setSelectValue(id, value) {
