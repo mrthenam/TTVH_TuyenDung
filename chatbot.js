@@ -10,6 +10,7 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const db = require('./db');
+const sheet = require('./sheet');
 
 function sendJson(res, status, obj) {
   const b = JSON.stringify(obj);
@@ -61,7 +62,7 @@ async function findTrainingByPhone(phone) {
 }
 
 // Trả về chuỗi trả lời nếu luồng xử lý, hoặc null nếu không thuộc luồng (để KB/Gemini xử lý tiếp)
-async function handleTrainingFlow(sid, text) {
+async function handleTrainingFlow(sid, text, cfg) {
   const un = norm(text);
   let st = flowState.get(sid);
   if (st && Date.now() - st.ts > FLOW_TTL) { flowState.delete(sid); st = null; }
@@ -111,6 +112,8 @@ async function handleTrainingFlow(sid, text) {
     if (!d) return 'Bạn vui lòng nhập **ngày mong muốn** theo định dạng ngày/tháng/năm, ví dụ 21/12/2026.\n\n' + NOTE_DATE;
     try { await db.updateTraining(st.recordId, { sess_date: d.iso }); }
     catch (e) { return 'Xin lỗi, mình chưa cập nhật được lúc này. Bạn vui lòng thử lại sau ít phút hoặc liên hệ HR giúp mình nhé.'; }
+    // Cập nhật cột "Ngày Dự Kiến..." trong Excel SharePoint qua webhook (không chặn)
+    sheet.pushToSheet(cfg, { action: 'update', phone: st.phone || '', name: st.name || '', sess_date: d.display, sess_date_iso: d.iso }).catch(() => {});
     const name = st.name; flowState.delete(sid);
     return 'Mình đã cập nhật ngày đào tạo của bạn' + (name ? ' (' + name + ')' : '') + ' sang **' + d.display + '** thành công ✅.\nBộ phận Đào tạo sẽ liên hệ xác nhận lại với bạn. Cảm ơn bạn rất nhiều!';
   }
@@ -195,7 +198,7 @@ async function handleChat(req, res, url, loadConfig) {
       if (conv && conv.human_mode) return sendJson(res, 200, { ok: true, humanMode: true, userTs });
 
       // Luồng đặc biệt: thay đổi lịch đào tạo (ưu tiên trước KB/Gemini)
-      const flowReply = await handleTrainingFlow(sid, text);
+      const flowReply = await handleTrainingFlow(sid, text, cfg);
       if (flowReply !== null) {
         const ts = await db.addMessage(sid, 'bot', flowReply, 'flow');
         return sendJson(res, 200, { ok: true, reply: flowReply, from: 'flow', ts, userTs });

@@ -16,6 +16,7 @@ const path = require('path');
 const { URL } = require('url');
 const chatbot = require('./chatbot');
 const db = require('./db');
+const sheet = require('./sheet');
 
 const ROOT = __dirname;
 const CONFIG_PATH = path.join(ROOT, 'config.json');
@@ -43,6 +44,9 @@ function loadConfig() {
     if (process.env.APPLY_SOURCE) o.create.extra.source = process.env.APPLY_SOURCE;
     if (process.env.APPLY_CAMPAIGN) o.create.extra.campaign_current_id = process.env.APPLY_CAMPAIGN;
   }
+  // Sheet (Power Automate webhook)
+  const sh = cfg.sheet || (cfg.sheet = {});
+  if (process.env.SHEET_WEBHOOK_URL) sh.webhookUrl = process.env.SHEET_WEBHOOK_URL;
   // Chatbot
   const cb = cfg.chatbot || (cfg.chatbot = {});
   if (process.env.GEMINI_API_KEY) cb.geminiApiKey = process.env.GEMINI_API_KEY;
@@ -317,6 +321,18 @@ const server = http.createServer(async (req, res) => {
     }
     try {
       const id = await db.addTraining(form);
+      // Đẩy sang Excel SharePoint qua webhook (không chặn phản hồi)
+      const cfg = loadConfig();
+      const now = new Date(); const p2 = (n) => (n < 10 ? '0' : '') + n;
+      sheet.pushToSheet(cfg, {
+        action: 'create', id: id,
+        name: form.name || '', phone: form.phone || '', email: form.email || '',
+        province: form.province || '', district: form.district || '',
+        position: form.position || '', mode: form.mode || '',
+        sess_date: sheet.isoToDmy(form.sess_date || ''), sess_date_iso: form.sess_date || '',
+        store: form.store || '',
+        submitted_at: p2(now.getDate()) + '/' + p2(now.getMonth() + 1) + '/' + now.getFullYear() + ' ' + p2(now.getHours()) + ':' + p2(now.getMinutes())
+      }).catch(() => {});
       return sendJson(res, 200, { ok: true, id });
     } catch (e) {
       return sendJson(res, 500, { error: 'Không lưu được đăng ký: ' + e.message });
