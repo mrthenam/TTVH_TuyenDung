@@ -49,6 +49,11 @@ function loadConfig() {
   if (process.env.SHEET_WEBHOOK_URL) sh.webhookUrl = process.env.SHEET_WEBHOOK_URL;
   if (process.env.SHEET_VIEW_URL) sh.viewUrl = process.env.SHEET_VIEW_URL;
   if (process.env.GOOGLE_CLIENT_ID) sh.googleClientId = process.env.GOOGLE_CLIENT_ID;
+  // Báo Zalo khi đổi lịch đào tạo
+  const zl = cfg.zalo || (cfg.zalo = {});
+  if (process.env.ZALO_NOTIFY_URL) zl.notifyUrl = process.env.ZALO_NOTIFY_URL;
+  if (process.env.ZALO_OA_TOKEN) zl.oaToken = process.env.ZALO_OA_TOKEN;
+  if (process.env.ZALO_RECIPIENT_ID) zl.recipientId = process.env.ZALO_RECIPIENT_ID;
   // Chatbot
   const cb = cfg.chatbot || (cfg.chatbot = {});
   if (process.env.GEMINI_API_KEY) cb.geminiApiKey = process.env.GEMINI_API_KEY;

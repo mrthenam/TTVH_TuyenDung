@@ -80,6 +80,13 @@
     "googleClientId": ""
   },
 
+  "_note_zalo": "Báo Zalo khi ứng viên đổi lịch đào tạo. Cách A: notifyUrl = webhook trung gian chuyển tiếp tới Zalo (Make/Zapier/Apps Script…). Cách B: oaToken + recipientId (Zalo OA). Env: ZALO_NOTIFY_URL / ZALO_OA_TOKEN / ZALO_RECIPIENT_ID.",
+  "zalo": {
+    "notifyUrl": "",
+    "oaToken": "",
+    "recipientId": ""
+  },
+
   "_note_chatbot": "Chatbot: geminiApiKey (dùng khi KB không có câu trả lời), agentKey (mật khẩu trang quản trị /admin). Khi deploy đặt qua biến môi trường GEMINI_API_KEY / AGENT_KEY.",
   "chatbot": {
     "geminiApiKey": "PASTE_YOUR_GEMINI_API_KEY",
