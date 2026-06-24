@@ -429,10 +429,14 @@ function switchView(v) {
   $('#tabTrain').classList.toggle('act', v === 'train');
   $('#tabStaff').classList.toggle('act', v === 'staff');
   $('#tabCamp').classList.toggle('act', v === 'camp');
-  if (v === 'train') loadTraining();
+  if (v === 'train') { loadTraining(null, true); startTrainSync(); } else { stopTrainSync(); }
   if (v === 'staff') loadStaff();
   if (v === 'camp') loadCampaigns();
 }
+// Định kỳ kéo dữ liệu mới (form/chatbot) rồi tự đẩy lên Google Sheet khi đang mở tab Đào tạo
+var trainSyncTimer = null;
+function startTrainSync() { if (!trainSyncTimer) trainSyncTimer = setInterval(function () { loadTraining(autoSyncSheet); }, 25000); }
+function stopTrainSync() { if (trainSyncTimer) { clearInterval(trainSyncTimer); trainSyncTimer = null; } }
 $('#tabChat').addEventListener('click', function () { switchView('chat'); });
 $('#tabTrain').addEventListener('click', function () { switchView('train'); });
 $('#tabStaff').addEventListener('click', function () { switchView('staff'); });
@@ -524,11 +528,16 @@ function normPos(v) {
   if (m && POS_CANON[m[1]]) return POS_CANON[m[1]];
   return v;
 }
-function loadTraining() {
-  api('/api/training').then(function (d) {
+var lastRenderSig = '';
+function trainingSig() { return JSON.stringify(trainRows.map(function (r) { return [r.id, r.ts, r.name, r.phone, r.email, r.province, r.district, r.position, r.mode, r.sess_date, r.store]; })); }
+// after: gọi sau khi đã tải xong (đúng thứ tự); force: luôn vẽ lại bảng
+function loadTraining(after, force) {
+  return api('/api/training').then(function (d) {
     trainRows = d.rows || []; $('#navTrainCnt').textContent = trainRows.length;
     healPositions();
-    renderTraining();
+    var sig = trainingSig();
+    if (force || sig !== lastRenderSig) { renderTraining(); lastRenderSig = sig; }
+    if (after) after();
   }).catch(function (e) { if (e.message === '401') logout(); });
 }
 // Tự sửa các bản ghi có vị trí bị lỗi font (chạy 1 lần khi dữ liệu còn lỗi)
@@ -567,7 +576,7 @@ function renderTraining() {
   [].forEach.call(document.querySelectorAll('[data-del]'), function (b) { b.onclick = function () { delRow(b.getAttribute('data-del')); }; });
 }
 $('#tsearch').addEventListener('input', renderTraining);
-$('#treload').addEventListener('click', function () { loadTraining(); autoSyncSheet(); });
+$('#treload').addEventListener('click', function () { loadTraining(autoSyncSheet, true); });
 
 /* ===== XUẤT / XEM EXCEL ===== */
 var TR_HEAD = ['Id', 'Thời gian bắt đầu', 'Thời gian hoàn thành', 'Họ Tên', 'Số Điện Thoại', 'Email Cá Nhân', 'Tỉnh Thành Bạn Đang Ở', 'Quận Huyện Bạn Đang Ở', 'Vị Trí Trúng Tuyển', 'Hình Thức Tham Gia Đào Tạo', 'Ngày Dự Kiến Bạn Có Thể Tham Gia Đào Tạo', 'Cửa Hàng Bạn Làm Việc'];
@@ -635,12 +644,15 @@ $('#tsheet').addEventListener('click', function () {
 });
 
 // Tự cập nhật sheet ngay khi dữ liệu thay đổi (im lặng, không mở tab) — chỉ khi đã có sheet + đã cấp quyền
+var lastSyncSig = '';
 function autoSyncSheet() {
   if (!GOOGLE_CLIENT_ID) return;
+  var sig = trainingSig();
+  if (sig === lastSyncSig) return;                 // dữ liệu chưa đổi -> khỏi đẩy lại
   api('/api/agent/gsheet').then(function (saved) {
     if (!saved || !saved.id) return;               // chưa tạo sheet -> chờ bấm nút lần đầu
     getGoogleToken(false).then(function (token) {
-      updateGoogleSheet(token, saved.id).then(function () { toast('Đã cập nhật Google Sheet ✓'); }).catch(function () {});
+      updateGoogleSheet(token, saved.id).then(function () { lastSyncSig = sig; toast('Đã cập nhật Google Sheet ✓'); }).catch(function () {});
     }).catch(function () {});                       // chưa có token -> bỏ qua im lặng
   }).catch(function () {});
 }
@@ -654,6 +666,12 @@ function sheetValues() {
 }
 function valuesUrl(id, tab, rangeSuffix) { return 'https://sheets.googleapis.com/v4/spreadsheets/' + id + '/values/' + encodeURIComponent("'" + tab + "'!" + rangeSuffix); }
 function finishSheet(url) { toast('Đã đồng bộ Google Sheet ✓'); window.open(url, '_blank'); }
+// Ép cột SĐT (4) & Ngày dự kiến (10) về dạng TEXT để không mất số 0 đầu / không bị đổi định dạng ngày
+function textColReqs(sid) {
+  return [4, 10].map(function (c) {
+    return { repeatCell: { range: { sheetId: sid, startColumnIndex: c, endColumnIndex: c + 1 }, cell: { userEnteredFormat: { numberFormat: { type: 'TEXT' } } }, fields: 'userEnteredFormat.numberFormat' } };
+  });
+}
 
 // Quyết định: có sheet đã lưu thì cập nhật, không thì tạo mới. openTab=true -> mở sheet sau khi xong
 function syncGoogleSheet(token, openTab) {
@@ -672,8 +690,9 @@ function updateGoogleSheet(token, id) {
   var values = sheetValues(), lastCol = colLetter(TR_HEAD.length - 1);
   return gFetch('https://sheets.googleapis.com/v4/spreadsheets/' + id + '?fields=spreadsheetUrl,sheets.properties(sheetId,title)', token, 'GET')
     .then(function (meta) {
-      var tab = meta.sheets[0].properties.title, url = meta.spreadsheetUrl;
+      var sid = meta.sheets[0].properties.sheetId, tab = meta.sheets[0].properties.title, url = meta.spreadsheetUrl;
       return gFetch(valuesUrl(id, tab, 'A:' + lastCol) + ':clear', token, 'POST', {})
+        .then(function () { return gFetch('https://sheets.googleapis.com/v4/spreadsheets/' + id + ':batchUpdate', token, 'POST', { requests: textColReqs(sid) }); })
         .then(function () { return gFetch(valuesUrl(id, tab, 'A1') + '?valueInputOption=USER_ENTERED', token, 'PUT', { values: values }); })
         .then(function () { return url; });
     });
@@ -689,7 +708,8 @@ function createGoogleSheet(token) {
     sheets: [{ properties: { title: 'Đăng ký đào tạo', gridProperties: { frozenRowCount: 1 } } }]
   }).then(function (ss) {
     var ssId = ss.spreadsheetId, ssUrl = ss.spreadsheetUrl, sheetId = ss.sheets[0].properties.sheetId;
-    return gFetch(valuesUrl(ssId, 'Đăng ký đào tạo', 'A1') + '?valueInputOption=USER_ENTERED', token, 'PUT', { values: values })
+    return gFetch('https://sheets.googleapis.com/v4/spreadsheets/' + ssId + ':batchUpdate', token, 'POST', { requests: textColReqs(sheetId) })
+      .then(function () { return gFetch(valuesUrl(ssId, 'Đăng ký đào tạo', 'A1') + '?valueInputOption=USER_ENTERED', token, 'PUT', { values: values }); })
       .then(function () {
         var blue = { red: 0.267, green: 0.447, blue: 0.769 }, light = { red: 0.851, green: 0.882, blue: 0.949 };
         var reqs = [
@@ -852,7 +872,7 @@ $('#tmSave').addEventListener('click', function () {
     : fetch('/api/training', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(function (r) { return r.json(); });
   req.then(function (res) {
     btn.disabled = false; btn.textContent = old;
-    if (res && res.ok) { closeModal(); toast(editingId ? 'Đã cập nhật đăng ký.' : 'Đã thêm đăng ký.'); loadTraining(); autoSyncSheet(); }
+    if (res && res.ok) { closeModal(); toast(editingId ? 'Đã cập nhật đăng ký.' : 'Đã thêm đăng ký.'); loadTraining(autoSyncSheet, true); }
     else { var e = $('#tmErr'); e.textContent = 'Lưu thất bại: ' + ((res && res.error) || 'lỗi'); e.style.display = 'block'; }
   }).catch(function (err) {
     btn.disabled = false; btn.textContent = old;
@@ -865,7 +885,7 @@ function delRow(id) {
   var r = trainRows.filter(function (x) { return String(x.id) === String(id); })[0];
   if (!confirm('Xóa đăng ký của "' + (r ? r.name : '') + '"? Hành động không thể hoàn tác.')) return;
   api('/api/training/' + encodeURIComponent(id), { method: 'DELETE' }).then(function (res) {
-    if (res && res.ok) { toast('Đã xóa đăng ký.'); loadTraining(); autoSyncSheet(); }
+    if (res && res.ok) { toast('Đã xóa đăng ký.'); loadTraining(autoSyncSheet, true); }
     else { toast('Xóa thất bại.'); }
   }).catch(function (e) { if (e.message === '401') logout(); else toast('Lỗi kết nối.'); });
 }
