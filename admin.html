@@ -542,12 +542,12 @@ $('#treload').addEventListener('click', loadTraining);
 
 /* ===== XUẤT EXCEL (.xlsx thật) ===== */
 $('#tcsv').addEventListener('click', function () {
-  var head = ['Id', 'Thời gian bắt đầu', 'Thời gian hoàn thành', 'Email', 'Tên', 'Họ Tên', 'Số Điện Thoại', 'Email Cá Nhân', 'Tỉnh Thành Bạn Đang Ở', 'Quận Huyện Bạn Đang Ở', 'Vị Trí Trúng Tuyển', 'Hình Thức Tham Gia Đào Tạo', 'Ngày Dự Kiến Bạn Có Thể Tham Gia Đào Tạo', 'Cửa Hàng Bạn Làm Việc'];
-  var widths = [6, 18, 18, 12, 10, 26, 16, 28, 22, 20, 24, 38, 30, 34]; // đơn vị ký tự
+  var head = ['Id', 'Thời gian bắt đầu', 'Thời gian hoàn thành', 'Họ Tên', 'Số Điện Thoại', 'Email Cá Nhân', 'Tỉnh Thành Bạn Đang Ở', 'Quận Huyện Bạn Đang Ở', 'Vị Trí Trúng Tuyển', 'Hình Thức Tham Gia Đào Tạo', 'Ngày Dự Kiến Bạn Có Thể Tham Gia Đào Tạo', 'Cửa Hàng Bạn Làm Việc'];
+  var widths = [6, 18, 18, 26, 16, 28, 22, 20, 24, 38, 30, 34]; // đơn vị ký tự
   var rows = trainRows.slice().sort(function (a, b) { return a.ts - b.ts; }).map(function (r, i) {
     return [
       { v: (r.id != null ? r.id : (i + 1)), num: true },
-      { v: fmtTsUS(r.ts) }, { v: fmtTsUS(r.ts) }, { v: 'anonymous' }, { v: '' },
+      { v: fmtTsUS(r.ts) }, { v: fmtTsUS(r.ts) },
       { v: r.name || '' }, { v: r.phone || '' }, { v: r.email || '' }, { v: r.province || '' }, { v: r.district || '' },
       { v: normPos(r.position) || '' }, { v: r.mode || '' }, { v: fmtDateUS(r.sess_date) || '' }, { v: r.store || '' }
     ];
