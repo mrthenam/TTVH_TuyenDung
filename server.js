@@ -52,8 +52,11 @@ function loadConfig() {
   // Báo Zalo khi đổi lịch đào tạo
   const zl = cfg.zalo || (cfg.zalo = {});
   if (process.env.ZALO_NOTIFY_URL) zl.notifyUrl = process.env.ZALO_NOTIFY_URL;
-  if (process.env.ZALO_OA_TOKEN) zl.oaToken = process.env.ZALO_OA_TOKEN;
+  if (process.env.ZALO_APP_ID) zl.appId = process.env.ZALO_APP_ID;
+  if (process.env.ZALO_APP_SECRET) zl.appSecret = process.env.ZALO_APP_SECRET;
+  if (process.env.ZALO_REFRESH_TOKEN) zl.refreshToken = process.env.ZALO_REFRESH_TOKEN;
   if (process.env.ZALO_RECIPIENT_ID) zl.recipientId = process.env.ZALO_RECIPIENT_ID;
+  if (process.env.ZALO_OA_TOKEN) zl.oaToken = process.env.ZALO_OA_TOKEN;
   // Chatbot
   const cb = cfg.chatbot || (cfg.chatbot = {});
   if (process.env.GEMINI_API_KEY) cb.geminiApiKey = process.env.GEMINI_API_KEY;
