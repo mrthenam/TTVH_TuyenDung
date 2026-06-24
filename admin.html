@@ -236,7 +236,7 @@
             <input id="tsearch" class="search" type="text" placeholder="Tìm theo tên, SĐT, email, cửa hàng…" />
             <button class="btn" id="treload">↻ Tải lại</button>
             <button class="btn" id="tview">👁 Xem dạng Excel</button>
-            <button class="btn" id="tsheet">📊 Mở Google Sheet</button>
+            <button class="btn" id="tsheet">📊 Tạo Google Sheet</button>
             <button class="btn" id="tcsv">⬇ Xuất Excel</button>
             <button class="btn primary" id="tadd">＋ Thêm đăng ký</button>
           </div>
@@ -343,9 +343,10 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
 var TOKEN = localStorage.getItem('ttvh_agent_token') || '';
-var sel = null, listTimer = null, msgTimer = null, editingId = null, SHEET_VIEW_URL = '';
+var sel = null, listTimer = null, msgTimer = null, editingId = null, SHEET_VIEW_URL = '', GOOGLE_CLIENT_ID = '';
 var $ = function (s) { return document.querySelector(s); };
 
 function api(path, opts) {
@@ -373,7 +374,7 @@ $('#p').addEventListener('keydown', function (e) { if (e.key === 'Enter') doLogi
 function showApp(name) {
   $('#gate').style.display = 'none'; $('#app').style.display = 'flex'; $('#app').style.flexDirection = 'column'; $('#me').textContent = name || 'Nhân viên';
   refreshList(); if (!listTimer) listTimer = setInterval(refreshList, 3000);
-  api('/api/agent/sheetinfo').then(function (d) { SHEET_VIEW_URL = (d && d.viewUrl) || ''; if (!SHEET_VIEW_URL) $('#tsheet').style.display = 'none'; }).catch(function () {});
+  api('/api/agent/sheetinfo').then(function (d) { SHEET_VIEW_URL = (d && d.viewUrl) || ''; GOOGLE_CLIENT_ID = (d && d.googleClientId) || ''; }).catch(function () {});
 }
 function logout() { TOKEN = ''; localStorage.removeItem('ttvh_agent_token'); clearInterval(listTimer); clearInterval(msgTimer); location.reload(); }
 $('#logout').addEventListener('click', logout);
@@ -601,7 +602,57 @@ $('#tview').addEventListener('click', openPreview);
 $('#xlClose').addEventListener('click', function () { $('#xlview').classList.remove('show'); });
 $('#xlview').addEventListener('click', function (e) { if (e.target === $('#xlview')) $('#xlview').classList.remove('show'); });
 $('#xlExport').addEventListener('click', function () { $('#tcsv').click(); });
-$('#tsheet').addEventListener('click', function () { if (SHEET_VIEW_URL) window.open(SHEET_VIEW_URL, '_blank'); else toast('Chưa cấu hình link Google Sheet.'); });
+// Tạo Google Sheet MỚI trong tài khoản Google của người đang dùng (OAuth + Sheets API)
+$('#tsheet').addEventListener('click', function () {
+  if (!GOOGLE_CLIENT_ID) { toast('Chưa cấu hình Google Client ID. Liên hệ quản trị để bật tính năng này.'); return; }
+  if (!(window.google && google.accounts && google.accounts.oauth2)) { toast('Đang tải Google, vui lòng thử lại sau giây lát…'); return; }
+  if (!trainRows.length) { toast('Chưa có dữ liệu để tạo sheet.'); return; }
+  var tc = google.accounts.oauth2.initTokenClient({
+    client_id: GOOGLE_CLIENT_ID,
+    scope: 'https://www.googleapis.com/auth/drive.file',
+    callback: function (resp) {
+      if (resp && resp.access_token) createGoogleSheet(resp.access_token);
+      else toast('Bạn chưa cấp quyền Google.');
+    }
+  });
+  tc.requestAccessToken();
+});
+function gFetch(url, token, method, body) {
+  return fetch(url, { method: method, headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined })
+    .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error((j.error && j.error.message) || ('HTTP ' + r.status)); return j; }); });
+}
+function createGoogleSheet(token) {
+  toast('Đang tạo Google Sheet…');
+  var data = trainingMatrix();
+  var values = [TR_HEAD].concat(data.map(function (row) { return row.map(function (v) { return v == null ? '' : v; }); }));
+  var nCols = TR_HEAD.length, nRows = values.length;
+  var title = 'Đăng ký đào tạo - ' + new Date().toLocaleDateString('vi-VN');
+  var sheetId;
+  gFetch('https://sheets.googleapis.com/v4/spreadsheets', token, 'POST', {
+    properties: { title: title },
+    sheets: [{ properties: { title: 'Đăng ký đào tạo', gridProperties: { frozenRowCount: 1 } } }]
+  }).then(function (ss) {
+    sheetId = ss.sheets[0].properties.sheetId;
+    var range = "'Đăng ký đào tạo'!A1";
+    return gFetch('https://sheets.googleapis.com/v4/spreadsheets/' + ss.spreadsheetId + '/values/' + encodeURIComponent(range) + '?valueInputOption=USER_ENTERED', token, 'PUT', { values: values })
+      .then(function () {
+        var blue = { red: 0.267, green: 0.447, blue: 0.769 }, light = { red: 0.851, green: 0.882, blue: 0.949 };
+        var reqs = [
+          { repeatCell: { range: { sheetId: sheetId, startRowIndex: 0, endRowIndex: 1 }, cell: { userEnteredFormat: { textFormat: { bold: true, foregroundColor: { red: 1, green: 1, blue: 1 } }, verticalAlignment: 'MIDDLE' } }, fields: 'userEnteredFormat(textFormat,verticalAlignment)' } },
+          { addBanding: { bandedRange: { range: { sheetId: sheetId, startRowIndex: 0, endRowIndex: nRows, startColumnIndex: 0, endColumnIndex: nCols }, rowProperties: { headerColor: blue, firstBandColor: { red: 1, green: 1, blue: 1 }, secondBandColor: light } } } },
+          { setBasicFilter: { filter: { range: { sheetId: sheetId, startRowIndex: 0, endRowIndex: nRows, startColumnIndex: 0, endColumnIndex: nCols } } } },
+          { autoResizeDimensions: { dimensions: { sheetId: sheetId, dimension: 'COLUMNS', startIndex: 0, endIndex: nCols } } }
+        ];
+        return gFetch('https://sheets.googleapis.com/v4/spreadsheets/' + ss.spreadsheetId + ':batchUpdate', token, 'POST', { requests: reqs })
+          .then(function () { return ss.spreadsheetUrl; });
+      });
+  }).then(function (url) {
+    toast('Đã tạo Google Sheet trong tài khoản của bạn ✓');
+    window.open(url, '_blank');
+  }).catch(function (e) {
+    toast('Tạo sheet thất bại: ' + (e.message || e));
+  });
+}
 
 function xesc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 function colLetter(n) { var s = ''; n++; while (n > 0) { var m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = (n - m - 1) / 26; } return s; }

@@ -235,7 +235,7 @@ async function handleChat(req, res, url, loadConfig) {
       if (!sess) return sendJson(res, 401, { error: 'Chưa đăng nhập' });
 
       if (p === '/api/agent/me' && req.method === 'GET') return sendJson(res, 200, { username: sess.username, displayName: sess.displayName });
-      if (p === '/api/agent/sheetinfo' && req.method === 'GET') return sendJson(res, 200, { viewUrl: (cfg.sheet && cfg.sheet.viewUrl) || '' });
+      if (p === '/api/agent/sheetinfo' && req.method === 'GET') return sendJson(res, 200, { viewUrl: (cfg.sheet && cfg.sheet.viewUrl) || '', googleClientId: (cfg.sheet && cfg.sheet.googleClientId) || '' });
 
       // Quản lý nhân viên
       if (p === '/api/agent/staff' && req.method === 'GET') return sendJson(res, 200, { agents: await db.listAgents(), me: sess.username });

@@ -48,6 +48,7 @@ function loadConfig() {
   const sh = cfg.sheet || (cfg.sheet = {});
   if (process.env.SHEET_WEBHOOK_URL) sh.webhookUrl = process.env.SHEET_WEBHOOK_URL;
   if (process.env.SHEET_VIEW_URL) sh.viewUrl = process.env.SHEET_VIEW_URL;
+  if (process.env.GOOGLE_CLIENT_ID) sh.googleClientId = process.env.GOOGLE_CLIENT_ID;
   // Chatbot
   const cb = cfg.chatbot || (cfg.chatbot = {});
   if (process.env.GEMINI_API_KEY) cb.geminiApiKey = process.env.GEMINI_API_KEY;
