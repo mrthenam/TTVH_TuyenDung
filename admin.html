@@ -151,6 +151,19 @@
   .modal .mf{display:flex;gap:10px;justify-content:flex-end;padding:18px 24px;border-top:1px solid var(--line)}
   #tmErr{display:none;color:var(--red);font-weight:600;font-size:13px;margin-bottom:14px;background:rgba(224,52,43,.08);border:1px solid rgba(224,52,43,.3);padding:10px 12px;border-radius:9px}
 
+  /* xem trước dạng Excel */
+  .xlmodal{width:96vw;max-width:1400px;height:88vh;display:flex;flex-direction:column}
+  .xlmodal .mh{flex:none}
+  .xlwrap{flex:1;overflow:auto;background:#fff;border-top:1px solid var(--line)}
+  table.xlgrid{border-collapse:separate;border-spacing:0;font-size:12px;font-family:Calibri,'Segoe UI',system-ui,sans-serif;color:#1f2a37}
+  .xlgrid th,.xlgrid td{border-right:1px solid #d4d4d4;border-bottom:1px solid #d4d4d4;padding:3px 9px;white-space:nowrap}
+  .xlgrid thead th{position:sticky;top:0;z-index:3;background:#e8eaed;color:#555;text-align:center;font-weight:600;border-bottom:1px solid #b7b7b7}
+  .xlgrid .xlcorner{position:sticky;left:0;top:0;z-index:5;width:42px;background:#e8eaed}
+  .xlgrid .xlrow{position:sticky;left:0;z-index:2;background:#e8eaed;color:#555;text-align:center;font-weight:600;min-width:34px;border-right:1px solid #b7b7b7}
+  .xlgrid .xlh{background:#4472C4;color:#fff;font-weight:700;border-color:#3b63ad}
+  .xlgrid .xlodd{background:#fff}
+  .xlgrid .xleven{background:#D9E1F2}
+  .xlgrid .xlnum{text-align:right}
   .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--txt);color:#fff;padding:12px 22px;border-radius:12px;font-weight:700;font-size:14px;opacity:0;transition:.25s;z-index:60;pointer-events:none}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   @media(max-width:820px){aside.side{width:60px}.navbtn span.t{display:none}.navbtn .cnt{display:none}aside.side .lbl,aside.side .foot{display:none}.list{width:240px}}
@@ -222,6 +235,8 @@
           <div class="tbar">
             <input id="tsearch" class="search" type="text" placeholder="Tìm theo tên, SĐT, email, cửa hàng…" />
             <button class="btn" id="treload">↻ Tải lại</button>
+            <button class="btn" id="tview">👁 Xem dạng Excel</button>
+            <button class="btn" id="tsheet">📊 Mở Google Sheet</button>
             <button class="btn" id="tcsv">⬇ Xuất Excel</button>
             <button class="btn primary" id="tadd">＋ Thêm đăng ký</button>
           </div>
@@ -314,11 +329,23 @@
   </div>
 </div>
 
+<!-- XEM TRƯỚC DẠNG EXCEL -->
+<div class="overlay" id="xlview">
+  <div class="modal xlmodal">
+    <div class="mh">
+      <h3 style="flex:1">📗 Xem trước — Đăng ký đào tạo</h3>
+      <button class="btn" id="xlExport">⬇ Tải Excel</button>
+      <button class="x" id="xlClose">×</button>
+    </div>
+    <div class="xlwrap"><table class="xlgrid" id="xlgrid"></table></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
 var TOKEN = localStorage.getItem('ttvh_agent_token') || '';
-var sel = null, listTimer = null, msgTimer = null, editingId = null;
+var sel = null, listTimer = null, msgTimer = null, editingId = null, SHEET_VIEW_URL = '';
 var $ = function (s) { return document.querySelector(s); };
 
 function api(path, opts) {
@@ -346,6 +373,7 @@ $('#p').addEventListener('keydown', function (e) { if (e.key === 'Enter') doLogi
 function showApp(name) {
   $('#gate').style.display = 'none'; $('#app').style.display = 'flex'; $('#app').style.flexDirection = 'column'; $('#me').textContent = name || 'Nhân viên';
   refreshList(); if (!listTimer) listTimer = setInterval(refreshList, 3000);
+  api('/api/agent/sheetinfo').then(function (d) { SHEET_VIEW_URL = (d && d.viewUrl) || ''; if (!SHEET_VIEW_URL) $('#tsheet').style.display = 'none'; }).catch(function () {});
 }
 function logout() { TOKEN = ''; localStorage.removeItem('ttvh_agent_token'); clearInterval(listTimer); clearInterval(msgTimer); location.reload(); }
 $('#logout').addEventListener('click', logout);
@@ -540,22 +568,40 @@ function renderTraining() {
 $('#tsearch').addEventListener('input', renderTraining);
 $('#treload').addEventListener('click', loadTraining);
 
-/* ===== XUẤT EXCEL (.xlsx thật) ===== */
-$('#tcsv').addEventListener('click', function () {
-  var head = ['Id', 'Thời gian bắt đầu', 'Thời gian hoàn thành', 'Họ Tên', 'Số Điện Thoại', 'Email Cá Nhân', 'Tỉnh Thành Bạn Đang Ở', 'Quận Huyện Bạn Đang Ở', 'Vị Trí Trúng Tuyển', 'Hình Thức Tham Gia Đào Tạo', 'Ngày Dự Kiến Bạn Có Thể Tham Gia Đào Tạo', 'Cửa Hàng Bạn Làm Việc'];
-  var widths = [6, 18, 18, 26, 16, 28, 22, 20, 24, 38, 30, 34]; // đơn vị ký tự
-  var rows = trainRows.slice().sort(function (a, b) { return a.ts - b.ts; }).map(function (r, i) {
-    return [
-      { v: (r.id != null ? r.id : (i + 1)), num: true },
-      { v: fmtTsUS(r.ts) }, { v: fmtTsUS(r.ts) },
-      { v: r.name || '' }, { v: r.phone || '' }, { v: r.email || '' }, { v: r.province || '' }, { v: r.district || '' },
-      { v: normPos(r.position) || '' }, { v: r.mode || '' }, { v: fmtDateUS(r.sess_date) || '' }, { v: r.store || '' }
-    ];
+/* ===== XUẤT / XEM EXCEL ===== */
+var TR_HEAD = ['Id', 'Thời gian bắt đầu', 'Thời gian hoàn thành', 'Họ Tên', 'Số Điện Thoại', 'Email Cá Nhân', 'Tỉnh Thành Bạn Đang Ở', 'Quận Huyện Bạn Đang Ở', 'Vị Trí Trúng Tuyển', 'Hình Thức Tham Gia Đào Tạo', 'Ngày Dự Kiến Bạn Có Thể Tham Gia Đào Tạo', 'Cửa Hàng Bạn Làm Việc'];
+var TR_WIDTHS = [6, 18, 18, 26, 16, 28, 22, 20, 24, 38, 30, 34];
+function trainingMatrix() {
+  return trainRows.slice().sort(function (a, b) { return a.ts - b.ts; }).map(function (r, i) {
+    return [(r.id != null ? r.id : (i + 1)), fmtTsUS(r.ts), fmtTsUS(r.ts), r.name || '', r.phone || '', r.email || '', r.province || '', r.district || '', normPos(r.position) || '', r.mode || '', fmtDateUS(r.sess_date) || '', r.store || ''];
   });
-  var bytes = buildXlsx('Đăng ký đào tạo', head, widths, rows);
+}
+$('#tcsv').addEventListener('click', function () {
+  var rows = trainingMatrix().map(function (row) { return row.map(function (v, ci) { return ci === 0 ? { v: v, num: true } : { v: v }; }); });
+  var bytes = buildXlsx('Đăng ký đào tạo', TR_HEAD, TR_WIDTHS, rows);
   var blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
   var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'dangky-daotao.xlsx'; a.click();
 });
+
+// Xem trước dạng Excel (lưới có chữ cột A,B,C + số dòng)
+function openPreview() {
+  var data = trainingMatrix();
+  var letters = '<th class="xlcorner"></th>';
+  for (var c = 0; c < TR_HEAD.length; c++) letters += '<th>' + colLetter(c) + '</th>';
+  var html = '<thead><tr>' + letters + '</tr></thead><tbody>';
+  html += '<tr><td class="xlrow">1</td>' + TR_HEAD.map(function (h) { return '<td class="xlh">' + esc(h) + '</td>'; }).join('') + '</tr>';
+  data.forEach(function (row, ri) {
+    var cls = ri % 2 === 0 ? 'xlodd' : 'xleven';
+    html += '<tr><td class="xlrow">' + (ri + 2) + '</td>' + row.map(function (v, ci) { return '<td class="' + cls + (ci === 0 ? ' xlnum' : '') + '">' + esc(v) + '</td>'; }).join('') + '</tr>';
+  });
+  $('#xlgrid').innerHTML = html + '</tbody>';
+  $('#xlview').classList.add('show');
+}
+$('#tview').addEventListener('click', openPreview);
+$('#xlClose').addEventListener('click', function () { $('#xlview').classList.remove('show'); });
+$('#xlview').addEventListener('click', function (e) { if (e.target === $('#xlview')) $('#xlview').classList.remove('show'); });
+$('#xlExport').addEventListener('click', function () { $('#tcsv').click(); });
+$('#tsheet').addEventListener('click', function () { if (SHEET_VIEW_URL) window.open(SHEET_VIEW_URL, '_blank'); else toast('Chưa cấu hình link Google Sheet.'); });
 
 function xesc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 function colLetter(n) { var s = ''; n++; while (n > 0) { var m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = (n - m - 1) / 26; } return s; }

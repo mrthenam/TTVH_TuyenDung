@@ -47,6 +47,7 @@ function loadConfig() {
   // Sheet (Power Automate webhook)
   const sh = cfg.sheet || (cfg.sheet = {});
   if (process.env.SHEET_WEBHOOK_URL) sh.webhookUrl = process.env.SHEET_WEBHOOK_URL;
+  if (process.env.SHEET_VIEW_URL) sh.viewUrl = process.env.SHEET_VIEW_URL;
   // Chatbot
   const cb = cfg.chatbot || (cfg.chatbot = {});
   if (process.env.GEMINI_API_KEY) cb.geminiApiKey = process.env.GEMINI_API_KEY;

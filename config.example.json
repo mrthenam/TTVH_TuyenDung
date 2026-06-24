@@ -73,7 +73,9 @@
 
   "_note_sheet": "Đổ dữ liệu đăng ký đào tạo sang Excel SharePoint qua webhook Power Automate. Dán URL 'When an HTTP request is received'. Khi deploy đặt qua biến môi trường SHEET_WEBHOOK_URL.",
   "sheet": {
-    "webhookUrl": "PASTE_POWER_AUTOMATE_WEBHOOK_URL"
+    "webhookUrl": "PASTE_POWER_AUTOMATE_WEBHOOK_URL",
+    "_note_viewUrl": "Link mở file Google Sheet/Drive cho nút 'Mở Google Sheet' trong dashboard. Override bằng env SHEET_VIEW_URL.",
+    "viewUrl": "https://docs.google.com/spreadsheets/d/1Z7A85H9JlTibiw5FskNXOebT7jg4B-ygGuuybzCqMao/edit"
   },
 
   "_note_chatbot": "Chatbot: geminiApiKey (dùng khi KB không có câu trả lời), agentKey (mật khẩu trang quản trị /admin). Khi deploy đặt qua biến môi trường GEMINI_API_KEY / AGENT_KEY.",
