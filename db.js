@@ -15,6 +15,7 @@ const memMsg = new Map();    // id -> [{role,text,from_src,ts}]
 const memAgents = new Map(); // username -> {username,pass_hash,salt,display_name}
 const memTraining = [];      // [{...registration, id, ts}]  (fallback RAM)
 const memBrandCampaigns = new Map(); // brand -> {brand, code, name}
+const memSettings = new Map();       // k -> v (fallback RAM)
 // dùng chung cho cả 2 chế độ:
 const typing = new Map();    // convId -> ts
 const sessions = new Map();  // token -> {username, displayName, ts}
@@ -42,6 +43,7 @@ async function init() {
     await pool.query(`ALTER TABLE training ADD COLUMN IF NOT EXISTS district text`);
     await pool.query(`CREATE TABLE IF NOT EXISTS brand_campaigns(
       brand text PRIMARY KEY, code text, name text, updated_at bigint)`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS settings(k text PRIMARY KEY, v text)`);
     console.log(' [db] Đã kết nối PostgreSQL — lưu chat bền vững.');
   } else {
     console.log(' [db] Không có DATABASE_URL/pg — lưu chat tạm trong RAM.');
@@ -246,6 +248,16 @@ async function seedBrandCampaigns(obj) {
   }
 }
 
+// ----- settings (key-value) -----
+async function getSetting(k) {
+  if (HAS_PG) { const r = await pool.query('SELECT v FROM settings WHERE k=$1', [k]); return r.rows[0] ? r.rows[0].v : null; }
+  return memSettings.has(k) ? memSettings.get(k) : null;
+}
+async function setSetting(k, v) {
+  if (HAS_PG) { await pool.query('INSERT INTO settings(k,v) VALUES($1,$2) ON CONFLICT (k) DO UPDATE SET v=$2', [k, v]); }
+  else memSettings.set(k, v);
+}
+
 module.exports = {
   init, HAS_PG,
   verifyAgent, createAgent, listAgents,
@@ -253,5 +265,6 @@ module.exports = {
   ensureConv, addMessage, getMessages, setHumanMode, getConv, listConversations,
   setTyping, isTyping,
   addTraining, listTraining, updateTraining, deleteTraining,
-  listBrandCampaigns, setBrandCampaign, deleteBrandCampaign, getBrandCampaignMap, seedBrandCampaigns
+  listBrandCampaigns, setBrandCampaign, deleteBrandCampaign, getBrandCampaignMap, seedBrandCampaigns,
+  getSetting, setSetting
 };

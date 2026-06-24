@@ -236,6 +236,14 @@ async function handleChat(req, res, url, loadConfig) {
 
       if (p === '/api/agent/me' && req.method === 'GET') return sendJson(res, 200, { username: sess.username, displayName: sess.displayName });
       if (p === '/api/agent/sheetinfo' && req.method === 'GET') return sendJson(res, 200, { viewUrl: (cfg.sheet && cfg.sheet.viewUrl) || '', googleClientId: (cfg.sheet && cfg.sheet.googleClientId) || '' });
+      // Lưu/đọc 1 Google Sheet duy nhất (id + url) đã tạo
+      if (p === '/api/agent/gsheet' && req.method === 'GET') return sendJson(res, 200, { id: await db.getSetting('gsheet_id'), url: await db.getSetting('gsheet_url') });
+      if (p === '/api/agent/gsheet' && req.method === 'POST') {
+        const b = await readBody(req) || {};
+        await db.setSetting('gsheet_id', (b.id || '').toString());
+        await db.setSetting('gsheet_url', (b.url || '').toString());
+        return sendJson(res, 200, { ok: true });
+      }
 
       // Quản lý nhân viên
       if (p === '/api/agent/staff' && req.method === 'GET') return sendJson(res, 200, { agents: await db.listAgents(), me: sess.username });

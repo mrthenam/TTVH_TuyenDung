@@ -602,7 +602,7 @@ $('#tview').addEventListener('click', openPreview);
 $('#xlClose').addEventListener('click', function () { $('#xlview').classList.remove('show'); });
 $('#xlview').addEventListener('click', function (e) { if (e.target === $('#xlview')) $('#xlview').classList.remove('show'); });
 $('#xlExport').addEventListener('click', function () { $('#tcsv').click(); });
-// Tạo Google Sheet MỚI trong tài khoản Google của người đang dùng (OAuth + Sheets API)
+// Đồng bộ dữ liệu vào MỘT Google Sheet duy nhất (tạo lần đầu, các lần sau cập nhật lại)
 $('#tsheet').addEventListener('click', function () {
   if (!GOOGLE_CLIENT_ID) { toast('Chưa cấu hình Google Client ID. Liên hệ quản trị để bật tính năng này.'); return; }
   if (!(window.google && google.accounts && google.accounts.oauth2)) { toast('Đang tải Google, vui lòng thử lại sau giây lát…'); return; }
@@ -611,7 +611,7 @@ $('#tsheet').addEventListener('click', function () {
     client_id: GOOGLE_CLIENT_ID,
     scope: 'https://www.googleapis.com/auth/drive.file',
     callback: function (resp) {
-      if (resp && resp.access_token) createGoogleSheet(resp.access_token);
+      if (resp && resp.access_token) syncGoogleSheet(resp.access_token);
       else toast('Bạn chưa cấp quyền Google.');
     }
   });
@@ -621,20 +621,48 @@ function gFetch(url, token, method, body) {
   return fetch(url, { method: method, headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined })
     .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error((j.error && j.error.message) || ('HTTP ' + r.status)); return j; }); });
 }
+function sheetValues() {
+  var data = trainingMatrix();
+  return [TR_HEAD].concat(data.map(function (row) { return row.map(function (v) { return v == null ? '' : v; }); }));
+}
+function valuesUrl(id, tab, rangeSuffix) { return 'https://sheets.googleapis.com/v4/spreadsheets/' + id + '/values/' + encodeURIComponent("'" + tab + "'!" + rangeSuffix); }
+function finishSheet(url) { toast('Đã đồng bộ Google Sheet ✓'); window.open(url, '_blank'); }
+
+// Quyết định: có sheet đã lưu thì cập nhật, không thì tạo mới
+function syncGoogleSheet(token) {
+  api('/api/agent/gsheet').then(function (saved) {
+    if (saved && saved.id) {
+      updateGoogleSheet(token, saved.id)
+        .then(function (url) { finishSheet(url); })
+        .catch(function () { createGoogleSheet(token); }); // không truy cập được sheet cũ -> tạo mới
+    } else { createGoogleSheet(token); }
+  }).catch(function () { createGoogleSheet(token); });
+}
+
+// Cập nhật lại chính sheet đã lưu (giữ nguyên link)
+function updateGoogleSheet(token, id) {
+  toast('Đang cập nhật Google Sheet…');
+  var values = sheetValues(), lastCol = colLetter(TR_HEAD.length - 1);
+  return gFetch('https://sheets.googleapis.com/v4/spreadsheets/' + id + '?fields=spreadsheetUrl,sheets.properties(sheetId,title)', token, 'GET')
+    .then(function (meta) {
+      var tab = meta.sheets[0].properties.title, url = meta.spreadsheetUrl;
+      return gFetch(valuesUrl(id, tab, 'A:' + lastCol) + ':clear', token, 'POST', {})
+        .then(function () { return gFetch(valuesUrl(id, tab, 'A1') + '?valueInputOption=USER_ENTERED', token, 'PUT', { values: values }); })
+        .then(function () { return url; });
+    });
+}
+
+// Tạo sheet mới (lần đầu) + lưu id/url để các lần sau dùng lại
 function createGoogleSheet(token) {
   toast('Đang tạo Google Sheet…');
-  var data = trainingMatrix();
-  var values = [TR_HEAD].concat(data.map(function (row) { return row.map(function (v) { return v == null ? '' : v; }); }));
-  var nCols = TR_HEAD.length, nRows = values.length;
-  var title = 'Đăng ký đào tạo - ' + new Date().toLocaleDateString('vi-VN');
-  var sheetId;
+  var values = sheetValues(), nCols = TR_HEAD.length, nRows = values.length;
+  var title = 'Đăng ký đào tạo';
   gFetch('https://sheets.googleapis.com/v4/spreadsheets', token, 'POST', {
     properties: { title: title },
     sheets: [{ properties: { title: 'Đăng ký đào tạo', gridProperties: { frozenRowCount: 1 } } }]
   }).then(function (ss) {
-    sheetId = ss.sheets[0].properties.sheetId;
-    var range = "'Đăng ký đào tạo'!A1";
-    return gFetch('https://sheets.googleapis.com/v4/spreadsheets/' + ss.spreadsheetId + '/values/' + encodeURIComponent(range) + '?valueInputOption=USER_ENTERED', token, 'PUT', { values: values })
+    var ssId = ss.spreadsheetId, ssUrl = ss.spreadsheetUrl, sheetId = ss.sheets[0].properties.sheetId;
+    return gFetch(valuesUrl(ssId, 'Đăng ký đào tạo', 'A1') + '?valueInputOption=USER_ENTERED', token, 'PUT', { values: values })
       .then(function () {
         var blue = { red: 0.267, green: 0.447, blue: 0.769 }, light = { red: 0.851, green: 0.882, blue: 0.949 };
         var reqs = [
@@ -643,15 +671,12 @@ function createGoogleSheet(token) {
           { setBasicFilter: { filter: { range: { sheetId: sheetId, startRowIndex: 0, endRowIndex: nRows, startColumnIndex: 0, endColumnIndex: nCols } } } },
           { autoResizeDimensions: { dimensions: { sheetId: sheetId, dimension: 'COLUMNS', startIndex: 0, endIndex: nCols } } }
         ];
-        return gFetch('https://sheets.googleapis.com/v4/spreadsheets/' + ss.spreadsheetId + ':batchUpdate', token, 'POST', { requests: reqs })
-          .then(function () { return ss.spreadsheetUrl; });
+        return gFetch('https://sheets.googleapis.com/v4/spreadsheets/' + ssId + ':batchUpdate', token, 'POST', { requests: reqs }).then(function () { return { id: ssId, url: ssUrl }; });
       });
-  }).then(function (url) {
-    toast('Đã tạo Google Sheet trong tài khoản của bạn ✓');
-    window.open(url, '_blank');
-  }).catch(function (e) {
-    toast('Tạo sheet thất bại: ' + (e.message || e));
-  });
+  }).then(function (r) {
+    api('/api/agent/gsheet', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: r.id, url: r.url }) }).catch(function () {});
+    finishSheet(r.url);
+  }).catch(function (e) { toast('Tạo sheet thất bại: ' + (e.message || e)); });
 }
 
 function xesc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
