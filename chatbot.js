@@ -120,6 +120,7 @@ async function handleTrainingFlow(sid, text, cfg) {
       event: 'training_reschedule', name: st.name || '', phone: st.phone || '', newDate: d.display,
       text: '🔔 Ứng viên ĐỔI LỊCH ĐÀO TẠO\n• Họ tên: ' + (st.name || '(trống)') + '\n• SĐT: ' + (st.phone || '') + '\n• Ngày đào tạo mới: ' + d.display
     }).catch(() => {});
+    db.addTrainingLog({ name: st.name || '', phone: st.phone || '', action: 'reschedule', detail: 'Thay đổi lịch đào tạo sang ngày ' + d.display }).catch(() => {});
     const name = st.name; flowState.delete(sid);
     return 'Mình đã cập nhật ngày đào tạo của bạn' + (name ? ' (' + name + ')' : '') + ' sang **' + d.display + '** thành công ✅.\nBộ phận Đào tạo sẽ liên hệ xác nhận lại với bạn. Cảm ơn bạn rất nhiều!';
   }
@@ -242,6 +243,8 @@ async function handleChat(req, res, url, loadConfig) {
 
       if (p === '/api/agent/me' && req.method === 'GET') return sendJson(res, 200, { username: sess.username, displayName: sess.displayName });
       if (p === '/api/agent/sheetinfo' && req.method === 'GET') return sendJson(res, 200, { viewUrl: (cfg.sheet && cfg.sheet.viewUrl) || '', googleClientId: (cfg.sheet && cfg.sheet.googleClientId) || '' });
+      // Lịch sử chỉnh sửa / thông báo
+      if (p === '/api/agent/log' && req.method === 'GET') return sendJson(res, 200, { rows: await db.listTrainingLog(+url.searchParams.get('limit') || 100) });
       // Lưu/đọc 1 Google Sheet duy nhất (id + url) đã tạo
       if (p === '/api/agent/gsheet' && req.method === 'GET') return sendJson(res, 200, { id: await db.getSetting('gsheet_id'), url: await db.getSetting('gsheet_url') });
       if (p === '/api/agent/gsheet' && req.method === 'POST') {

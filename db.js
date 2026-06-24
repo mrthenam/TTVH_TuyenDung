@@ -16,6 +16,7 @@ const memAgents = new Map(); // username -> {username,pass_hash,salt,display_nam
 const memTraining = [];      // [{...registration, id, ts}]  (fallback RAM)
 const memBrandCampaigns = new Map(); // brand -> {brand, code, name}
 const memSettings = new Map();       // k -> v (fallback RAM)
+const memLog = [];                   // lịch sử chỉnh sửa (fallback RAM)
 // dùng chung cho cả 2 chế độ:
 const typing = new Map();    // convId -> ts
 const sessions = new Map();  // token -> {username, displayName, ts}
@@ -44,6 +45,8 @@ async function init() {
     await pool.query(`CREATE TABLE IF NOT EXISTS brand_campaigns(
       brand text PRIMARY KEY, code text, name text, updated_at bigint)`);
     await pool.query(`CREATE TABLE IF NOT EXISTS settings(k text PRIMARY KEY, v text)`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS training_log(
+      id bigserial PRIMARY KEY, name text, phone text, action text, detail text, ts bigint)`);
     console.log(' [db] Đã kết nối PostgreSQL — lưu chat bền vững.');
   } else {
     console.log(' [db] Không có DATABASE_URL/pg — lưu chat tạm trong RAM.');
@@ -211,6 +214,26 @@ async function deleteTraining(id) {
   if (idx >= 0) { memTraining.splice(idx, 1); return 1; }
   return 0;
 }
+async function getTrainingById(id) {
+  if (HAS_PG) { const r = await pool.query('SELECT * FROM training WHERE id=$1', [id]); return r.rows[0] || null; }
+  return memTraining.find(x => String(x.id) === String(id)) || null;
+}
+// ----- lịch sử chỉnh sửa -----
+async function addTrainingLog(e) {
+  const ts = Date.now();
+  const row = { name: e.name || '', phone: e.phone || '', action: e.action || '', detail: e.detail || '' };
+  if (HAS_PG) {
+    const r = await pool.query('INSERT INTO training_log(name,phone,action,detail,ts) VALUES($1,$2,$3,$4,$5) RETURNING id',
+      [row.name, row.phone, row.action, row.detail, ts]);
+    return r.rows[0].id;
+  }
+  const id = memLog.length + 1; memLog.push(Object.assign({ id, ts }, row)); return id;
+}
+async function listTrainingLog(limit) {
+  limit = limit || 100;
+  if (HAS_PG) { const r = await pool.query('SELECT * FROM training_log ORDER BY ts DESC LIMIT $1', [limit]); return r.rows.map(x => Object.assign({}, x, { ts: Number(x.ts) })); }
+  return [...memLog].sort((a, b) => b.ts - a.ts).slice(0, limit);
+}
 
 // ----- chiến dịch theo thương hiệu -----
 async function listBrandCampaigns() {
@@ -264,7 +287,8 @@ module.exports = {
   createSession, getSession,
   ensureConv, addMessage, getMessages, setHumanMode, getConv, listConversations,
   setTyping, isTyping,
-  addTraining, listTraining, updateTraining, deleteTraining,
+  addTraining, listTraining, updateTraining, deleteTraining, getTrainingById,
+  addTrainingLog, listTrainingLog,
   listBrandCampaigns, setBrandCampaign, deleteBrandCampaign, getBrandCampaignMap, seedBrandCampaigns,
   getSetting, setSetting
 };

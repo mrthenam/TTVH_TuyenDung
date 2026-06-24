@@ -344,6 +344,7 @@ const server = http.createServer(async (req, res) => {
     }
     try {
       const id = await db.addTraining(form);
+      db.addTrainingLog({ name: form.name, phone: form.phone, action: 'create', detail: 'Đăng ký mới lịch đào tạo' + (form.sess_date ? ' ngày ' + sheet.isoToDmy(form.sess_date) : '') }).catch(() => {});
       // Đẩy sang Excel SharePoint qua webhook (không chặn phản hồi)
       const cfg = loadConfig();
       const now = new Date(); const p2 = (n) => (n < 10 ? '0' : '') + n;
@@ -377,13 +378,30 @@ const server = http.createServer(async (req, res) => {
     if (!db.getSession(token)) return sendJson(res, 401, { error: 'Cần đăng nhập nhân viên.' });
     const id = decodeURIComponent(url.pathname.slice('/api/training/'.length));
     if (req.method === 'DELETE') {
-      try { const n = await db.deleteTraining(id); return sendJson(res, 200, { ok: n > 0, deleted: n }); }
-      catch (e) { return sendJson(res, 500, { error: e.message }); }
+      try {
+        const old = await db.getTrainingById(id);
+        const n = await db.deleteTraining(id);
+        if (n > 0) db.addTrainingLog({ name: old && old.name, phone: old && old.phone, action: 'delete', detail: 'Xóa đăng ký đào tạo' }).catch(() => {});
+        return sendJson(res, 200, { ok: n > 0, deleted: n });
+      } catch (e) { return sendJson(res, 500, { error: e.message }); }
     }
     const form = await readBody(req);
     if (!form) return sendJson(res, 400, { error: 'Dữ liệu không hợp lệ.' });
-    try { const n = await db.updateTraining(id, form); return sendJson(res, 200, { ok: n > 0, updated: n }); }
-    catch (e) { return sendJson(res, 500, { error: e.message }); }
+    try {
+      const oldRow = await db.getTrainingById(id);
+      const old = oldRow ? Object.assign({}, oldRow) : null; // chụp ảnh trước khi cập nhật
+      const n = await db.updateTraining(id, form);
+      if (n > 0) {
+        const labels = { name: 'Họ tên', phone: 'SĐT', email: 'Email', province: 'Tỉnh thành', district: 'Quận huyện', position: 'Vị trí', mode: 'Hình thức đào tạo', store: 'Cửa hàng' };
+        const changes = [];
+        if (old) {
+          if ('sess_date' in form && (old.sess_date || '') !== (form.sess_date || '')) changes.push('đổi lịch đào tạo sang ngày ' + sheet.isoToDmy(form.sess_date));
+          for (const k in labels) { if (k in form && (old[k] || '') !== (form[k] || '')) changes.push('đổi ' + labels[k] + ' → ' + form[k]); }
+        }
+        db.addTrainingLog({ name: form.name || (old && old.name), phone: form.phone || (old && old.phone), action: 'update', detail: changes.length ? changes.join('; ') : 'Cập nhật thông tin' }).catch(() => {});
+      }
+      return sendJson(res, 200, { ok: n > 0, updated: n });
+    } catch (e) { return sendJson(res, 500, { error: e.message }); }
   }
 
   // Nhận hồ sơ ứng tuyển từ form -> tạo ứng viên trên 1Office

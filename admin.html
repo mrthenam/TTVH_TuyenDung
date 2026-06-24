@@ -151,6 +151,21 @@
   .modal .mf{display:flex;gap:10px;justify-content:flex-end;padding:18px 24px;border-top:1px solid var(--line)}
   #tmErr{display:none;color:var(--red);font-weight:600;font-size:13px;margin-bottom:14px;background:rgba(224,52,43,.08);border:1px solid rgba(224,52,43,.3);padding:10px 12px;border-radius:9px}
 
+  /* chuông thông báo */
+  .bellwrap{position:relative}
+  .bell{position:relative;background:var(--card);border:1px solid var(--line-2);border-radius:10px;width:42px;height:38px;cursor:pointer;font-size:18px;line-height:1}
+  .bell:hover{background:var(--card-2)}
+  .bdg{position:absolute;top:-7px;right:-7px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--red);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center}
+  .notif{position:absolute;right:0;top:48px;width:360px;max-width:92vw;max-height:70vh;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 26px 70px -22px rgba(42,24,16,.45);display:none;z-index:70}
+  .notif.show{display:block}
+  .nhd{display:flex;align-items:center;gap:8px;padding:12px 15px;border-bottom:1px solid var(--line);font-weight:800;font-size:14px;position:sticky;top:0;background:var(--card)}
+  .nclear{margin-left:auto;background:none;border:none;color:var(--red);font-weight:700;font-size:12px;cursor:pointer;font-family:inherit}
+  .nitem{padding:11px 15px;border-bottom:1px solid var(--line)}
+  .nitem .nl1{font-weight:800;font-size:13.5px}
+  .nitem .nl2{font-size:13px;color:#4a382f;margin-top:2px}
+  .nitem .nl3{font-size:11px;color:var(--muted);margin-top:3px}
+  .nitem.unseen{background:var(--grad-soft)}
+  .nempty{padding:26px;text-align:center;color:var(--muted)}
   /* xem trước dạng Excel */
   .xlmodal{width:96vw;max-width:1400px;height:88vh;display:flex;flex-direction:column}
   .xlmodal .mh{flex:none}
@@ -188,6 +203,13 @@
     <img class="logo" src="images/logo-ttvh.jpg" alt="TTVH" />
     <div class="ttl"><b>Quản trị tuyển dụng</b><small>THỊNH THẾ VINH HOA F&B GROUP</small></div>
     <div class="right">
+      <div class="bellwrap">
+        <button class="bell" id="bell" title="Thông báo chỉnh sửa">🔔<span class="bdg" id="bellBadge" style="display:none">0</span></button>
+        <div class="notif" id="notif">
+          <div class="nhd">Thông báo chỉnh sửa<button class="nclear" id="nclear">Đánh dấu đã đọc</button></div>
+          <div class="nlist" id="nlist"></div>
+        </div>
+      </div>
       <span class="who"><span class="dot"></span><span id="me"></span></span>
       <button class="logout" id="logout">Đăng xuất</button>
     </div>
@@ -200,6 +222,7 @@
       <button class="navbtn" id="tabTrain"><span class="ic">📋</span><span class="t">Đăng ký đào tạo</span><span class="cnt" id="navTrainCnt">0</span></button>
       <button class="navbtn" id="tabStaff"><span class="ic">👥</span><span class="t">Nhân viên</span><span class="cnt" id="navStaffCnt">0</span></button>
       <button class="navbtn" id="tabCamp"><span class="ic">🎯</span><span class="t">Chiến dịch</span><span class="cnt" id="navCampCnt">0</span></button>
+      <button class="navbtn" id="tabLog"><span class="ic">📝</span><span class="t">Lịch sử chỉnh sửa</span></button>
       <div class="foot">© 2026 TTVH F&B</div>
     </aside>
 
@@ -282,6 +305,16 @@
           <button class="btn primary" id="cAdd" style="justify-content:center;margin-top:6px">Thêm chiến dịch</button>
           <p class="hintnote">Tên thương hiệu phải trùng đúng giá trị trong ô “Thương hiệu ứng tuyển” trên form ứng tuyển.</p>
         </div>
+      </div>
+
+      <!-- LỊCH SỬ CHỈNH SỬA -->
+      <div class="trainview" id="viewLog" style="display:none">
+        <div class="pagehd">
+          <div><h1>📝 Lịch sử chỉnh sửa</h1><div class="sub" id="logcount">0 thay đổi</div></div>
+          <div class="spacer"></div>
+          <div class="tbar"><button class="btn" id="lreload">↻ Tải lại</button></div>
+        </div>
+        <div class="tablecard"><table class="tt" id="ltable"></table></div>
       </div>
 
     </div>
@@ -374,6 +407,7 @@ $('#p').addEventListener('keydown', function (e) { if (e.key === 'Enter') doLogi
 function showApp(name) {
   $('#gate').style.display = 'none'; $('#app').style.display = 'flex'; $('#app').style.flexDirection = 'column'; $('#me').textContent = name || 'Nhân viên';
   refreshList(); if (!listTimer) listTimer = setInterval(refreshList, 3000);
+  loadNotif(); if (!notifTimer) notifTimer = setInterval(loadNotif, 15000);
   api('/api/agent/sheetinfo').then(function (d) { SHEET_VIEW_URL = (d && d.viewUrl) || ''; GOOGLE_CLIENT_ID = (d && d.googleClientId) || ''; }).catch(function () {});
 }
 function logout() { TOKEN = ''; localStorage.removeItem('ttvh_agent_token'); clearInterval(listTimer); clearInterval(msgTimer); location.reload(); }
@@ -425,13 +459,16 @@ function switchView(v) {
   $('#viewTraining').style.display = v === 'train' ? 'flex' : 'none';
   $('#viewStaff').style.display = v === 'staff' ? 'flex' : 'none';
   $('#viewCampaign').style.display = v === 'camp' ? 'flex' : 'none';
+  $('#viewLog').style.display = v === 'log' ? 'flex' : 'none';
   $('#tabChat').classList.toggle('act', v === 'chat');
   $('#tabTrain').classList.toggle('act', v === 'train');
   $('#tabStaff').classList.toggle('act', v === 'staff');
   $('#tabCamp').classList.toggle('act', v === 'camp');
+  $('#tabLog').classList.toggle('act', v === 'log');
   if (v === 'train') { loadTraining(null, true); startTrainSync(); } else { stopTrainSync(); }
   if (v === 'staff') loadStaff();
   if (v === 'camp') loadCampaigns();
+  if (v === 'log') loadLog();
 }
 // Định kỳ kéo dữ liệu mới (form/chatbot) rồi tự đẩy lên Google Sheet khi đang mở tab Đào tạo
 var trainSyncTimer = null;
@@ -441,6 +478,48 @@ $('#tabChat').addEventListener('click', function () { switchView('chat'); });
 $('#tabTrain').addEventListener('click', function () { switchView('train'); });
 $('#tabStaff').addEventListener('click', function () { switchView('staff'); });
 $('#tabCamp').addEventListener('click', function () { switchView('camp'); });
+$('#tabLog').addEventListener('click', function () { switchView('log'); });
+
+/* ===== THÔNG BÁO / LỊCH SỬ CHỈNH SỬA ===== */
+var notifRows = [], NOTIF_SEEN = +(localStorage.getItem('ttvh_notif_seen') || 0), notifTimer = null;
+function actIcon(a) { return a === 'create' ? '🆕' : a === 'delete' ? '🗑️' : a === 'reschedule' ? '📅' : '✏️'; }
+function actLabel(a) { return a === 'create' ? 'Thêm mới' : a === 'delete' ? 'Xóa' : a === 'reschedule' ? 'Đổi lịch (chatbot)' : 'Chỉnh sửa'; }
+function loadNotif() { api('/api/agent/log?limit=80').then(function (d) { notifRows = d.rows || []; renderNotif(); }).catch(function () {}); }
+function renderNotif() {
+  var unseen = notifRows.filter(function (r) { return r.ts > NOTIF_SEEN; }).length;
+  var b = $('#bellBadge');
+  if (unseen > 0) { b.textContent = unseen > 99 ? '99+' : unseen; b.style.display = 'flex'; } else b.style.display = 'none';
+  if (!notifRows.length) { $('#nlist').innerHTML = '<div class="nempty">Chưa có thông báo.</div>'; return; }
+  $('#nlist').innerHTML = notifRows.map(function (r) {
+    return '<div class="nitem' + (r.ts > NOTIF_SEEN ? ' unseen' : '') + '">'
+      + '<div class="nl1">' + actIcon(r.action) + ' ' + esc(r.name || '(không tên)') + ' · ' + esc(r.phone || '') + '</div>'
+      + '<div class="nl2">' + esc(r.detail || '') + '</div>'
+      + '<div class="nl3">' + timeAgo(r.ts) + ' trước</div></div>';
+  }).join('');
+}
+function markNotifSeen() { NOTIF_SEEN = notifRows.length ? Math.max(NOTIF_SEEN, notifRows[0].ts) : Date.now(); localStorage.setItem('ttvh_notif_seen', NOTIF_SEEN); renderNotif(); }
+$('#bell').addEventListener('click', function (e) {
+  e.stopPropagation();
+  var open = !$('#notif').classList.contains('show');
+  $('#notif').classList.toggle('show', open);
+  if (open) markNotifSeen();
+});
+document.addEventListener('click', function (e) { if (!e.target.closest('.bellwrap')) $('#notif').classList.remove('show'); });
+$('#nclear').addEventListener('click', function (e) { e.stopPropagation(); markNotifSeen(); });
+
+// Tab Lịch sử chỉnh sửa (bảng đầy đủ)
+function loadLog() {
+  api('/api/agent/log?limit=300').then(function (d) {
+    var rows = d.rows || []; $('#logcount').textContent = rows.length + ' thay đổi';
+    if (!rows.length) { $('#ltable').innerHTML = '<tbody><tr><td class="norows">Chưa có thay đổi nào.</td></tr></tbody>'; return; }
+    var html = '<thead><tr><th>Thời gian</th><th>Hành động</th><th>Họ tên</th><th>SĐT</th><th>Nội dung thay đổi</th></tr></thead><tbody>';
+    rows.forEach(function (r) {
+      html += '<tr><td>' + esc(fmtTs(r.ts)) + '</td><td>' + actIcon(r.action) + ' ' + esc(actLabel(r.action)) + '</td><td>' + esc(r.name || '') + '</td><td>' + esc(r.phone || '') + '</td><td class="wr">' + esc(r.detail || '') + '</td></tr>';
+    });
+    $('#ltable').innerHTML = html + '</tbody>';
+  }).catch(function (e) { if (e.message === '401') logout(); });
+}
+$('#lreload').addEventListener('click', loadLog);
 
 /* ===== CHIẾN DỊCH ===== */
 function loadCampaigns() {
@@ -872,7 +951,7 @@ $('#tmSave').addEventListener('click', function () {
     : fetch('/api/training', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(function (r) { return r.json(); });
   req.then(function (res) {
     btn.disabled = false; btn.textContent = old;
-    if (res && res.ok) { closeModal(); toast(editingId ? 'Đã cập nhật đăng ký.' : 'Đã thêm đăng ký.'); loadTraining(autoSyncSheet, true); }
+    if (res && res.ok) { closeModal(); toast(editingId ? 'Đã cập nhật đăng ký.' : 'Đã thêm đăng ký.'); loadTraining(autoSyncSheet, true); loadNotif(); }
     else { var e = $('#tmErr'); e.textContent = 'Lưu thất bại: ' + ((res && res.error) || 'lỗi'); e.style.display = 'block'; }
   }).catch(function (err) {
     btn.disabled = false; btn.textContent = old;
@@ -885,7 +964,7 @@ function delRow(id) {
   var r = trainRows.filter(function (x) { return String(x.id) === String(id); })[0];
   if (!confirm('Xóa đăng ký của "' + (r ? r.name : '') + '"? Hành động không thể hoàn tác.')) return;
   api('/api/training/' + encodeURIComponent(id), { method: 'DELETE' }).then(function (res) {
-    if (res && res.ok) { toast('Đã xóa đăng ký.'); loadTraining(autoSyncSheet, true); }
+    if (res && res.ok) { toast('Đã xóa đăng ký.'); loadTraining(autoSyncSheet, true); loadNotif(); }
     else { toast('Xóa thất bại.'); }
   }).catch(function (e) { if (e.message === '401') logout(); else toast('Lỗi kết nối.'); });
 }
