@@ -17,6 +17,7 @@ const { URL } = require('url');
 const chatbot = require('./chatbot');
 const db = require('./db');
 const sheet = require('./sheet');
+const notify = require('./notify');
 
 const ROOT = __dirname;
 const CONFIG_PATH = path.join(ROOT, 'config.json');
@@ -322,6 +323,18 @@ async function createCandidate(form, cfg, res) {
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost');
+
+  // Zalo OA: nhận code cấp quyền -> đổi lấy refresh_token (lưu DB)
+  if (url.pathname === '/zalo/callback' && req.method === 'GET') {
+    const code = url.searchParams.get('code');
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    if (!code) return res.end('<h2>Thiếu tham số code. Hãy mở lại link cấp quyền OA.</h2>');
+    const cfg = loadConfig() || {};
+    const r = await notify.exchangeZaloCode(cfg, code);
+    return res.end(r.ok
+      ? '<h2>✅ Đã kết nối Zalo OA thành công!</h2><p>Hệ thống đã lưu refresh_token. Bạn có thể đóng tab này.</p>'
+      : '<h2>❌ Kết nối Zalo OA thất bại</h2><p>' + String(r.error || '').replace(/</g, '&lt;') + '</p>');
+  }
 
   // Đăng ký lịch đào tạo (lưu DB / RAM)
   if (url.pathname === '/api/training' && req.method === 'POST') {

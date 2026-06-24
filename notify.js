@@ -83,4 +83,16 @@ async function notifyZalo(cfg, payload) {
   return { ok: false, skipped: true };
 }
 
-module.exports = { notifyZalo };
+// Đổi authorization code -> refresh_token (gọi 1 lần khi cấp quyền OA), lưu vào DB
+async function exchangeZaloCode(cfg, code) {
+  const z = (cfg && cfg.zalo) || {};
+  if (!z.appId || !z.appSecret) return { ok: false, error: 'Chưa cấu hình ZALO_APP_ID / ZALO_APP_SECRET' };
+  const body = 'code=' + encodeURIComponent(code) + '&app_id=' + encodeURIComponent(z.appId) + '&grant_type=authorization_code';
+  const res = await request(new URL('https://oauth.zaloapp.com/v4/oa/access_token'), 'POST',
+    { 'Content-Type': 'application/x-www-form-urlencoded', 'secret_key': z.appSecret }, body, 0);
+  const j = res.json || {};
+  if (j.refresh_token) { await db.setSetting('zalo_refresh_token', j.refresh_token); return { ok: true }; }
+  return { ok: false, error: (res.body || 'không nhận được refresh_token').slice(0, 200) };
+}
+
+module.exports = { notifyZalo, exchangeZaloCode };
