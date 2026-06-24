@@ -236,7 +236,7 @@
             <input id="tsearch" class="search" type="text" placeholder="Tìm theo tên, SĐT, email, cửa hàng…" />
             <button class="btn" id="treload">↻ Tải lại</button>
             <button class="btn" id="tview">👁 Xem dạng Excel</button>
-            <button class="btn" id="tsheet">📊 Tạo Google Sheet</button>
+            <button class="btn" id="tsheet">📊 Update dữ liệu sheet</button>
             <button class="btn" id="tcsv">⬇ Xuất Excel</button>
             <button class="btn primary" id="tadd">＋ Thêm đăng ký</button>
           </div>
@@ -567,7 +567,7 @@ function renderTraining() {
   [].forEach.call(document.querySelectorAll('[data-del]'), function (b) { b.onclick = function () { delRow(b.getAttribute('data-del')); }; });
 }
 $('#tsearch').addEventListener('input', renderTraining);
-$('#treload').addEventListener('click', loadTraining);
+$('#treload').addEventListener('click', function () { loadTraining(); autoSyncSheet(); });
 
 /* ===== XUẤT / XEM EXCEL ===== */
 var TR_HEAD = ['Id', 'Thời gian bắt đầu', 'Thời gian hoàn thành', 'Họ Tên', 'Số Điện Thoại', 'Email Cá Nhân', 'Tỉnh Thành Bạn Đang Ở', 'Quận Huyện Bạn Đang Ở', 'Vị Trí Trúng Tuyển', 'Hình Thức Tham Gia Đào Tạo', 'Ngày Dự Kiến Bạn Có Thể Tham Gia Đào Tạo', 'Cửa Hàng Bạn Làm Việc'];
@@ -602,21 +602,48 @@ $('#tview').addEventListener('click', openPreview);
 $('#xlClose').addEventListener('click', function () { $('#xlview').classList.remove('show'); });
 $('#xlview').addEventListener('click', function (e) { if (e.target === $('#xlview')) $('#xlview').classList.remove('show'); });
 $('#xlExport').addEventListener('click', function () { $('#tcsv').click(); });
-// Đồng bộ dữ liệu vào MỘT Google Sheet duy nhất (tạo lần đầu, các lần sau cập nhật lại)
+// ----- Quản lý token Google (cache trong phiên để auto-sync im lặng) -----
+var gTokenClient = null, gAccessToken = '', gTokenExp = 0, gPending = null;
+function getGoogleToken(interactive) {
+  return new Promise(function (resolve, reject) {
+    if (gAccessToken && Date.now() < gTokenExp) return resolve(gAccessToken);
+    if (!GOOGLE_CLIENT_ID) return reject(new Error('no_client_id'));
+    if (!(window.google && google.accounts && google.accounts.oauth2)) return reject(new Error('gsi'));
+    if (!gTokenClient) {
+      gTokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: GOOGLE_CLIENT_ID, scope: 'https://www.googleapis.com/auth/drive.file',
+        callback: function (resp) {
+          if (resp && resp.access_token) { gAccessToken = resp.access_token; gTokenExp = Date.now() + ((resp.expires_in || 3600) - 60) * 1000; if (gPending) { gPending.resolve(resp.access_token); } }
+          else if (gPending) { gPending.reject(new Error('no_token')); }
+          gPending = null;
+        }
+      });
+    }
+    gPending = { resolve: resolve, reject: reject };
+    try { gTokenClient.requestAccessToken({ prompt: interactive ? 'consent' : '' }); }
+    catch (e) { gPending = null; reject(e); }
+  });
+}
+
+// Nút bấm: cấp quyền (nếu cần) rồi đồng bộ + mở sheet
 $('#tsheet').addEventListener('click', function () {
   if (!GOOGLE_CLIENT_ID) { toast('Chưa cấu hình Google Client ID. Liên hệ quản trị để bật tính năng này.'); return; }
   if (!(window.google && google.accounts && google.accounts.oauth2)) { toast('Đang tải Google, vui lòng thử lại sau giây lát…'); return; }
-  if (!trainRows.length) { toast('Chưa có dữ liệu để tạo sheet.'); return; }
-  var tc = google.accounts.oauth2.initTokenClient({
-    client_id: GOOGLE_CLIENT_ID,
-    scope: 'https://www.googleapis.com/auth/drive.file',
-    callback: function (resp) {
-      if (resp && resp.access_token) syncGoogleSheet(resp.access_token);
-      else toast('Bạn chưa cấp quyền Google.');
-    }
-  });
-  tc.requestAccessToken();
+  if (!trainRows.length) { toast('Chưa có dữ liệu để cập nhật.'); return; }
+  getGoogleToken(true).then(function (token) { syncGoogleSheet(token, true); })
+    .catch(function () { toast('Bạn chưa cấp quyền Google.'); });
 });
+
+// Tự cập nhật sheet ngay khi dữ liệu thay đổi (im lặng, không mở tab) — chỉ khi đã có sheet + đã cấp quyền
+function autoSyncSheet() {
+  if (!GOOGLE_CLIENT_ID) return;
+  api('/api/agent/gsheet').then(function (saved) {
+    if (!saved || !saved.id) return;               // chưa tạo sheet -> chờ bấm nút lần đầu
+    getGoogleToken(false).then(function (token) {
+      updateGoogleSheet(token, saved.id).then(function () { toast('Đã cập nhật Google Sheet ✓'); }).catch(function () {});
+    }).catch(function () {});                       // chưa có token -> bỏ qua im lặng
+  }).catch(function () {});
+}
 function gFetch(url, token, method, body) {
   return fetch(url, { method: method, headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined })
     .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error((j.error && j.error.message) || ('HTTP ' + r.status)); return j; }); });
@@ -628,12 +655,13 @@ function sheetValues() {
 function valuesUrl(id, tab, rangeSuffix) { return 'https://sheets.googleapis.com/v4/spreadsheets/' + id + '/values/' + encodeURIComponent("'" + tab + "'!" + rangeSuffix); }
 function finishSheet(url) { toast('Đã đồng bộ Google Sheet ✓'); window.open(url, '_blank'); }
 
-// Quyết định: có sheet đã lưu thì cập nhật, không thì tạo mới
-function syncGoogleSheet(token) {
+// Quyết định: có sheet đã lưu thì cập nhật, không thì tạo mới. openTab=true -> mở sheet sau khi xong
+function syncGoogleSheet(token, openTab) {
+  if (openTab) toast('Đang cập nhật Google Sheet…');
   api('/api/agent/gsheet').then(function (saved) {
     if (saved && saved.id) {
       updateGoogleSheet(token, saved.id)
-        .then(function (url) { finishSheet(url); })
+        .then(function (url) { if (openTab) finishSheet(url); else toast('Đã cập nhật Google Sheet ✓'); })
         .catch(function () { createGoogleSheet(token); }); // không truy cập được sheet cũ -> tạo mới
     } else { createGoogleSheet(token); }
   }).catch(function () { createGoogleSheet(token); });
@@ -641,7 +669,6 @@ function syncGoogleSheet(token) {
 
 // Cập nhật lại chính sheet đã lưu (giữ nguyên link)
 function updateGoogleSheet(token, id) {
-  toast('Đang cập nhật Google Sheet…');
   var values = sheetValues(), lastCol = colLetter(TR_HEAD.length - 1);
   return gFetch('https://sheets.googleapis.com/v4/spreadsheets/' + id + '?fields=spreadsheetUrl,sheets.properties(sheetId,title)', token, 'GET')
     .then(function (meta) {
@@ -825,7 +852,7 @@ $('#tmSave').addEventListener('click', function () {
     : fetch('/api/training', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(function (r) { return r.json(); });
   req.then(function (res) {
     btn.disabled = false; btn.textContent = old;
-    if (res && res.ok) { closeModal(); toast(editingId ? 'Đã cập nhật đăng ký.' : 'Đã thêm đăng ký.'); loadTraining(); }
+    if (res && res.ok) { closeModal(); toast(editingId ? 'Đã cập nhật đăng ký.' : 'Đã thêm đăng ký.'); loadTraining(); autoSyncSheet(); }
     else { var e = $('#tmErr'); e.textContent = 'Lưu thất bại: ' + ((res && res.error) || 'lỗi'); e.style.display = 'block'; }
   }).catch(function (err) {
     btn.disabled = false; btn.textContent = old;
@@ -838,7 +865,7 @@ function delRow(id) {
   var r = trainRows.filter(function (x) { return String(x.id) === String(id); })[0];
   if (!confirm('Xóa đăng ký của "' + (r ? r.name : '') + '"? Hành động không thể hoàn tác.')) return;
   api('/api/training/' + encodeURIComponent(id), { method: 'DELETE' }).then(function (res) {
-    if (res && res.ok) { toast('Đã xóa đăng ký.'); loadTraining(); }
+    if (res && res.ok) { toast('Đã xóa đăng ký.'); loadTraining(); autoSyncSheet(); }
     else { toast('Xóa thất bại.'); }
   }).catch(function (e) { if (e.message === '401') logout(); else toast('Lỗi kết nối.'); });
 }
