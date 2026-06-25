@@ -125,6 +125,25 @@
   .show-card .meta span{font-size:13px;color:var(--muted)}
   @media(max-width:880px){.showcase-grid{grid-template-columns:repeat(2,1fr)}}
 
+  /* POPUP THÔNG TIN TUYỂN DỤNG */
+  .jobmodal-ov{position:fixed;inset:0;background:rgba(42,24,16,.55);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:200;padding:20px}
+  .jobmodal-ov.show{display:flex}
+  .jobmodal{background:#fff;max-width:760px;width:100%;max-height:88vh;display:flex;flex-direction:column;border-radius:18px;overflow:hidden;box-shadow:0 30px 80px -20px rgba(42,24,16,.55)}
+  .jm-head{background:var(--grad);color:#fff;padding:18px 24px;display:flex;align-items:center;gap:12px;flex:none}
+  .jm-head h3{font-family:var(--head);font-size:clamp(18px,3vw,23px);font-weight:800;line-height:1.2;flex:1}
+  .jm-x{background:rgba(255,255,255,.22);border:none;color:#fff;width:36px;height:36px;border-radius:10px;font-size:22px;line-height:1;cursor:pointer;flex:none}
+  .jm-x:hover{background:rgba(255,255,255,.34)}
+  .jm-body{padding:22px 26px 26px;overflow-y:auto;font-size:15px;line-height:1.6;color:var(--txt)}
+  .jm-body h4{font-size:17px;font-weight:800;color:var(--red);margin:20px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--grad-soft)}
+  .jm-body h4:first-child{margin-top:0}
+  .jm-body p{margin:5px 0}
+  .jm-body .lvl{font-weight:800;font-size:15.5px;margin-top:14px}
+  .jm-body .sub{font-weight:700;color:var(--muted);margin-top:10px}
+  .jm-body ul{margin:6px 0 10px;padding-left:22px}
+  .jm-body li{margin:4px 0}
+  .jm-body a{color:#1a73e8;text-decoration:underline;word-break:break-word}
+  @media(max-width:560px){.jm-body{padding:18px 18px 22px}}
+
   /* WHY JOIN (cards) */
   .pain-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
   .pain{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:26px;display:flex;gap:16px;align-items:flex-start;box-shadow:0 18px 40px -34px rgba(198,147,32,.5)}
@@ -301,8 +320,87 @@
       <div class="show-card"><div class="show-thumb tile-dark"><img src="images/logo-gagion.png" alt="Gà Giòn Sốt Ba Cô Gái" /></div><div class="meta"><b>Gà Giòn Sốt Ba Cô Gái</b><span>Gà giòn rụm · sốt đặc trưng · combo hời</span></div></div>
       <div class="show-card"><div class="show-thumb tile-tea"><img src="images/logo-trahu.png" alt="Trà Hú" /></div><div class="meta"><b>Trà Hú — Đậm Hú Hồn</b><span>Trà cao cấp · tùy chọn tới 8 topping</span></div></div>
     </div>
+    <div class="center fade" style="margin-top:34px">
+      <button type="button" class="btn btn-primary" id="jobInfoBtn">📋 Thông tin tuyển dụng</button>
+    </div>
   </div>
 </section>
+
+<!-- POPUP THÔNG TIN TUYỂN DỤNG -->
+<div class="jobmodal-ov" id="jobModal">
+  <div class="jobmodal">
+    <div class="jm-head">
+      <h3>🍗 Tụi mình tìm đồng đội cho Gà rán</h3>
+      <button class="jm-x" id="jobModalX" type="button">×</button>
+    </div>
+    <div class="jm-body">
+      <h4>A. Thông tin vị trí tuyển dụng</h4>
+
+      <p class="lvl">1. Store Manager / Quản lý cửa hàng</p>
+      <p>🔗 <a href="https://drive.google.com/file/d/194pu5EhOvQ4ZYBZO9qsOR27YSoYIvjyi/view" target="_blank" rel="noopener">Xem mô tả công việc (JD)</a></p>
+
+      <p class="lvl">2. Nhân viên cửa hàng toàn thời gian / Captain / Tổ trưởng</p>
+      <p>🔗 <a href="https://drive.google.com/file/d/1mLiasQTcoDN2I4YTCaXzQ-_6-qxbOjav/view" target="_blank" rel="noopener">Xem mô tả công việc (JD)</a></p>
+      <ul>
+        <li>Có kinh nghiệm làm việc tại các cửa hàng đồ ăn, uống (F&amp;B) từ 6 tháng đến 1 năm.</li>
+        <li>Vận hành cửa hàng cùng cửa hàng trưởng, sắp xếp ca làm.</li>
+        <li>Là đội ngũ tiềm năng thăng tiến lên vị trí Trưởng ca, Quản lý cửa hàng.</li>
+      </ul>
+
+      <p class="lvl">3. Nhân viên cửa hàng bán thời gian</p>
+      <ul>
+        <li>Đảm nhận các công việc về tư vấn bán hàng (Order); thanh toán, …</li>
+        <li>Đảm bảo vệ sinh cửa hàng.</li>
+        <li>Các công việc khác theo sự phân công của Quản lý cửa hàng.</li>
+      </ul>
+
+      <h4>B. Quyền lợi</h4>
+
+      <p class="lvl">1. Cấp quản lý</p>
+      <p class="sub">Thu nhập:</p>
+      <ul>
+        <li>Quản lý cửa hàng: <b>10.000.000 – 11.200.000</b> + thưởng BSC từ 700.000 đến 2.000.000/tháng + thưởng doanh thu</li>
+        <li>Trưởng ca: <b>7.500.000 – 8.500.000</b> + thưởng BSC từ 700.000 đến 2.000.000/tháng + thưởng doanh thu</li>
+        <li>Tổ trưởng / Captain: <b>6.500.000 – 7.000.000</b> + thưởng BSC từ 700.000 đến 2.000.000/tháng + thưởng doanh thu</li>
+      </ul>
+      <p class="sub">Phúc lợi:</p>
+      <ul>
+        <li>Thử việc 100% lương</li>
+        <li>Tham gia BHXH sau 2 tháng thử việc</li>
+        <li>Được đào tạo lên các vị trí cao hơn. Lộ trình đào tạo và phát triển rõ ràng, cụ thể</li>
+        <li>Xét tăng lương, cấp bậc định kỳ 3 – 6 tháng</li>
+        <li>Bảo hiểm sức khỏe 24/7 PVI</li>
+        <li>Lương tháng 13</li>
+        <li>Chính sách ưu đãi nội bộ</li>
+        <li>Các hoạt động truyền thông nội bộ</li>
+      </ul>
+
+      <p class="lvl">2. Nhân viên cửa hàng</p>
+      <p class="sub">Toàn thời gian:</p>
+      <ul>
+        <li>Toàn thời gian chưa có kinh nghiệm, sẽ được đào tạo: <b>5.800.000đ – 6.000.000đ/tháng</b>.</li>
+        <li>Thời gian làm việc: xoay ca fulltime (ca 8 tiếng), cửa hàng mở từ 08:30 – 23:00, off 1 ngày/tuần.</li>
+      </ul>
+      <p class="sub">Bán thời gian:</p>
+      <ul>
+        <li>Mức lương dao động từ <b>24.000đ – 25.500đ/giờ</b> + thưởng BSC từ 300.000đ đến 1.300.000đ/tháng.</li>
+        <li>Thời gian làm việc linh hoạt theo lịch đăng ký: 4–6 ca/tuần, 6–8 tiếng/ca, đăng ký trong khung giờ:
+          <ul>
+            <li>Ca 8 tiếng: 08h00 – 16h00 &amp; 16h00 – 23h00</li>
+            <li>Ca 6 tiếng: 18h00 – 23h00 &amp; 10h00 – 16h00</li>
+          </ul>
+        </li>
+        <li>Môi trường làm việc thân thiện, ưu tiên bố trí gần nhà.</li>
+        <li>Được đào tạo lên các vị trí cao hơn. Lộ trình đào tạo và phát triển rõ ràng, cụ thể.</li>
+        <li>Xét tăng lương, cấp bậc định kỳ 3 – 6 tháng.</li>
+      </ul>
+
+      <div style="text-align:center;margin-top:22px">
+        <a href="#ungtuyen" class="btn btn-primary" id="jobApplyBtn">Ứng tuyển ngay →</a>
+      </div>
+    </div>
+  </div>
+</div>
 
 
 <!-- BENEFITS -->
@@ -483,6 +581,18 @@ document.querySelectorAll('.faq button').forEach(function(btn){
     if(!open){item.classList.add('open');ans.style.maxHeight=ans.scrollHeight+'px';}
   });
 });
+
+/* Popup thông tin tuyển dụng */
+(function(){
+  var ov=document.getElementById('jobModal'); if(!ov) return;
+  function open(){ ov.classList.add('show'); document.body.style.overflow='hidden'; }
+  function close(){ ov.classList.remove('show'); document.body.style.overflow=''; }
+  document.getElementById('jobInfoBtn').addEventListener('click',open);
+  document.getElementById('jobModalX').addEventListener('click',close);
+  var ab=document.getElementById('jobApplyBtn'); if(ab) ab.addEventListener('click',close);
+  ov.addEventListener('click',function(e){ if(e.target===ov) close(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
+})();
 
 /* Form validation + submit (demo) */
 (function(){
