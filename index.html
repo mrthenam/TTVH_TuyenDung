@@ -18,16 +18,16 @@
     --line-2:rgba(54,28,18,.18);
     --txt:#2a1810;
     --muted:#8b7060;
-    --red:#e0342b;
-    --red-2:#c52820;
-    --gold:#f4a521;
-    --amber:#ff7a1a;
+    --red:#b8902e;
+    --red-2:#9c7a26;
+    --gold:#c9a24b;
+    --amber:#d8bc66;
     --green:#2faa5e;
-    --grad:linear-gradient(135deg,#ff7a1a 0%,#e0342b 100%);
-    --grad-gold:linear-gradient(135deg,#f4a521 0%,#ff7a1a 100%);
-    --grad-soft:linear-gradient(135deg,rgba(244,165,33,.16),rgba(224,52,43,.06));
+    --grad:linear-gradient(135deg,#d8bc66 0%,#b8902e 100%);
+    --grad-gold:linear-gradient(135deg,#e2c677 0%,#c9a24b 100%);
+    --grad-soft:linear-gradient(135deg,rgba(201,162,75,.18),rgba(184,144,46,.07));
     --radius:18px;
-    --shadow:0 24px 60px -22px rgba(224,52,43,.35);
+    --shadow:0 24px 60px -22px rgba(184,144,46,.35);
     --maxw:1120px;
   }
   *{box-sizing:border-box;margin:0;padding:0}
@@ -45,7 +45,7 @@
     display:inline-flex;align-items:center;gap:8px;
     font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
     color:var(--red);background:var(--grad-soft);
-    border:1px solid rgba(224,52,43,.22);
+    border:1px solid rgba(184,144,46,.22);
     padding:7px 16px;border-radius:999px;margin-bottom:18px;
   }
   h2.title{font-size:clamp(26px,4.2vw,44px);font-weight:900;line-height:1.15;letter-spacing:-.02em}
@@ -60,8 +60,8 @@
     padding:16px 30px;border-radius:14px;transition:transform .18s ease,box-shadow .18s ease,background .2s;
     white-space:nowrap;
   }
-  .btn-primary{background:var(--grad);color:#fff;box-shadow:0 14px 34px -10px rgba(224,52,43,.55)}
-  .btn-primary:hover{transform:translateY(-3px);box-shadow:0 22px 44px -12px rgba(224,52,43,.7)}
+  .btn-primary{background:var(--grad);color:#fff;box-shadow:0 14px 34px -10px rgba(184,144,46,.55)}
+  .btn-primary:hover{transform:translateY(-3px);box-shadow:0 22px 44px -12px rgba(184,144,46,.7)}
   .btn-ghost{background:#fff;color:var(--txt);border:1px solid var(--line-2)}
   .btn-ghost:hover{background:var(--card-2);transform:translateY(-3px)}
   .btn-block{width:100%}
@@ -79,12 +79,12 @@
   /* HERO */
   .hero{padding:74px 0 60px;text-align:center;position:relative}
   .hero::before{content:"";position:absolute;inset:0;z-index:-1;
-    background:radial-gradient(60% 50% at 50% 0%,rgba(244,165,33,.20),transparent 70%),
-               radial-gradient(45% 45% at 82% 25%,rgba(224,52,43,.12),transparent 70%)}
-  .hero-logo{width:140px;height:auto;margin:0 auto 22px;border-radius:18px;box-shadow:0 18px 44px -22px rgba(224,52,43,.5)}
+    background:radial-gradient(60% 50% at 50% 0%,rgba(201,162,75,.20),transparent 70%),
+               radial-gradient(45% 45% at 82% 25%,rgba(184,144,46,.12),transparent 70%)}
+  .hero-logo{width:140px;height:auto;margin:0 auto 22px;border-radius:18px;box-shadow:0 18px 44px -22px rgba(184,144,46,.5)}
   .badge-row{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:22px}
   .pill{font-size:13px;font-weight:800;padding:8px 16px;border-radius:999px;background:#fff;border:1px solid var(--line-2)}
-  .pill.hot{background:rgba(224,52,43,.10);border-color:rgba(224,52,43,.3);color:var(--red)}
+  .pill.hot{background:rgba(184,144,46,.10);border-color:rgba(184,144,46,.3);color:var(--red)}
   .hero h1{font-size:clamp(32px,6vw,62px);font-weight:900;line-height:1.06;letter-spacing:-.03em;margin:6px auto 18px;max-width:16ch}
   .hero p.sub{font-size:clamp(16px,2.4vw,21px);color:var(--muted);max-width:660px;margin:0 auto 30px}
   .hero-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:46px}
@@ -92,7 +92,7 @@
   /* STATS */
   .stats{padding:8px 0 60px}
   .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-  .stat{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:26px 14px;text-align:center;box-shadow:0 18px 40px -30px rgba(224,52,43,.4)}
+  .stat{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:26px 14px;text-align:center;box-shadow:0 18px 40px -30px rgba(184,144,46,.4)}
   .stat b{display:block;font-size:clamp(26px,4vw,38px);font-weight:900;line-height:1}
   .stat span{color:var(--muted);font-size:13px;margin-top:6px;display:block}
   @media(max-width:760px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
@@ -102,8 +102,8 @@
 
   /* BRANDS SHOWCASE */
   .showcase-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
-  .show-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;transition:transform .2s,box-shadow .2s;box-shadow:0 18px 40px -32px rgba(224,52,43,.5)}
-  .show-card:hover{transform:translateY(-6px);box-shadow:0 26px 50px -28px rgba(224,52,43,.55)}
+  .show-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;transition:transform .2s,box-shadow .2s;box-shadow:0 18px 40px -32px rgba(184,144,46,.5)}
+  .show-card:hover{transform:translateY(-6px);box-shadow:0 26px 50px -28px rgba(184,144,46,.55)}
   .show-thumb{height:200px;min-height:200px;display:grid;place-items:center;overflow:hidden}
   .show-thumb img{max-height:156px;max-width:80%;width:auto;height:auto;object-fit:contain}
   .tile-light{background:#ffffff}
@@ -117,7 +117,7 @@
 
   /* WHY JOIN (cards) */
   .pain-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
-  .pain{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:26px;display:flex;gap:16px;align-items:flex-start;box-shadow:0 18px 40px -34px rgba(224,52,43,.5)}
+  .pain{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:26px;display:flex;gap:16px;align-items:flex-start;box-shadow:0 18px 40px -34px rgba(184,144,46,.5)}
   .pain .ic{flex:none;width:48px;height:48px;border-radius:13px;background:var(--grad-soft);display:grid;place-items:center;font-size:24px}
   .pain b{font-size:17px;display:block;margin-bottom:4px}
   .pain p{color:var(--muted);font-size:14px}
@@ -125,9 +125,9 @@
 
   /* POSITIONS */
   .sessions{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
-  .session{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:28px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;box-shadow:0 18px 40px -34px rgba(224,52,43,.5)}
-  .session:hover{transform:translateY(-6px);box-shadow:0 26px 50px -28px rgba(224,52,43,.55)}
-  .session .num{font-size:54px;font-weight:900;line-height:1;color:rgba(224,52,43,.12);position:absolute;top:14px;right:20px}
+  .session{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:28px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;box-shadow:0 18px 40px -34px rgba(184,144,46,.5)}
+  .session:hover{transform:translateY(-6px);box-shadow:0 26px 50px -28px rgba(184,144,46,.55)}
+  .session .num{font-size:54px;font-weight:900;line-height:1;color:rgba(184,144,46,.12);position:absolute;top:14px;right:20px}
   .session .day{font-size:13px;font-weight:800;color:var(--red);letter-spacing:.05em}
   .session h3{font-size:20px;font-weight:900;margin:8px 0 12px;line-height:1.25}
   .session ul{list-style:none;display:grid;gap:9px}
@@ -138,7 +138,7 @@
   /* BENEFITS */
   .benefits{background:var(--bg-soft)}
   .ben-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
-  .ben{display:flex;gap:14px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:0 18px 40px -36px rgba(224,52,43,.5)}
+  .ben{display:flex;gap:14px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:0 18px 40px -36px rgba(184,144,46,.5)}
   .ben .ic{flex:none;width:44px;height:44px;border-radius:12px;background:var(--grad-soft);display:grid;place-items:center;font-size:21px}
   .ben b{display:block;margin-bottom:2px}
   .ben p{font-size:14px;color:var(--muted)}
@@ -146,7 +146,7 @@
 
   /* APPLY-BY-BRAND (replaces pricing) */
   .tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:stretch}
-  .tier{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:30px 26px;display:flex;flex-direction:column;position:relative;box-shadow:0 20px 46px -34px rgba(224,52,43,.5)}
+  .tier{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:30px 26px;display:flex;flex-direction:column;position:relative;box-shadow:0 20px 46px -34px rgba(184,144,46,.5)}
   .tier.featured{border-color:var(--red);box-shadow:var(--shadow)}
   .tier .tag{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--grad);color:#fff;font-size:12px;font-weight:800;padding:6px 16px;border-radius:999px}
   .tier .brandhead{display:flex;align-items:center;gap:12px;margin-bottom:14px}
@@ -167,12 +167,12 @@
   .ins-list li{padding-left:30px;position:relative;color:var(--muted)}
   .ins-list li::before{content:"★";position:absolute;left:0;color:var(--gold)}
   .ins-list li b{color:var(--txt)}
-  .mission{background:var(--grad-soft);border:1px solid rgba(224,52,43,.18);border-radius:14px;padding:20px;font-style:italic}
+  .mission{background:var(--grad-soft);border:1px solid rgba(184,144,46,.18);border-radius:14px;padding:20px;font-style:italic}
   @media(max-width:780px){.instructor{grid-template-columns:1fr;gap:24px}}
 
   /* TESTIMONIALS */
   .tg{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
-  .tcard{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:26px;box-shadow:0 18px 40px -36px rgba(224,52,43,.5)}
+  .tcard{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:26px;box-shadow:0 18px 40px -36px rgba(184,144,46,.5)}
   .tcard .top{display:flex;align-items:center;gap:14px;margin-bottom:14px}
   .tcard .av{width:50px;height:50px;border-radius:50%;background:var(--grad);display:grid;place-items:center;color:#fff;font-weight:900;flex:none}
   .tcard .who b{display:block}
@@ -213,7 +213,7 @@
   .form-grid .full{grid-column:1 / -1}
   @media(max-width:680px){.form-grid{grid-template-columns:1fr}}
   .field label .req{color:var(--red);margin-left:2px}
-  #formErr{display:none;background:rgba(224,52,43,.08);border:1px solid rgba(224,52,43,.3);color:var(--red);font-size:13px;font-weight:600;padding:11px 14px;border-radius:10px;margin-bottom:16px}
+  #formErr{display:none;background:rgba(184,144,46,.08);border:1px solid rgba(184,144,46,.3);color:var(--red);font-size:13px;font-weight:600;padding:11px 14px;border-radius:10px;margin-bottom:16px}
 
   /* FAQ */
   .faq-list{max-width:760px;margin:0 auto;display:grid;gap:12px}
@@ -226,7 +226,7 @@
 
   /* FINAL */
   .final{text-align:center;padding:90px 0}
-  .final::before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(60% 70% at 50% 50%,rgba(244,165,33,.18),transparent 70%)}
+  .final::before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(60% 70% at 50% 50%,rgba(201,162,75,.18),transparent 70%)}
   .final h2{font-size:clamp(28px,5vw,52px);font-weight:900;line-height:1.1;max-width:18ch;margin:0 auto 18px}
   .final .proof{color:var(--muted);margin-bottom:28px;font-weight:700}
   .final .hero-actions{margin-bottom:14px}
@@ -360,25 +360,6 @@
       <div class="ben"><div class="ic">🍵</div><div><b>Hỗ trợ ăn ca &amp; đồ uống</b><p>Được dùng sản phẩm, hỗ trợ bữa ăn trong ca làm việc.</p></div></div>
       <div class="ben"><div class="ic">🎓</div><div><b>Đào tạo miễn phí</b><p>Học nghề pha chế, vận hành, kỹ năng phục vụ chuyên nghiệp.</p></div></div>
       <div class="ben"><div class="ic">🚀</div><div><b>Cơ hội thăng tiến thật</b><p>Đề bạt nội bộ minh bạch khi cửa hàng mở rộng.</p></div></div>
-    </div>
-  </div>
-</section>
-
-<!-- VALUES / ABOUT -->
-<section class="sec">
-  <div class="wrap instructor fade">
-    <div class="ins-photo"><img src="images/logo-ttvh.jpg" alt="Thịnh Thế Vinh Hoa F&amp;B Group" /></div>
-    <div>
-      <span class="eyebrow">Về chúng tôi</span>
-      <h2 class="title">Thịnh Thế Vinh Hoa F&amp;B Group</h2>
-      <p class="lead" style="margin-top:8px">Hệ sinh thái F&amp;B đa thương hiệu, tạo ra sản phẩm chất lượng bằng cả công thức vượt trội và cách vận hành tử tế.</p>
-      <ul class="ins-list">
-        <li><b>Chất lượng:</b> nguyên liệu chọn lọc, quy trình chuẩn ở mọi cửa hàng</li>
-        <li><b>Hương vị riêng biệt:</b> mỗi thương hiệu một bản sắc, không trùng lặp</li>
-        <li><b>Phục vụ tận tâm:</b> chăm sóc khách bằng sự chân thành</li>
-        <li><b>Phát triển bền vững:</b> mở rộng để tạo cơ hội thăng tiến cho đội ngũ</li>
-      </ul>
-      <div class="mission">“Chúng tôi tin: phát triển bền vững là khi mỗi thành viên trong nhà đều có cơ hội tiến lên cùng công ty.”</div>
     </div>
   </div>
 </section>
