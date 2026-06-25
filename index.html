@@ -69,13 +69,22 @@
 
   /* HEADER */
   header{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:rgba(255,248,240,.82);border-bottom:1px solid var(--line)}
-  .nav{display:flex;align-items:center;justify-content:space-between;height:70px}
+  .nav{display:flex;align-items:center;justify-content:space-between;height:70px;flex-wrap:wrap;gap:10px}
+  .nav-cta{display:flex;align-items:center;gap:16px}
+  .nav-cta .navlink{font-size:14px;font-weight:700;color:var(--muted);white-space:nowrap}
+  .nav-cta .navlink:hover{color:var(--red)}
   .brand{display:flex;align-items:center;gap:12px;font-weight:900}
   .brand .logo-img{height:50px;width:auto;border-radius:10px;display:block}
   .brand .nm{font-family:var(--head);font-weight:800;font-size:17px;line-height:1.1;letter-spacing:.01em}
   .brand small{display:block;font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.04em}
   .nav .btn{padding:11px 22px;font-size:14px}
-  @media(max-width:640px){.brand small{display:none}.brand .nm{font-size:14px}}
+  @media(max-width:640px){.brand small{display:none}.brand .nm{font-size:14px}.nav .btn{padding:9px 15px;font-size:13px}.nav-cta{gap:12px}.nav-cta .navlink{font-size:13px}}
+  @media(max-width:560px){
+    .nav{height:auto;justify-content:center;padding:10px 0;gap:8px}
+    .brand{flex:1 1 auto}
+    .nav-cta{flex:1 1 100%;justify-content:center}
+  }
+  @media(max-width:360px){.nav-cta .navlink{font-size:12px}.nav .btn{padding:9px 12px}}
 
   /* HERO */
   .hero{padding:74px 0 60px;text-align:center;position:relative}
@@ -252,8 +261,8 @@
       <img src="images/logo-ttvh.jpg" alt="Thịnh Thế Vinh Hoa" class="logo-img" />
       <div class="nm">Thịnh Thế Vinh Hoa<small>F&amp;B Group</small></div>
     </a>
-    <div class="nav-cta" style="display:flex;align-items:center;gap:18px">
-      <a href="dao-tao.html" style="font-size:14px;font-weight:700;color:var(--muted)">Đăng ký đào tạo</a>
+    <div class="nav-cta">
+      <a href="dao-tao.html" class="navlink">Đăng ký đào tạo</a>
       <a href="#ungtuyen" class="btn btn-primary">Ứng tuyển ngay</a>
     </div>
   </div>
