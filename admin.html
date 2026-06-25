@@ -695,6 +695,8 @@ var gTokenClient = null, gAccessToken = '', gTokenExp = 0, gPending = null;
 function getGoogleToken(interactive) {
   return new Promise(function (resolve, reject) {
     if (gAccessToken && Date.now() < gTokenExp) return resolve(gAccessToken);
+    // Chạy nền (không tương tác): chỉ dùng token còn hạn; hết hạn -> bỏ qua, KHÔNG bật popup
+    if (!interactive) return reject(new Error('expired'));
     if (!GOOGLE_CLIENT_ID) return reject(new Error('no_client_id'));
     if (!(window.google && google.accounts && google.accounts.oauth2)) return reject(new Error('gsi'));
     if (!gTokenClient) {
@@ -708,7 +710,8 @@ function getGoogleToken(interactive) {
       });
     }
     gPending = { resolve: resolve, reject: reject };
-    try { gTokenClient.requestAccessToken({ prompt: interactive ? 'consent' : '' }); }
+    // Chỉ bấm nút mới được mở popup; dùng '' để tái sử dụng phiên (đỡ phải chọn lại tài khoản)
+    try { gTokenClient.requestAccessToken({ prompt: '' }); }
     catch (e) { gPending = null; reject(e); }
   });
 }
