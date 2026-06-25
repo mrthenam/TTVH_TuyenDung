@@ -7,7 +7,7 @@
 <meta name="description" content="Gia nhập đại gia đình F&B Thịnh Thế Vinh Hoa. Ứng tuyển ngay vào MayCha, Hồng Trà Sữa Tam Hảo, Gà Giòn Sốt Ba Cô Gái — đào tạo từ A-Z, lộ trình thăng tiến rõ ràng." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,700&display=swap" rel="stylesheet" />
 <style>
   :root{
     --bg:#fff8f0;
@@ -29,6 +29,7 @@
     --radius:18px;
     --shadow:0 24px 60px -22px rgba(198,147,32,.38);
     --maxw:1120px;
+    --head:'Playfair Display', Georgia, 'Times New Roman', serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
@@ -48,7 +49,7 @@
     border:1px solid rgba(198,147,32,.22);
     padding:7px 16px;border-radius:999px;margin-bottom:18px;
   }
-  h2.title{font-size:clamp(26px,4.2vw,44px);font-weight:900;line-height:1.15;letter-spacing:-.02em}
+  h2.title{font-family:var(--head);font-size:clamp(28px,4.6vw,48px);font-weight:800;line-height:1.15;letter-spacing:-.01em}
   .lead{color:var(--muted);font-size:clamp(15px,2vw,18px);max-width:680px}
   .center{text-align:center}
   .center .lead{margin-left:auto;margin-right:auto}
@@ -71,7 +72,7 @@
   .nav{display:flex;align-items:center;justify-content:space-between;height:70px}
   .brand{display:flex;align-items:center;gap:12px;font-weight:900}
   .brand .logo-img{height:50px;width:auto;border-radius:10px;display:block}
-  .brand .nm{font-size:16px;line-height:1.1}
+  .brand .nm{font-family:var(--head);font-weight:800;font-size:17px;line-height:1.1;letter-spacing:.01em}
   .brand small{display:block;font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.04em}
   .nav .btn{padding:11px 22px;font-size:14px}
   @media(max-width:640px){.brand small{display:none}.brand .nm{font-size:14px}}
@@ -85,7 +86,7 @@
   .badge-row{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:22px}
   .pill{font-size:13px;font-weight:800;padding:8px 16px;border-radius:999px;background:#fff;border:1px solid var(--line-2)}
   .pill.hot{background:rgba(198,147,32,.10);border-color:rgba(198,147,32,.3);color:var(--red)}
-  .hero h1{font-size:clamp(32px,6vw,62px);font-weight:900;line-height:1.06;letter-spacing:-.03em;margin:6px auto 18px;max-width:16ch}
+  .hero h1{font-family:var(--head);font-size:clamp(34px,6.4vw,66px);font-weight:800;line-height:1.08;letter-spacing:-.01em;margin:6px auto 18px;max-width:16ch}
   .hero p.sub{font-size:clamp(16px,2.4vw,21px);color:var(--muted);max-width:660px;margin:0 auto 30px}
   .hero-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:46px}
 
@@ -227,7 +228,7 @@
   /* FINAL */
   .final{text-align:center;padding:90px 0}
   .final::before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(60% 70% at 50% 50%,rgba(212,175,55,.18),transparent 70%)}
-  .final h2{font-size:clamp(28px,5vw,52px);font-weight:900;line-height:1.1;max-width:18ch;margin:0 auto 18px}
+  .final h2{font-family:var(--head);font-size:clamp(30px,5.2vw,54px);font-weight:800;line-height:1.12;max-width:18ch;margin:0 auto 18px}
   .final .proof{color:var(--muted);margin-bottom:28px;font-weight:700}
   .final .hero-actions{margin-bottom:14px}
 
