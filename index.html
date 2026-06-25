@@ -89,12 +89,6 @@
   .hero p.sub{font-size:clamp(16px,2.4vw,21px);color:var(--muted);max-width:660px;margin:0 auto 30px}
   .hero-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:46px}
 
-  .countdown{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-  .cd-box{background:#fff;border:1px solid var(--line-2);border-radius:16px;padding:16px 8px;min-width:84px;box-shadow:0 10px 30px -20px rgba(224,52,43,.5)}
-  .cd-box b{display:block;font-size:clamp(28px,5vw,40px);font-weight:900;line-height:1;font-variant-numeric:tabular-nums;color:var(--red)}
-  .cd-box span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
-  .cd-label{font-size:13px;color:var(--muted);margin-bottom:14px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
-
   /* STATS */
   .stats{padding:8px 0 60px}
   .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
@@ -279,13 +273,6 @@
       <a href="#ungtuyen" class="btn btn-primary">ỨNG TUYỂN NGAY →</a>
       <a href="#vitri" class="btn btn-ghost">Xem vị trí tuyển dụng</a>
     </div>
-    <div class="cd-label">Hạn nhận hồ sơ đợt này còn</div>
-    <div class="countdown" id="countdown">
-      <div class="cd-box"><b id="cd-d">00</b><span>Ngày</span></div>
-      <div class="cd-box"><b id="cd-h">00</b><span>Giờ</span></div>
-      <div class="cd-box"><b id="cd-m">00</b><span>Phút</span></div>
-      <div class="cd-box"><b id="cd-s">00</b><span>Giây</span></div>
-    </div>
   </div>
 </section>
 
@@ -314,22 +301,6 @@
       <div class="show-card"><div class="show-thumb tile-cream"><img src="images/logo-tamhao.png" alt="Hồng Trà Sữa Tam Hảo" /></div><div class="meta"><b>Hồng Trà Sữa Tam Hảo</b><span>Trà ngon · giá hợp lý · phục vụ chân thành</span></div></div>
       <div class="show-card"><div class="show-thumb tile-dark"><img src="images/logo-gagion.png" alt="Gà Giòn Sốt Ba Cô Gái" /></div><div class="meta"><b>Gà Giòn Sốt Ba Cô Gái</b><span>Gà giòn rụm · sốt đặc trưng · combo hời</span></div></div>
       <div class="show-card"><div class="show-thumb tile-tea"><img src="images/logo-trahu.png" alt="Trà Hú" /></div><div class="meta"><b>Trà Hú — Đậm Hú Hồn</b><span>Trà cao cấp · tùy chọn tới 8 topping</span></div></div>
-    </div>
-  </div>
-</section>
-
-<!-- WHY JOIN -->
-<section class="sec" style="padding-top:0">
-  <div class="wrap">
-    <div class="sec-head center fade">
-      <span class="eyebrow">Vì sao chọn chúng tôi</span>
-      <h2 class="title">4 lý do bạn nên <span class="grad-text">gia nhập ngay</span></h2>
-    </div>
-    <div class="pain-grid fade">
-      <div class="pain"><div class="ic">🎓</div><div><b>Không cần kinh nghiệm</b><p>Được đào tạo pha chế, phục vụ, vận hành theo quy trình chuẩn — học là làm được.</p></div></div>
-      <div class="pain"><div class="ic">📈</div><div><b>Lộ trình thăng tiến rõ ràng</b><p>Từ nhân viên → ca trưởng → quản lý cửa hàng. Năng lực tới đâu, cơ hội tới đó.</p></div></div>
-      <div class="pain"><div class="ic">⏰</div><div><b>Ca linh hoạt</b><p>Phù hợp cả sinh viên và người đi làm: ca sáng, ca tối, bán thời gian hoặc toàn thời gian.</p></div></div>
-      <div class="pain"><div class="ic">❤️</div><div><b>Môi trường trẻ trung</b><p>Đồng đội thân thiện, văn hóa tử tế. Vững thời · Sáng vận · Đẹp danh.</p></div></div>
     </div>
   </div>
 </section>
@@ -393,47 +364,6 @@
   </div>
 </section>
 
-<!-- APPLY BY BRAND (replaces pricing) -->
-<section class="sec" id="thuonghieu">
-  <div class="wrap">
-    <div class="sec-head center fade">
-      <span class="eyebrow">Chọn nơi bạn muốn gắn bó</span>
-      <h2 class="title">Chọn thương hiệu <span class="grad-text">ứng tuyển</span></h2>
-      <p class="lead">Bấm chọn thương hiệu — chúng tôi sẽ điền sẵn vào form ứng tuyển bên dưới.</p>
-    </div>
-    <div class="tiers fade">
-      <div class="tier">
-        <div class="brandhead"><div class="bicon tile-light"><img src="images/logo-maycha.png" alt="MayCha" /></div><div><h3>MayCha</h3><div class="role">Trà sữa giới trẻ</div></div></div>
-        <ul>
-          <li>Pha chế &amp; phục vụ tại cửa hàng</li>
-          <li>Đào tạo công thức MayCha từ đầu</li>
-          <li>Ca linh hoạt cho sinh viên</li>
-        </ul>
-        <a href="#ungtuyen" class="btn btn-ghost btn-block" data-brand="MayCha">Ứng tuyển MayCha</a>
-      </div>
-      <div class="tier featured">
-        <div class="tag">🔥 Tuyển nhiều nhất</div>
-        <div class="brandhead"><div class="bicon tile-cream"><img src="images/logo-tamhao.png" alt="Hồng Trà Sữa Tam Hảo" /></div><div><h3>Hồng Trà Sữa Tam Hảo</h3><div class="role">Trà ngon · giá hợp lý</div></div></div>
-        <ul>
-          <li>Pha chế hồng trà sữa truyền thống</li>
-          <li>Phục vụ tận tâm, tạo trải nghiệm</li>
-          <li>Cơ hội lên ca trưởng nhanh</li>
-        </ul>
-        <a href="#ungtuyen" class="btn btn-primary btn-block" data-brand="Hồng Trà Sữa Tam Hảo">Ứng tuyển Tam Hảo</a>
-      </div>
-      <div class="tier">
-        <div class="brandhead"><div class="bicon tile-dark"><img src="images/logo-gagion.png" alt="Gà Giòn Sốt Ba Cô Gái" /></div><div><h3>Gà Giòn Sốt Ba Cô Gái</h3><div class="role">Gà giòn · sốt đặc trưng</div></div></div>
-        <ul>
-          <li>Chế biến &amp; phục vụ món gà giòn</li>
-          <li>Vận hành bếp theo quy trình chuẩn</li>
-          <li>Thưởng theo doanh số cửa hàng</li>
-        </ul>
-        <a href="#ungtuyen" class="btn btn-ghost btn-block" data-brand="Gà Giòn Sốt Ba Cô Gái">Ứng tuyển Ba Cô Gái</a>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- VALUES / ABOUT -->
 <section class="sec">
   <div class="wrap instructor fade">
@@ -449,42 +379,6 @@
         <li><b>Phát triển bền vững:</b> mở rộng để tạo cơ hội thăng tiến cho đội ngũ</li>
       </ul>
       <div class="mission">“Chúng tôi tin: phát triển bền vững là khi mỗi thành viên trong nhà đều có cơ hội tiến lên cùng công ty.”</div>
-    </div>
-  </div>
-</section>
-
-<!-- TESTIMONIALS -->
-<section class="sec benefits">
-  <div class="wrap">
-    <div class="sec-head center fade">
-      <span class="eyebrow">Người trong nhà nói gì</span>
-      <h2 class="title">Đồng đội của bạn <span class="grad-text">đang ở đây</span></h2>
-    </div>
-    <div class="tg fade">
-      <div class="tcard">
-        <div class="top"><div class="av">ML</div><div class="who"><b>Mỹ Linh</b><span>Nhân viên pha chế · MayCha</span></div></div>
-        <span class="result">Lên ca trưởng sau 6 tháng</span>
-        <p>“Mình vào khi chưa biết pha chế gì. Được training tận tình nên giờ tự tin đứng quầy và đã lên ca trưởng.”</p>
-        <div class="stars">★★★★★</div>
-      </div>
-      <div class="tcard">
-        <div class="top"><div class="av">QH</div><div class="who"><b>Quốc Huy</b><span>Quản lý cửa hàng · Tam Hảo</span></div></div>
-        <span class="result">Quản lý 1 cửa hàng</span>
-        <p>“Lộ trình rõ ràng, làm tốt là được ghi nhận. Công ty cho mình cơ hội thật sự để phát triển.”</p>
-        <div class="stars">★★★★★</div>
-      </div>
-      <div class="tcard">
-        <div class="top"><div class="av">TN</div><div class="who"><b>Thảo Nhi</b><span>Part-time · Sinh viên</span></div></div>
-        <span class="result">Ca linh hoạt</span>
-        <p>“Mình sắp xếp ca theo lịch học dễ dàng, vừa kiếm thêm thu nhập vừa học được kỹ năng giao tiếp.”</p>
-        <div class="stars">★★★★★</div>
-      </div>
-      <div class="tcard">
-        <div class="top"><div class="av">VK</div><div class="who"><b>Văn Khang</b><span>Nhân viên bếp · Ba Cô Gái</span></div></div>
-        <span class="result">Thưởng doanh số tốt</span>
-        <p>“Môi trường trẻ, đồng đội vui. Cửa hàng đông khách nên thưởng doanh số cũng đáng kể.”</p>
-        <div class="stars">★★★★★</div>
-      </div>
     </div>
   </div>
 </section>
@@ -643,35 +537,12 @@
 <div class="sticky-cta"><a href="#ungtuyen" class="btn btn-primary">ỨNG TUYỂN NGAY</a></div>
 
 <script>
-/* Countdown to end of current month (application deadline) */
-(function(){
-  var now=new Date();
-  var target=new Date(now.getFullYear(),now.getMonth()+1,0,23,59,59);
-  var els={d:document.getElementById('cd-d'),h:document.getElementById('cd-h'),m:document.getElementById('cd-m'),s:document.getElementById('cd-s')};
-  function pad(n){return String(n).padStart(2,'0');}
-  function tick(){
-    var diff=target-new Date(); if(diff<0)diff=0;
-    els.d.textContent=pad(Math.floor(diff/86400000));
-    els.h.textContent=pad(Math.floor(diff%86400000/3600000));
-    els.m.textContent=pad(Math.floor(diff%3600000/60000));
-    els.s.textContent=pad(Math.floor(diff%60000/1000));
-  }
-  tick();setInterval(tick,1000);
-})();
-
 /* FAQ accordion */
 document.querySelectorAll('.faq button').forEach(function(btn){
   btn.addEventListener('click',function(){
     var item=btn.parentElement,ans=item.querySelector('.ans'),open=item.classList.contains('open');
     document.querySelectorAll('.faq').forEach(function(f){f.classList.remove('open');f.querySelector('.ans').style.maxHeight=null;});
     if(!open){item.classList.add('open');ans.style.maxHeight=ans.scrollHeight+'px';}
-  });
-});
-
-/* Brand buttons -> preselect form brand */
-document.querySelectorAll('[data-brand]').forEach(function(b){
-  b.addEventListener('click',function(){
-    var sel=document.getElementById('brand'); if(sel) sel.value=b.getAttribute('data-brand');
   });
 });
 
