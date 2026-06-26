@@ -121,6 +121,18 @@
   .boxmsg.err.show{display:block;color:var(--red);background:rgba(224,52,43,.08);border:1px solid rgba(224,52,43,.3)}
   .boxmsg.ok.show{display:block;color:#1f9a52;background:rgba(47,170,94,.1);border:1px solid rgba(47,170,94,.35)}
   .youtag{font-size:10px;font-weight:800;color:#fff;background:var(--green);padding:2px 8px;border-radius:99px;margin-left:6px}
+  /* thông tin tuyển dụng */
+  .recruitlist{display:flex;flex-direction:column;gap:16px}
+  .reccard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 20px;box-shadow:0 14px 40px -32px rgba(224,52,43,.4)}
+  .reccard .rh{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .reccard .rh b{font-size:16px;font-weight:900}
+  .reccard .rh .rkey{font-size:11px;font-weight:800;color:var(--muted);background:var(--card-2);border:1px solid var(--line);padding:2px 9px;border-radius:99px}
+  .reccard label{display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin:8px 0 5px}
+  .reccard input,.reccard textarea{width:100%;border:1px solid var(--line-2);border-radius:10px;padding:11px 13px;font-family:inherit;font-size:14px;background:var(--bg);color:var(--txt)}
+  .reccard input:focus,.reccard textarea:focus{outline:none;border-color:var(--red)}
+  .reccard textarea{min-height:170px;resize:vertical;line-height:1.55;white-space:pre}
+  .reccard .ra{display:flex;align-items:center;gap:12px;margin-top:12px}
+  .reccard .hintnote{margin:0}
   /* chiến dịch */
   .camplist{display:flex;flex-direction:column;gap:12px;margin-bottom:18px}
   .camprow{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:0 14px 40px -32px rgba(224,52,43,.4);display:grid;grid-template-columns:200px 1fr 1fr auto;gap:14px;align-items:end}
@@ -236,6 +248,7 @@
       <button class="navbtn" id="tabTrain"><span class="ic">📋</span><span class="t">Đăng ký đào tạo</span><span class="cnt" id="navTrainCnt">0</span></button>
       <button class="navbtn" id="tabStaff"><span class="ic">👥</span><span class="t">Nhân viên</span><span class="cnt" id="navStaffCnt">0</span></button>
       <button class="navbtn" id="tabCamp"><span class="ic">🎯</span><span class="t">Chiến dịch</span><span class="cnt" id="navCampCnt">0</span></button>
+      <button class="navbtn" id="tabRecruit"><span class="ic">📢</span><span class="t">Thông tin tuyển dụng</span></button>
       <button class="navbtn" id="tabLog"><span class="ic">📝</span><span class="t">Lịch sử chỉnh sửa</span></button>
       <div class="foot">© 2026 TTVH F&B</div>
     </aside>
@@ -319,6 +332,14 @@
           <button class="btn primary" id="cAdd" style="justify-content:center;margin-top:6px">Thêm chiến dịch</button>
           <p class="hintnote">Tên thương hiệu phải trùng đúng giá trị trong ô “Thương hiệu ứng tuyển” trên form ứng tuyển.</p>
         </div>
+      </div>
+
+      <!-- THÔNG TIN TUYỂN DỤNG -->
+      <div class="trainview" id="viewRecruit" style="display:none">
+        <div class="pagehd">
+          <div><h1>📢 Thông tin tuyển dụng</h1><div class="sub">Nội dung popup "Thông tin tuyển dụng" trên trang chủ — chỉnh theo từng thương hiệu.</div></div>
+        </div>
+        <div id="recruitList" class="recruitlist"></div>
       </div>
 
       <!-- LỊCH SỬ CHỈNH SỬA -->
@@ -473,15 +494,18 @@ function switchView(v) {
   $('#viewTraining').style.display = v === 'train' ? 'flex' : 'none';
   $('#viewStaff').style.display = v === 'staff' ? 'flex' : 'none';
   $('#viewCampaign').style.display = v === 'camp' ? 'flex' : 'none';
+  $('#viewRecruit').style.display = v === 'recruit' ? 'flex' : 'none';
   $('#viewLog').style.display = v === 'log' ? 'flex' : 'none';
   $('#tabChat').classList.toggle('act', v === 'chat');
   $('#tabTrain').classList.toggle('act', v === 'train');
   $('#tabStaff').classList.toggle('act', v === 'staff');
   $('#tabCamp').classList.toggle('act', v === 'camp');
+  $('#tabRecruit').classList.toggle('act', v === 'recruit');
   $('#tabLog').classList.toggle('act', v === 'log');
   if (v === 'train') { loadTraining(null, true); startTrainSync(); } else { stopTrainSync(); }
   if (v === 'staff') loadStaff();
   if (v === 'camp') loadCampaigns();
+  if (v === 'recruit') loadRecruit();
   if (v === 'log') loadLog();
 }
 // Định kỳ kéo dữ liệu mới (form/chatbot) rồi tự đẩy lên Google Sheet khi đang mở tab Đào tạo
@@ -493,6 +517,35 @@ $('#tabTrain').addEventListener('click', function () { switchView('train'); });
 $('#tabStaff').addEventListener('click', function () { switchView('staff'); });
 $('#tabCamp').addEventListener('click', function () { switchView('camp'); });
 $('#tabLog').addEventListener('click', function () { switchView('log'); });
+$('#tabRecruit').addEventListener('click', function () { switchView('recruit'); });
+
+/* ===== THÔNG TIN TUYỂN DỤNG ===== */
+function loadRecruit() {
+  api('/api/agent/recruitment').then(function (d) {
+    var rows = d.rows || [];
+    if (!rows.length) { $('#recruitList').innerHTML = '<div class="norows">Chưa có dữ liệu. Khởi động lại server để nạp mặc định.</div>'; return; }
+    $('#recruitList').innerHTML = rows.map(function (r) {
+      return '<div class="reccard" data-brand="' + esc(r.brand) + '">'
+        + '<div class="rh"><b>' + esc(r.name || r.brand) + '</b><span class="rkey">' + esc(r.brand) + '</span></div>'
+        + '<label>Tiêu đề popup</label><input class="r_title" value="' + esc(r.title || '') + '" />'
+        + '<label>Nội dung (giữ nguyên xuống dòng; dán link http... sẽ tự thành link)</label>'
+        + '<textarea class="r_content" spellcheck="false">' + esc(r.content || '') + '</textarea>'
+        + '<div class="ra"><button class="btn primary rsave">Lưu</button><span class="hintnote">Để trống nội dung = popup hiện "đang cập nhật".</span></div>'
+        + '</div>';
+    }).join('');
+    [].forEach.call(document.querySelectorAll('#recruitList .reccard'), function (card) {
+      var brand = card.getAttribute('data-brand');
+      card.querySelector('.rsave').onclick = function () {
+        saveRecruit(brand, card.querySelector('.r_title').value, card.querySelector('.r_content').value, card.querySelector('.rh b').textContent);
+      };
+    });
+  }).catch(function (e) { if (e.message === '401') logout(); });
+}
+function saveRecruit(brand, title, content, name) {
+  api('/api/agent/recruitment', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ brand: brand, name: name, title: title, content: content }) })
+    .then(function (res) { if (res && res.ok) toast('Đã lưu thông tin tuyển dụng "' + brand + '".'); else toast('Lưu thất bại.'); })
+    .catch(function (e) { if (e.message === '401') logout(); else toast('Lỗi kết nối.'); });
+}
 
 /* ===== THÔNG BÁO / LỊCH SỬ CHỈNH SỬA ===== */
 var notifRows = [], NOTIF_SEEN = +(localStorage.getItem('ttvh_notif_seen') || 0), notifTimer = null;

@@ -17,6 +17,7 @@ const memTraining = [];      // [{...registration, id, ts}]  (fallback RAM)
 const memBrandCampaigns = new Map(); // brand -> {brand, code, name}
 const memSettings = new Map();       // k -> v (fallback RAM)
 const memLog = [];                   // lịch sử chỉnh sửa (fallback RAM)
+const memRecruit = new Map();        // thông tin tuyển dụng theo thương hiệu (fallback RAM)
 // dùng chung cho cả 2 chế độ:
 const typing = new Map();    // convId -> ts
 const sessions = new Map();  // token -> {username, displayName, ts}
@@ -47,6 +48,8 @@ async function init() {
     await pool.query(`CREATE TABLE IF NOT EXISTS settings(k text PRIMARY KEY, v text)`);
     await pool.query(`CREATE TABLE IF NOT EXISTS training_log(
       id bigserial PRIMARY KEY, name text, phone text, action text, detail text, ts bigint)`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS recruitment_info(
+      brand text PRIMARY KEY, name text, title text, content text, updated_at bigint)`);
     console.log(' [db] Đã kết nối PostgreSQL — lưu chat bền vững.');
   } else {
     console.log(' [db] Không có DATABASE_URL/pg — lưu chat tạm trong RAM.');
@@ -271,6 +274,29 @@ async function seedBrandCampaigns(obj) {
   }
 }
 
+// ----- thông tin tuyển dụng theo thương hiệu -----
+async function listRecruitment() {
+  if (HAS_PG) { const r = await pool.query('SELECT brand,name,title,content FROM recruitment_info ORDER BY brand'); return r.rows; }
+  return [...memRecruit.values()].map(x => ({ brand: x.brand, name: x.name, title: x.title, content: x.content }));
+}
+async function setRecruitment(brand, name, title, content) {
+  brand = (brand || '').trim(); if (!brand) return false;
+  const now = Date.now();
+  if (HAS_PG) {
+    await pool.query(
+      `INSERT INTO recruitment_info(brand,name,title,content,updated_at) VALUES($1,$2,$3,$4,$5)
+       ON CONFLICT (brand) DO UPDATE SET name=$2, title=$3, content=$4, updated_at=$5`,
+      [brand, name || '', title || '', content || '', now]);
+  } else { memRecruit.set(brand, { brand, name: name || '', title: title || '', content: content || '' }); }
+  return true;
+}
+async function seedRecruitment(arr) {
+  if (!arr) return;
+  const ex = await listRecruitment();
+  const have = {}; ex.forEach(r => { have[r.brand] = true; });
+  for (const r of arr) { if (!have[r.brand]) await setRecruitment(r.brand, r.name, r.title, r.content); }
+}
+
 // ----- settings (key-value) -----
 async function getSetting(k) {
   if (HAS_PG) { const r = await pool.query('SELECT v FROM settings WHERE k=$1', [k]); return r.rows[0] ? r.rows[0].v : null; }
@@ -290,5 +316,6 @@ module.exports = {
   addTraining, listTraining, updateTraining, deleteTraining, getTrainingById,
   addTrainingLog, listTrainingLog,
   listBrandCampaigns, setBrandCampaign, deleteBrandCampaign, getBrandCampaignMap, seedBrandCampaigns,
+  listRecruitment, setRecruitment, seedRecruitment,
   getSetting, setSetting
 };

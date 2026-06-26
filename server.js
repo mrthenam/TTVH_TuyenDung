@@ -413,6 +413,12 @@ const server = http.createServer(async (req, res) => {
     return createCandidate(form, cfg, res);
   }
 
+  // Thông tin tuyển dụng theo thương hiệu (công khai cho popup trang chủ)
+  if (url.pathname === '/api/recruitment' && req.method === 'GET') {
+    try { return sendJson(res, 200, { rows: await db.listRecruitment() }); }
+    catch (e) { return sendJson(res, 200, { rows: [] }); }
+  }
+
   // Chatbot (khách + nhân viên)
   if (url.pathname.startsWith('/api/chat/') || url.pathname.startsWith('/api/agent/')) {
     return chatbot.handleChat(req, res, url, loadConfig);
@@ -429,11 +435,64 @@ const server = http.createServer(async (req, res) => {
 
 const cfg = loadConfig() || { port: 3000 };
 const PORT = process.env.PORT || cfg.port || 3000;
+const GARAN_CONTENT = [
+  'A. Thông tin vị trí tuyển dụng:',
+  '',
+  '1. Store Manager/ Quản lý cửa hàng: https://drive.google.com/file/d/194pu5EhOvQ4ZYBZO9qsOR27YSoYIvjyi/view',
+  '',
+  '2. Nhân viên cửa hàng toàn thời gian/Captain/Tổ trưởng: https://drive.google.com/file/d/1mLiasQTcoDN2I4YTCaXzQ-_6-qxbOjav/view',
+  '- Có kinh nghiệm làm việc tại các cửa hàng đồ ăn, uống (F&B) từ 6 tháng đến 1 năm.',
+  '- Vận hành cửa hàng cùng cửa hàng trưởng, sắp xếp ca làm.',
+  '- Là đội ngũ tiềm năng thăng tiến lên vị trí Trưởng ca, Quản lý cửa hàng.',
+  '',
+  '3. Nhân viên cửa hàng bán thời gian:',
+  '- Đảm nhận các công việc về tư vấn bán hàng (Order); thanh toán, ...',
+  '- Đảm bảo vệ sinh Cửa hàng.',
+  '- Các công việc khác theo sự phân công của Quản lý cửa hàng.',
+  '',
+  'B. Quyền lợi:',
+  '',
+  '1. Cấp quản lý',
+  '- Thu nhập:',
+  '+ Quản lý cửa hàng: 10.000.000 - 11.200.000 + thưởng BSC từ 700.000 đến 2.000.000/tháng + thưởng doanh thu',
+  '+ Trưởng ca: 7.500.000 - 8.500.000 + thưởng BSC từ 700.000 đến 2.000.000/tháng + thưởng doanh thu',
+  '+ Tổ trưởng/Captain: 6.500.000 - 7.000.000 + thưởng BSC từ 700.000 đến 2.000.000/tháng + thưởng doanh thu',
+  '- Phúc lợi:',
+  '+ Thử việc 100% lương',
+  '+ Tham gia BHXH sau 2 tháng thử việc',
+  '+ Được đào tạo lên các vị trí cao hơn. Lộ trình đào tạo và phát triển rõ ràng, cụ thể',
+  '+ Xét tăng lương, cấp bậc định kỳ 3 - 6 tháng',
+  '+ Bảo hiểm sức khỏe 24/7 PVI',
+  '+ Lương tháng 13',
+  '+ Chính sách ưu đãi nội bộ',
+  '+ Các hoạt động truyền thông nội bộ',
+  '',
+  '2. Nhân viên cửa hàng:',
+  '- Toàn thời gian:',
+  '+ Toàn thời gian chưa có kinh nghiệm, sẽ được đào tạo: 5.800.000đ/tháng đến 6.000.000đ/tháng.',
+  '+ Thời gian làm việc: xoay ca fulltime (Ca 8 tiếng), cửa hàng mở từ 08:30 - 23:00, off 1 ngày/tuần.',
+  '- Bán thời gian:',
+  '+ Mức lương dao động từ 24.000đ đến 25.500đ/giờ + thưởng BSC từ 300.000đ đến 1.300.000đ/tháng',
+  '+ Thời gian làm việc linh hoạt theo lịch đăng ký: 4-6 ca/tuần, 6-8 tiếng/ca, đăng ký trong khung giờ:',
+  'Ca 8 tiếng: 08h00 - 16h00 & 16h00 - 23h00',
+  'Ca 6 tiếng: 18h00 - 23h00 & 10h00 - 16h00',
+  '+ Môi trường làm việc thân thiện, ưu tiên bố trí gần nhà.',
+  '+ Được đào tạo lên các vị trí cao hơn. Lộ trình đào tạo và phát triển rõ ràng, cụ thể',
+  '+ Xét tăng lương, cấp bậc định kỳ 3 - 6 tháng'
+].join('\n');
+const RECRUIT_DEFAULTS = [
+  { brand: 'maycha', name: 'MayCha', title: 'Thông tin tuyển dụng — MayCha', content: '' },
+  { brand: 'tamhao', name: 'Hồng Trà Sữa Tam Hảo', title: 'Thông tin tuyển dụng — Hồng Trà Sữa Tam Hảo', content: '' },
+  { brand: 'gagion', name: 'Gà Giòn Sốt Ba Cô Gái', title: '🍗 Tụi mình tìm đồng đội cho Gà rán', content: GARAN_CONTENT },
+  { brand: 'trahu', name: 'Trà Hú', title: 'Thông tin tuyển dụng — Trà Hú', content: '' }
+];
+
 chatbot.init()
   .then(() => {
     const bc = cfg.oneOffice && cfg.oneOffice.create && cfg.oneOffice.create.brandCampaigns;
     if (bc) return db.seedBrandCampaigns(bc);
   })
+  .then(() => db.seedRecruitment(RECRUIT_DEFAULTS))
   .catch((e) => console.error(' [db] init lỗi:', e.message));
 server.listen(PORT, () => {
   console.log('--------------------------------------------------');
