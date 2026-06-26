@@ -480,11 +480,36 @@ const GARAN_CONTENT = [
   '+ Được đào tạo lên các vị trí cao hơn. Lộ trình đào tạo và phát triển rõ ràng, cụ thể',
   '+ Xét tăng lương, cấp bậc định kỳ 3 - 6 tháng'
 ].join('\n');
+function brandContent(brandDrink) {
+  return [
+    'A. Thông tin vị trí tuyển dụng:',
+    '',
+    '1. Quản lý cửa hàng / Trưởng ca:',
+    '- Vận hành cửa hàng, sắp xếp ca làm, quản lý nhân sự & doanh thu.',
+    '- Ưu tiên có kinh nghiệm F&B từ 6 tháng đến 1 năm.',
+    '- Lộ trình thăng tiến lên Quản lý khu vực.',
+    '',
+    '2. Nhân viên pha chế & phục vụ (toàn thời gian):',
+    '- Pha chế ' + brandDrink + ', đồ uống theo công thức chuẩn.',
+    '- Phục vụ, order, vệ sinh khu vực; được đào tạo bài bản từ đầu.',
+    '',
+    '3. Nhân viên bán thời gian:',
+    '- Tư vấn bán hàng (Order), thanh toán, đảm bảo vệ sinh cửa hàng.',
+    '- Ca linh hoạt, phù hợp với sinh viên.',
+    '',
+    'B. Quyền lợi:',
+    '- Thử việc 100% lương; tham gia BHXH theo quy định.',
+    '- Lộ trình thăng tiến rõ ràng: Nhân viên → Trưởng ca → Quản lý cửa hàng.',
+    '- Xét tăng lương, cấp bậc định kỳ 3 - 6 tháng.',
+    '- Lương tháng 13, chính sách ưu đãi nội bộ, các hoạt động truyền thông nội bộ.',
+    '- Môi trường trẻ trung, thân thiện; ưu tiên bố trí gần nhà.'
+  ].join('\n');
+}
 const RECRUIT_DEFAULTS = [
-  { brand: 'maycha', name: 'MayCha', title: 'Thông tin tuyển dụng — MayCha', content: '' },
-  { brand: 'tamhao', name: 'Hồng Trà Sữa Tam Hảo', title: 'Thông tin tuyển dụng — Hồng Trà Sữa Tam Hảo', content: '' },
+  { brand: 'maycha', name: 'MayCha', title: 'Thông tin tuyển dụng — MayCha', content: brandContent('trà sữa') },
+  { brand: 'tamhao', name: 'Hồng Trà Sữa Tam Hảo', title: 'Thông tin tuyển dụng — Hồng Trà Sữa Tam Hảo', content: brandContent('hồng trà sữa') },
   { brand: 'gagion', name: 'Gà Giòn Sốt Ba Cô Gái', title: '🍗 Tụi mình tìm đồng đội cho Gà rán', content: GARAN_CONTENT },
-  { brand: 'trahu', name: 'Trà Hú', title: 'Thông tin tuyển dụng — Trà Hú', content: '' }
+  { brand: 'trahu', name: 'Trà Hú', title: 'Thông tin tuyển dụng — Trà Hú', content: brandContent('trà') }
 ];
 
 chatbot.init()

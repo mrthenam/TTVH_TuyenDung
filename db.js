@@ -293,8 +293,15 @@ async function setRecruitment(brand, name, title, content) {
 async function seedRecruitment(arr) {
   if (!arr) return;
   const ex = await listRecruitment();
-  const have = {}; ex.forEach(r => { have[r.brand] = true; });
-  for (const r of arr) { if (!have[r.brand]) await setRecruitment(r.brand, r.name, r.title, r.content); }
+  const cur = {}; ex.forEach(r => { cur[r.brand] = r; });
+  for (const r of arr) {
+    const c = cur[r.brand];
+    if (!c) { await setRecruitment(r.brand, r.name, r.title, r.content); }
+    else if ((!c.content || !c.content.trim()) && r.content && r.content.trim()) {
+      // điền nội dung mặc định cho thương hiệu còn trống (không ghi đè nội dung đã có)
+      await setRecruitment(r.brand, c.name || r.name, c.title || r.title, r.content);
+    }
+  }
 }
 
 // ----- settings (key-value) -----

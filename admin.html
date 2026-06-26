@@ -409,6 +409,14 @@
   </div>
 </div>
 
+<!-- XEM TRƯỚC POPUP TUYỂN DỤNG -->
+<div class="overlay" id="recPrev">
+  <div class="modal" style="max-width:720px;max-height:88vh;display:flex;flex-direction:column">
+    <div class="mh"><h3 id="rpTitle" style="flex:1"></h3><button class="x" id="rpX">×</button></div>
+    <div class="mb" id="rpBody" style="overflow:auto;white-space:pre-wrap;word-break:break-word;line-height:1.65;font-size:14.5px"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -530,13 +538,16 @@ function loadRecruit() {
         + '<label>Tiêu đề popup</label><input class="r_title" value="' + esc(r.title || '') + '" />'
         + '<label>Nội dung (giữ nguyên xuống dòng; dán link http... sẽ tự thành link)</label>'
         + '<textarea class="r_content" spellcheck="false">' + esc(r.content || '') + '</textarea>'
-        + '<div class="ra"><button class="btn primary rsave">Lưu</button><span class="hintnote">Để trống nội dung = popup hiện "đang cập nhật".</span></div>'
+        + '<div class="ra"><button class="btn rprev">👁 Xem trước</button><button class="btn primary rsave">Lưu</button><span class="hintnote">Để trống nội dung = popup hiện "đang cập nhật".</span></div>'
         + '</div>';
     }).join('');
     [].forEach.call(document.querySelectorAll('#recruitList .reccard'), function (card) {
       var brand = card.getAttribute('data-brand');
       card.querySelector('.rsave').onclick = function () {
         saveRecruit(brand, card.querySelector('.r_title').value, card.querySelector('.r_content').value, card.querySelector('.rh b').textContent);
+      };
+      card.querySelector('.rprev').onclick = function () {
+        openRecPreview(card.querySelector('.r_title').value || ('📋 Thông tin tuyển dụng — ' + card.querySelector('.rh b').textContent), card.querySelector('.r_content').value, card.querySelector('.rh b').textContent);
       };
     });
   }).catch(function (e) { if (e.message === '401') logout(); });
@@ -546,6 +557,16 @@ function saveRecruit(brand, title, content, name) {
     .then(function (res) { if (res && res.ok) toast('Đã lưu thông tin tuyển dụng "' + brand + '".'); else toast('Lưu thất bại.'); })
     .catch(function (e) { if (e.message === '401') logout(); else toast('Lỗi kết nối.'); });
 }
+function linkifyTxt(t) { return esc(t).replace(/(https?:\/\/[^\s<]+)/g, function (u) { return '<a href="' + u + '" target="_blank" rel="noopener" style="color:#1a73e8">' + u + '</a>'; }); }
+function openRecPreview(title, content, name) {
+  $('#rpTitle').textContent = title || 'Xem trước';
+  var c = (content || '').trim();
+  $('#rpBody').innerHTML = c ? linkifyTxt(c)
+    : 'Thông tin tuyển dụng của <b>' + esc(name || '') + '</b> đang được cập nhật.\n\n(Popup trên trang chủ sẽ hiện thông báo này khi nội dung để trống.)';
+  $('#recPrev').classList.add('show');
+}
+$('#rpX').addEventListener('click', function () { $('#recPrev').classList.remove('show'); });
+$('#recPrev').addEventListener('click', function (e) { if (e.target === $('#recPrev')) $('#recPrev').classList.remove('show'); });
 
 /* ===== THÔNG BÁO / LỊCH SỬ CHỈNH SỬA ===== */
 var notifRows = [], NOTIF_SEEN = +(localStorage.getItem('ttvh_notif_seen') || 0), notifTimer = null;
