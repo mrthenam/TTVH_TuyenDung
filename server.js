@@ -357,6 +357,17 @@ const server = http.createServer(async (req, res) => {
         store: form.store || '',
         submitted_at: p2(now.getDate()) + '/' + p2(now.getMonth() + 1) + '/' + now.getFullYear() + ' ' + p2(now.getHours()) + ':' + p2(now.getMinutes())
       }).catch(() => {});
+      // Báo Zalo (qua webhook n8n) khi có đăng ký đào tạo mới
+      const dDmy = sheet.isoToDmy(form.sess_date || '');
+      notify.notifyZalo(cfg, {
+        event: 'training_register',
+        name: form.name || '', phone: form.phone || '', email: form.email || '',
+        position: form.position || '', store: form.store || '', date: dDmy,
+        text: '✅ ĐĂNG KÝ ĐÀO TẠO MỚI\n• Họ tên: ' + (form.name || '') + '\n• SĐT: ' + (form.phone || '')
+          + (form.position ? '\n• Vị trí: ' + form.position : '')
+          + (dDmy ? '\n• Ngày đào tạo: ' + dDmy : '')
+          + (form.store ? '\n• Cửa hàng: ' + form.store : '')
+      }).catch(() => {});
       return sendJson(res, 200, { ok: true, id });
     } catch (e) {
       return sendJson(res, 500, { error: 'Không lưu được đăng ký: ' + e.message });
