@@ -112,7 +112,7 @@
 
   /* BRANDS SHOWCASE */
   .showcase-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
-  .show-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;transition:transform .2s,box-shadow .2s;box-shadow:0 18px 40px -32px rgba(198,147,32,.5)}
+  .show-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;transition:transform .2s,box-shadow .2s;box-shadow:0 18px 40px -32px rgba(198,147,32,.5);display:flex;flex-direction:column}
   .show-card:hover{transform:translateY(-6px);box-shadow:0 26px 50px -28px rgba(198,147,32,.55)}
   .show-thumb{height:200px;min-height:200px;display:grid;place-items:center;overflow:hidden}
   .show-thumb img{max-height:156px;max-width:80%;width:auto;height:auto;object-fit:contain}
@@ -120,9 +120,11 @@
   .tile-cream{background:#fff7ea}
   .tile-dark{background:#161616}
   .tile-tea{background:#14463a}
-  .show-card .meta{padding:16px}
+  .show-card .meta{padding:16px 16px 10px;flex:1}
   .show-card .meta b{font-size:15px;display:block}
   .show-card .meta span{font-size:13px;color:var(--muted)}
+  .btn-job{margin:0 14px 16px;padding:11px 14px;border:none;border-radius:12px;background:var(--grad);color:#fff;font-family:inherit;font-weight:800;font-size:13.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;box-shadow:0 10px 24px -12px rgba(198,147,32,.6);transition:transform .15s,box-shadow .15s}
+  .btn-job:hover{transform:translateY(-2px);box-shadow:0 16px 30px -12px rgba(198,147,32,.7)}
   @media(max-width:880px){.showcase-grid{grid-template-columns:repeat(2,1fr)}}
 
   /* POPUP THÔNG TIN TUYỂN DỤNG */
@@ -315,13 +317,26 @@
       <p class="lead">Bạn sẽ làm việc tại một trong các thương hiệu đang được giới trẻ yêu thích của Thịnh Thế Vinh Hoa F&amp;B Group.</p>
     </div>
     <div class="showcase-grid fade">
-      <div class="show-card"><div class="show-thumb tile-light"><img src="images/logo-maycha.png" alt="MayCha" /></div><div class="meta"><b>MayCha</b><span>Trà sữa — “Hạnh phúc trong từng lần hút”</span></div></div>
-      <div class="show-card"><div class="show-thumb tile-cream"><img src="images/logo-tamhao.png" alt="Hồng Trà Sữa Tam Hảo" /></div><div class="meta"><b>Hồng Trà Sữa Tam Hảo</b><span>Trà ngon · giá hợp lý · phục vụ chân thành</span></div></div>
-      <div class="show-card"><div class="show-thumb tile-dark"><img src="images/logo-gagion.png" alt="Gà Giòn Sốt Ba Cô Gái" /></div><div class="meta"><b>Gà Giòn Sốt Ba Cô Gái</b><span>Gà giòn rụm · sốt đặc trưng · combo hời</span></div></div>
-      <div class="show-card"><div class="show-thumb tile-tea"><img src="images/logo-trahu.png" alt="Trà Hú" /></div><div class="meta"><b>Trà Hú — Đậm Hú Hồn</b><span>Trà cao cấp · tùy chọn tới 8 topping</span></div></div>
-    </div>
-    <div class="center fade" style="margin-top:34px">
-      <button type="button" class="btn btn-primary" id="jobInfoBtn">📋 Thông tin tuyển dụng</button>
+      <div class="show-card">
+        <div class="show-thumb tile-light"><img src="images/logo-maycha.png" alt="MayCha" /></div>
+        <div class="meta"><b>MayCha</b><span>Trà sữa — “Hạnh phúc trong từng lần hút”</span></div>
+        <button type="button" class="btn-job" data-job="maycha" data-name="MayCha">📋 Thông tin tuyển dụng</button>
+      </div>
+      <div class="show-card">
+        <div class="show-thumb tile-cream"><img src="images/logo-tamhao.png" alt="Hồng Trà Sữa Tam Hảo" /></div>
+        <div class="meta"><b>Hồng Trà Sữa Tam Hảo</b><span>Trà ngon · giá hợp lý · phục vụ chân thành</span></div>
+        <button type="button" class="btn-job" data-job="tamhao" data-name="Hồng Trà Sữa Tam Hảo">📋 Thông tin tuyển dụng</button>
+      </div>
+      <div class="show-card">
+        <div class="show-thumb tile-dark"><img src="images/logo-gagion.png" alt="Gà Giòn Sốt Ba Cô Gái" /></div>
+        <div class="meta"><b>Gà Giòn Sốt Ba Cô Gái</b><span>Gà giòn rụm · sốt đặc trưng · combo hời</span></div>
+        <button type="button" class="btn-job" data-job="gagion" data-name="Gà Giòn Sốt Ba Cô Gái">📋 Thông tin tuyển dụng</button>
+      </div>
+      <div class="show-card">
+        <div class="show-thumb tile-tea"><img src="images/logo-trahu.png" alt="Trà Hú" /></div>
+        <div class="meta"><b>Trà Hú — Đậm Hú Hồn</b><span>Trà cao cấp · tùy chọn tới 8 topping</span></div>
+        <button type="button" class="btn-job" data-job="trahu" data-name="Trà Hú">📋 Thông tin tuyển dụng</button>
+      </div>
     </div>
   </div>
 </section>
@@ -330,10 +345,11 @@
 <div class="jobmodal-ov" id="jobModal">
   <div class="jobmodal">
     <div class="jm-head">
-      <h3>🍗 Tụi mình tìm đồng đội cho Gà rán</h3>
+      <h3 id="jmTitle">🍗 Tụi mình tìm đồng đội cho Gà rán</h3>
       <button class="jm-x" id="jobModalX" type="button">×</button>
     </div>
     <div class="jm-body">
+      <div id="jmGagion">
       <h4>A. Thông tin vị trí tuyển dụng</h4>
 
       <p class="lvl">1. Store Manager / Quản lý cửa hàng</p>
@@ -394,6 +410,12 @@
         <li>Được đào tạo lên các vị trí cao hơn. Lộ trình đào tạo và phát triển rõ ràng, cụ thể.</li>
         <li>Xét tăng lương, cấp bậc định kỳ 3 – 6 tháng.</li>
       </ul>
+      </div>
+
+      <div id="jmGeneric" style="display:none">
+        <p style="margin:8px 0 2px">Thông tin tuyển dụng của <b id="jmBrand"></b> đang được cập nhật.</p>
+        <p>Bạn vui lòng để lại hồ sơ qua form <b>Đăng ký ứng tuyển</b> bên dưới — đội ngũ Nhân sự sẽ liên hệ và tư vấn vị trí phù hợp nhất với bạn nhé! 🧡</p>
+      </div>
 
       <div style="text-align:center;margin-top:22px">
         <a href="#ungtuyen" class="btn btn-primary" id="jobApplyBtn">Ứng tuyển ngay →</a>
@@ -582,12 +604,24 @@ document.querySelectorAll('.faq button').forEach(function(btn){
   });
 });
 
-/* Popup thông tin tuyển dụng */
+/* Popup thông tin tuyển dụng (mỗi thương hiệu 1 nút) */
 (function(){
   var ov=document.getElementById('jobModal'); if(!ov) return;
-  function open(){ ov.classList.add('show'); document.body.style.overflow='hidden'; }
+  var gagion=document.getElementById('jmGagion'), generic=document.getElementById('jmGeneric');
+  var title=document.getElementById('jmTitle'), brand=document.getElementById('jmBrand');
+  function openJob(job,name){
+    var isGa = job==='gagion';
+    gagion.style.display = isGa ? 'block':'none';
+    generic.style.display = isGa ? 'none':'block';
+    title.textContent = isGa ? '🍗 Tụi mình tìm đồng đội cho Gà rán' : ('📋 Thông tin tuyển dụng — '+name);
+    if(brand) brand.textContent = name;
+    ov.querySelector('.jm-body').scrollTop=0;
+    ov.classList.add('show'); document.body.style.overflow='hidden';
+  }
   function close(){ ov.classList.remove('show'); document.body.style.overflow=''; }
-  document.getElementById('jobInfoBtn').addEventListener('click',open);
+  [].forEach.call(document.querySelectorAll('.btn-job'),function(b){
+    b.addEventListener('click',function(){ openJob(b.getAttribute('data-job'), b.getAttribute('data-name')); });
+  });
   document.getElementById('jobModalX').addEventListener('click',close);
   var ab=document.getElementById('jobApplyBtn'); if(ab) ab.addEventListener('click',close);
   ov.addEventListener('click',function(e){ if(e.target===ov) close(); });
