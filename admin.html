@@ -122,7 +122,10 @@
   .boxmsg.ok.show{display:block;color:#1f9a52;background:rgba(47,170,94,.1);border:1px solid rgba(47,170,94,.35)}
   .youtag{font-size:10px;font-weight:800;color:#fff;background:var(--green);padding:2px 8px;border-radius:99px;margin-left:6px}
   /* thông tin tuyển dụng */
-  .recruit-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .recruit-tabs{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+  .rgroup{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap}
+  .rglabel{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);min-width:108px;padding-top:9px}
+  .rgpills{display:flex;gap:8px;flex-wrap:wrap;flex:1}
   .rtab{border:1px solid var(--line-2);background:var(--card);border-radius:99px;padding:9px 18px;cursor:pointer;font-weight:700;font-size:13.5px;color:var(--txt);font-family:inherit}
   .rtab:hover{background:var(--card-2)}
   .rtab.act{background:var(--grad);color:#fff;border-color:transparent}
@@ -548,10 +551,22 @@ function captureRecEdit() {
   var r = recRows.filter(function (x) { return x.brand === card.getAttribute('data-brand'); })[0]; if (!r) return;
   r.title = card.querySelector('.r_title').value; r.content = card.querySelector('.r_content').value;
 }
+var REC_GROUPS = [
+  { label: 'Cửa hàng', keys: ['maycha', 'tamhao', 'gagion', 'trahu'] },
+  { label: 'Văn phòng', keys: ['marketing', 'hr', 'it', 'finance'] },
+  { label: 'Khối sản xuất', keys: ['sanxuat', 'qaqc', 'khovan', 'kythuat'] }
+];
+function recPill(r) { return '<button class="rtab' + (r.brand === recSel ? ' act' : '') + '" data-b="' + esc(r.brand) + '">' + esc(r.name || r.brand) + '</button>'; }
 function renderRecruit() {
-  $('#recruitTabs').innerHTML = recRows.map(function (r) {
-    return '<button class="rtab' + (r.brand === recSel ? ' act' : '') + '" data-b="' + esc(r.brand) + '">' + esc(r.name || r.brand) + '</button>';
-  }).join('');
+  var byKey = {}; recRows.forEach(function (r) { byKey[r.brand] = r; });
+  var used = {}, html = '';
+  REC_GROUPS.forEach(function (g) {
+    var pills = g.keys.filter(function (k) { return byKey[k]; }).map(function (k) { used[k] = 1; return recPill(byKey[k]); }).join('');
+    if (pills) html += '<div class="rgroup"><span class="rglabel">' + esc(g.label) + '</span><div class="rgpills">' + pills + '</div></div>';
+  });
+  var others = recRows.filter(function (r) { return !used[r.brand]; });
+  if (others.length) html += '<div class="rgroup"><span class="rglabel">Khác</span><div class="rgpills">' + others.map(recPill).join('') + '</div></div>';
+  $('#recruitTabs').innerHTML = html;
   [].forEach.call(document.querySelectorAll('#recruitTabs .rtab'), function (b) {
     b.onclick = function () { captureRecEdit(); recSel = b.getAttribute('data-b'); renderRecruit(); };
   });
