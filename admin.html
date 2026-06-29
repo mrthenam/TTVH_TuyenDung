@@ -121,6 +121,19 @@
   .boxmsg.err.show{display:block;color:var(--red);background:rgba(224,52,43,.08);border:1px solid rgba(224,52,43,.3)}
   .boxmsg.ok.show{display:block;color:#1f9a52;background:rgba(47,170,94,.1);border:1px solid rgba(47,170,94,.35)}
   .youtag{font-size:10px;font-weight:800;color:#fff;background:var(--green);padding:2px 8px;border-radius:99px;margin-left:6px}
+  /* khoảnh khắc vinh hoa */
+  .galbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+  .galbar input#g_url{flex:1;min-width:240px;border:1px solid var(--line-2);border-radius:11px;padding:10px 14px;font-family:inherit;font-size:13.5px;background:var(--card)}
+  .galbar input#g_url:focus{outline:none;border-color:var(--red)}
+  #gUploadBtn{cursor:pointer}
+  .gal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
+  .galcard{position:relative;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 12px 30px -26px rgba(224,52,43,.5);cursor:grab}
+  .galcard.drag{opacity:.4}
+  .galcard.over{outline:2px dashed var(--red);outline-offset:-2px}
+  .galcard img{width:100%;height:130px;object-fit:cover;display:block;background:var(--bg-soft)}
+  .galcard .gidx{position:absolute;top:6px;left:6px;background:var(--grad);color:#fff;font-size:11px;font-weight:800;border-radius:8px;padding:2px 8px}
+  .galcard .gdel{position:absolute;top:6px;right:6px;background:rgba(224,52,43,.92);color:#fff;border:none;width:26px;height:26px;border-radius:8px;cursor:pointer;font-size:15px;line-height:1}
+  .galcard .gurl{padding:7px 9px;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   /* thông tin tuyển dụng */
   .recruit-tabs{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
   .rgroup{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap}
@@ -256,6 +269,7 @@
       <button class="navbtn" id="tabStaff"><span class="ic">👥</span><span class="t">Nhân viên</span><span class="cnt" id="navStaffCnt">0</span></button>
       <button class="navbtn" id="tabCamp"><span class="ic">🎯</span><span class="t">Chiến dịch</span><span class="cnt" id="navCampCnt">0</span></button>
       <button class="navbtn" id="tabRecruit"><span class="ic">📢</span><span class="t">Thông tin tuyển dụng</span></button>
+      <button class="navbtn" id="tabGallery"><span class="ic">📸</span><span class="t">Khoảnh khắc Vinh Hoa</span></button>
       <button class="navbtn" id="tabLog"><span class="ic">📝</span><span class="t">Lịch sử chỉnh sửa</span></button>
       <div class="foot">© 2026 TTVH F&B</div>
     </aside>
@@ -348,6 +362,19 @@
         </div>
         <div class="recruit-tabs" id="recruitTabs"></div>
         <div id="recruitList" class="recruitlist"></div>
+      </div>
+
+      <!-- KHOẢNH KHẮC VINH HOA -->
+      <div class="trainview" id="viewGallery" style="display:none">
+        <div class="pagehd">
+          <div><h1>📸 Khoảnh khắc Vinh Hoa</h1><div class="sub" id="galcount">Ảnh hiển thị trên carousel trang chủ — kéo-thả để sắp xếp.</div></div>
+        </div>
+        <div class="galbar">
+          <input id="g_url" type="text" placeholder="Đường dẫn ảnh, vd: images/anh vinh danh/6.jpg  hoặc  https://..." />
+          <button class="btn primary" id="gAdd">＋ Thêm ảnh</button>
+          <label class="btn" id="gUploadBtn">⬆ Tải ảnh lên<input id="g_file" type="file" accept="image/*" style="display:none" /></label>
+        </div>
+        <div id="galGrid" class="gal-grid"></div>
       </div>
 
       <!-- LỊCH SỬ CHỈNH SỬA -->
@@ -511,17 +538,20 @@ function switchView(v) {
   $('#viewStaff').style.display = v === 'staff' ? 'flex' : 'none';
   $('#viewCampaign').style.display = v === 'camp' ? 'flex' : 'none';
   $('#viewRecruit').style.display = v === 'recruit' ? 'flex' : 'none';
+  $('#viewGallery').style.display = v === 'gallery' ? 'flex' : 'none';
   $('#viewLog').style.display = v === 'log' ? 'flex' : 'none';
   $('#tabChat').classList.toggle('act', v === 'chat');
   $('#tabTrain').classList.toggle('act', v === 'train');
   $('#tabStaff').classList.toggle('act', v === 'staff');
   $('#tabCamp').classList.toggle('act', v === 'camp');
   $('#tabRecruit').classList.toggle('act', v === 'recruit');
+  $('#tabGallery').classList.toggle('act', v === 'gallery');
   $('#tabLog').classList.toggle('act', v === 'log');
   if (v === 'train') { loadTraining(null, true); startTrainSync(); } else { stopTrainSync(); }
   if (v === 'staff') loadStaff();
   if (v === 'camp') loadCampaigns();
   if (v === 'recruit') loadRecruit();
+  if (v === 'gallery') loadGallery();
   if (v === 'log') loadLog();
 }
 // Định kỳ kéo dữ liệu mới (form/chatbot) rồi tự đẩy lên Google Sheet khi đang mở tab Đào tạo
@@ -534,6 +564,66 @@ $('#tabStaff').addEventListener('click', function () { switchView('staff'); });
 $('#tabCamp').addEventListener('click', function () { switchView('camp'); });
 $('#tabLog').addEventListener('click', function () { switchView('log'); });
 $('#tabRecruit').addEventListener('click', function () { switchView('recruit'); });
+$('#tabGallery').addEventListener('click', function () { switchView('gallery'); });
+
+/* ===== KHOẢNH KHẮC VINH HOA ===== */
+var galRows = [], galDragId = null;
+function loadGallery() {
+  api('/api/agent/gallery').then(function (d) { galRows = d.rows || []; renderGallery(); })
+    .catch(function (e) { if (e.message === '401') logout(); });
+}
+function renderGallery() {
+  $('#galcount').textContent = galRows.length + ' ảnh — kéo-thả để sắp xếp thứ tự hiển thị.';
+  if (!galRows.length) { $('#galGrid').innerHTML = '<div class="norows">Chưa có ảnh. Thêm bằng đường dẫn hoặc tải ảnh lên.</div>'; return; }
+  $('#galGrid').innerHTML = galRows.map(function (r, i) {
+    return '<div class="galcard" draggable="true" data-id="' + r.id + '">'
+      + '<span class="gidx">' + (i + 1) + '</span>'
+      + '<button class="gdel" data-del="' + r.id + '" title="Xóa">×</button>'
+      + '<img src="' + esc(r.url) + '" alt="" loading="lazy" />'
+      + '<div class="gurl">' + esc((r.url || '').slice(0, 60)) + '</div></div>';
+  }).join('');
+  [].forEach.call(document.querySelectorAll('#galGrid .gdel'), function (b) { b.onclick = function (e) { e.stopPropagation(); delGallery(b.getAttribute('data-del')); }; });
+  [].forEach.call(document.querySelectorAll('#galGrid .galcard'), function (card) {
+    card.addEventListener('dragstart', function () { galDragId = card.getAttribute('data-id'); card.classList.add('drag'); });
+    card.addEventListener('dragend', function () { card.classList.remove('drag'); [].forEach.call(document.querySelectorAll('.galcard'), function (c) { c.classList.remove('over'); }); });
+    card.addEventListener('dragover', function (e) { e.preventDefault(); card.classList.add('over'); });
+    card.addEventListener('dragleave', function () { card.classList.remove('over'); });
+    card.addEventListener('drop', function (e) {
+      e.preventDefault(); card.classList.remove('over');
+      var from = galDragId, to = card.getAttribute('data-id'); if (from === to) return;
+      var fi = galRows.findIndex(function (x) { return String(x.id) === String(from); });
+      var ti = galRows.findIndex(function (x) { return String(x.id) === String(to); });
+      if (fi < 0 || ti < 0) return;
+      var moved = galRows.splice(fi, 1)[0]; galRows.splice(ti, 0, moved);
+      renderGallery(); saveGalleryOrder();
+    });
+  });
+}
+function saveGalleryOrder() {
+  api('/api/agent/gallery/reorder', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids: galRows.map(function (r) { return r.id; }) }) })
+    .then(function () { toast('Đã lưu thứ tự ảnh.'); }).catch(function () {});
+}
+function addGalleryUrl(u) {
+  u = (u || '').trim(); if (!u) { toast('Nhập đường dẫn ảnh.'); return; }
+  api('/api/agent/gallery', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: u }) })
+    .then(function (res) { if (res && res.ok) { toast('Đã thêm ảnh.'); $('#g_url').value = ''; loadGallery(); } else toast((res && res.error) || 'Thêm thất bại.'); })
+    .catch(function (e) { if (e.message === '401') logout(); else toast('Lỗi kết nối.'); });
+}
+function delGallery(id) {
+  if (!confirm('Xóa ảnh này khỏi carousel?')) return;
+  api('/api/agent/gallery?id=' + encodeURIComponent(id), { method: 'DELETE' })
+    .then(function (res) { if (res && res.ok) { toast('Đã xóa ảnh.'); loadGallery(); } else toast('Xóa thất bại.'); })
+    .catch(function (e) { if (e.message === '401') logout(); else toast('Lỗi kết nối.'); });
+}
+$('#gAdd').addEventListener('click', function () { addGalleryUrl($('#g_url').value); });
+$('#g_url').addEventListener('keydown', function (e) { if (e.key === 'Enter') addGalleryUrl(this.value); });
+$('#g_file').addEventListener('change', function () {
+  var f = this.files && this.files[0]; if (!f) return;
+  if (f.size > 2.5 * 1024 * 1024) { toast('Ảnh quá lớn (>2.5MB). Nên dùng đường dẫn file thay vì tải lên.'); this.value = ''; return; }
+  var rd = new FileReader();
+  rd.onload = function () { addGalleryUrl(rd.result); };
+  rd.readAsDataURL(f); this.value = '';
+});
 
 /* ===== THÔNG TIN TUYỂN DỤNG (menu theo thương hiệu) ===== */
 var recRows = [], recSel = '';

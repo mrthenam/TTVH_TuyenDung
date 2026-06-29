@@ -429,6 +429,11 @@ const server = http.createServer(async (req, res) => {
     try { return sendJson(res, 200, { rows: await db.listRecruitment() }); }
     catch (e) { return sendJson(res, 200, { rows: [] }); }
   }
+  // Khoảnh khắc Vinh Hoa (công khai cho carousel trang chủ)
+  if (url.pathname === '/api/gallery' && req.method === 'GET') {
+    try { return sendJson(res, 200, { rows: await db.listGallery() }); }
+    catch (e) { return sendJson(res, 200, { rows: [] }); }
+  }
 
   // Chatbot (khách + nhân viên)
   if (url.pathname.startsWith('/api/chat/') || url.pathname.startsWith('/api/agent/')) {
@@ -555,6 +560,13 @@ chatbot.init()
     if (bc) return db.seedBrandCampaigns(bc);
   })
   .then(() => db.seedRecruitment(RECRUIT_DEFAULTS))
+  .then(() => db.seedGallery([
+    'images/anh vinh danh/1.jpg',
+    'images/anh vinh danh/2.jpg',
+    'images/anh vinh danh/3.jpg',
+    'images/anh vinh danh/4.jpg',
+    'images/anh vinh danh/5.jpg'
+  ]))
   .catch((e) => console.error(' [db] init lỗi:', e.message));
 server.listen(PORT, () => {
   console.log('--------------------------------------------------');

@@ -18,6 +18,7 @@ const memBrandCampaigns = new Map(); // brand -> {brand, code, name}
 const memSettings = new Map();       // k -> v (fallback RAM)
 const memLog = [];                   // lịch sử chỉnh sửa (fallback RAM)
 const memRecruit = new Map();        // thông tin tuyển dụng theo thương hiệu (fallback RAM)
+const memGallery = [];               // Khoảnh khắc Vinh Hoa: [{id,url,sort_order}] (fallback RAM)
 // dùng chung cho cả 2 chế độ:
 const typing = new Map();    // convId -> ts
 const sessions = new Map();  // token -> {username, displayName, ts}
@@ -50,6 +51,8 @@ async function init() {
       id bigserial PRIMARY KEY, name text, phone text, action text, detail text, ts bigint)`);
     await pool.query(`CREATE TABLE IF NOT EXISTS recruitment_info(
       brand text PRIMARY KEY, name text, title text, content text, updated_at bigint)`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS gallery(
+      id bigserial PRIMARY KEY, url text, sort_order int)`);
     console.log(' [db] Đã kết nối PostgreSQL — lưu chat bền vững.');
   } else {
     console.log(' [db] Không có DATABASE_URL/pg — lưu chat tạm trong RAM.');
@@ -304,6 +307,37 @@ async function seedRecruitment(arr) {
   }
 }
 
+// ----- Khoảnh khắc Vinh Hoa (gallery) -----
+async function listGallery() {
+  if (HAS_PG) { const r = await pool.query('SELECT id,url,sort_order FROM gallery ORDER BY sort_order ASC, id ASC'); return r.rows.map(x => ({ id: Number(x.id), url: x.url, sort_order: x.sort_order })); }
+  return [...memGallery].sort((a, b) => (a.sort_order - b.sort_order) || (a.id - b.id));
+}
+async function addGallery(url) {
+  url = (url || '').trim(); if (!url) return null;
+  if (HAS_PG) {
+    const m = await pool.query('SELECT COALESCE(MAX(sort_order),-1)+1 AS n FROM gallery');
+    const r = await pool.query('INSERT INTO gallery(url,sort_order) VALUES($1,$2) RETURNING id', [url, m.rows[0].n]);
+    return Number(r.rows[0].id);
+  }
+  const id = memGallery.reduce((a, x) => Math.max(a, x.id), 0) + 1;
+  const so = memGallery.reduce((a, x) => Math.max(a, x.sort_order), -1) + 1;
+  memGallery.push({ id, url, sort_order: so }); return id;
+}
+async function deleteGallery(id) {
+  if (HAS_PG) { const r = await pool.query('DELETE FROM gallery WHERE id=$1', [id]); return r.rowCount; }
+  const i = memGallery.findIndex(x => String(x.id) === String(id)); if (i >= 0) { memGallery.splice(i, 1); return 1; } return 0;
+}
+async function reorderGallery(ids) {
+  if (!Array.isArray(ids)) return;
+  if (HAS_PG) { for (let i = 0; i < ids.length; i++) await pool.query('UPDATE gallery SET sort_order=$2 WHERE id=$1', [ids[i], i]); return; }
+  ids.forEach((id, i) => { const r = memGallery.find(x => String(x.id) === String(id)); if (r) r.sort_order = i; });
+}
+async function seedGallery(urls) {
+  if (!urls || !urls.length) return;
+  const ex = await listGallery(); if (ex.length) return;
+  for (let i = 0; i < urls.length; i++) await addGallery(urls[i]);
+}
+
 // ----- settings (key-value) -----
 async function getSetting(k) {
   if (HAS_PG) { const r = await pool.query('SELECT v FROM settings WHERE k=$1', [k]); return r.rows[0] ? r.rows[0].v : null; }
@@ -324,5 +358,6 @@ module.exports = {
   addTrainingLog, listTrainingLog,
   listBrandCampaigns, setBrandCampaign, deleteBrandCampaign, getBrandCampaignMap, seedBrandCampaigns,
   listRecruitment, setRecruitment, seedRecruitment,
+  listGallery, addGallery, deleteGallery, reorderGallery, seedGallery,
   getSetting, setSetting
 };

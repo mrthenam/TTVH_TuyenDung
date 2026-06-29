@@ -246,6 +246,26 @@ async function handleChat(req, res, url, loadConfig) {
       // Lịch sử chỉnh sửa / thông báo
       if (p === '/api/agent/log' && req.method === 'GET') return sendJson(res, 200, { rows: await db.listTrainingLog(+url.searchParams.get('limit') || 100) });
 
+      // Khoảnh khắc Vinh Hoa (gallery)
+      if (p === '/api/agent/gallery' && req.method === 'GET') return sendJson(res, 200, { rows: await db.listGallery() });
+      if (p === '/api/agent/gallery' && req.method === 'POST') {
+        const b = await readBody(req) || {};
+        const u = (b.url || '').toString().trim();
+        if (!u) return sendJson(res, 400, { error: 'Thiếu ảnh' });
+        const id = await db.addGallery(u);
+        return sendJson(res, 200, { ok: true, id });
+      }
+      if (p === '/api/agent/gallery' && req.method === 'DELETE') {
+        const id = url.searchParams.get('id');
+        const n = await db.deleteGallery(id);
+        return sendJson(res, 200, { ok: n > 0, deleted: n });
+      }
+      if (p === '/api/agent/gallery/reorder' && req.method === 'POST') {
+        const b = await readBody(req) || {};
+        await db.reorderGallery(Array.isArray(b.ids) ? b.ids : []);
+        return sendJson(res, 200, { ok: true });
+      }
+
       // Thông tin tuyển dụng theo thương hiệu
       if (p === '/api/agent/recruitment' && req.method === 'GET') return sendJson(res, 200, { rows: await db.listRecruitment() });
       if (p === '/api/agent/recruitment' && req.method === 'POST') {
