@@ -516,12 +516,38 @@ function brandContent(brandDrink) {
     '- Môi trường trẻ trung, thân thiện; ưu tiên bố trí gần nhà.'
   ].join('\n');
 }
+function deptContent(role, place) {
+  return [
+    'Mô tả công việc:',
+    '- ' + role,
+    '- Làm việc ' + (place || 'tại văn phòng TP.HCM') + ', toàn thời gian.',
+    '',
+    'Quyền lợi:',
+    '- Lương thỏa thuận theo năng lực; thử việc 100% lương.',
+    '- Tham gia BHXH; lương tháng 13; xét tăng lương định kỳ.',
+    '- Lộ trình đào tạo & phát triển rõ ràng.',
+    '- Chính sách ưu đãi nội bộ; các hoạt động truyền thông nội bộ.'
+  ].join('\n');
+}
+const DEPT_OFFICE = [
+  { brand: 'marketing', name: 'Marketing', role: 'Lập kế hoạch & triển khai truyền thông thương hiệu, content, chạy quảng cáo.' },
+  { brand: 'hr', name: 'Nhân sự (HR)', role: 'Tuyển dụng, đào tạo, vận hành đội ngũ; xây dựng chính sách nhân sự.' },
+  { brand: 'it', name: 'IT', role: 'Vận hành, hỗ trợ hệ thống, phần mềm và hạ tầng công nghệ.' },
+  { brand: 'finance', name: 'Tài chính – Kế toán', role: 'Quản lý sổ sách, báo cáo tài chính, kiểm soát chi phí.' }
+];
+const DEPT_PROD = [
+  { brand: 'sanxuat', name: 'Sản xuất / Vận hành', role: 'Tham gia quy trình sản xuất, vận hành dây chuyền theo tiêu chuẩn.', place: 'tại nhà máy' },
+  { brand: 'qaqc', name: 'QA / QC', role: 'Kiểm soát chất lượng nguyên liệu & thành phẩm theo tiêu chuẩn ATVSTP.', place: 'tại nhà máy' },
+  { brand: 'khovan', name: 'Kho vận', role: 'Quản lý kho, xuất nhập hàng, điều phối giao vận.', place: 'tại kho/nhà máy' },
+  { brand: 'kythuat', name: 'Kỹ thuật / Bảo trì', role: 'Bảo trì, sửa chữa máy móc thiết bị; đảm bảo vận hành ổn định.', place: 'tại nhà máy' }
+];
 const RECRUIT_DEFAULTS = [
   { brand: 'maycha', name: 'MayCha', title: 'Thông tin tuyển dụng — MayCha', content: brandContent('trà sữa') },
   { brand: 'tamhao', name: 'Hồng Trà Sữa Tam Hảo', title: 'Thông tin tuyển dụng — Hồng Trà Sữa Tam Hảo', content: brandContent('hồng trà sữa') },
   { brand: 'gagion', name: 'Gà Giòn Sốt Ba Cô Gái', title: '🍗 Tụi mình tìm đồng đội cho Gà rán', content: GARAN_CONTENT },
   { brand: 'trahu', name: 'Trà Hú', title: 'Thông tin tuyển dụng — Trà Hú', content: brandContent('trà') }
-];
+].concat(DEPT_OFFICE.map(function (d) { return { brand: d.brand, name: d.name, title: 'Thông tin tuyển dụng — ' + d.name, content: deptContent(d.role, 'tại văn phòng TP.HCM') }; }))
+  .concat(DEPT_PROD.map(function (d) { return { brand: d.brand, name: d.name, title: 'Thông tin tuyển dụng — ' + d.name, content: deptContent(d.role, d.place) }; }));
 
 chatbot.init()
   .then(() => {

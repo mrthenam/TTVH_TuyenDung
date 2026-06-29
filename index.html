@@ -511,6 +511,73 @@
       }
     }
 
+    /* TAB CƠ HỘI NGHỀ NGHIỆP */
+    .career-tabs {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 30px
+    }
+
+    .ctab {
+      border: 1px solid var(--line-2);
+      background: var(--card);
+      border-radius: 99px;
+      padding: 11px 22px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 800;
+      font-size: 14.5px;
+      color: var(--txt);
+      white-space: nowrap
+    }
+
+    .ctab:hover {
+      background: var(--card-2)
+    }
+
+    .ctab.act {
+      background: var(--grad);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 12px 26px -12px rgba(198, 147, 32, .6)
+    }
+
+    .job-thumb {
+      height: 200px;
+      min-height: 200px;
+      display: grid;
+      place-items: center;
+      background: var(--grad-soft)
+    }
+
+    .job-ic {
+      font-size: 64px;
+      line-height: 1
+    }
+
+    @media(max-width:560px) {
+      .career-tabs {
+        gap: 8px;
+        margin-bottom: 22px
+      }
+
+      .ctab {
+        padding: 10px 16px;
+        font-size: 13.5px
+      }
+
+      .job-thumb {
+        height: 150px;
+        min-height: 150px
+      }
+
+      .job-ic {
+        font-size: 52px
+      }
+    }
+
     /* POPUP THÔNG TIN TUYỂN DỤNG */
     .jobmodal-ov {
       position: fixed;
@@ -1445,34 +1512,96 @@
   </section>
 
 
-  <!-- BRANDS SHOWCASE -->
-  <section class="sec">
+  <!-- CƠ HỘI NGHỀ NGHIỆP (3 TAB) -->
+  <section class="sec" id="career">
     <div class="wrap">
       <div class="sec-head center fade">
-        <span class="eyebrow">Hệ sinh thái</span>
-        <h2 class="title">4 thương hiệu — <span class="grad-text">một mái nhà</span></h2>
-        <p class="lead">Bạn sẽ làm việc tại một trong các thương hiệu đang được giới trẻ yêu thích của Thịnh Thế Vinh Hoa F&amp;B Group.</p>
+        <span class="eyebrow">Cơ hội nghề nghiệp</span>
+        <h2 class="title">Khám phá <span class="grad-text">cơ hội nghề nghiệp</span></h2>
+        <p class="lead">Chọn nhóm công việc phù hợp với bạn — Cửa hàng, Văn phòng hay Khối sản xuất.</p>
       </div>
-      <div class="showcase-grid fade">
-        <div class="show-card">
-          <div class="show-thumb tile-light"><img src="images/logo-maycha.png" alt="MayCha" /></div>
-          <div class="meta"><b>Trà Sữa MayCha</b><span>Trà sữa — “Hạnh phúc trong từng lần hút”</span></div>
-          <button type="button" class="btn-job" data-job="maycha" data-name="MayCha">Xem tuyển dụng MayCha →</button>
+
+      <div class="career-tabs fade">
+        <button type="button" class="ctab act" data-tab="store">🏪 Cửa Hàng</button>
+        <button type="button" class="ctab" data-tab="office">🏢 Văn Phòng</button>
+        <button type="button" class="ctab" data-tab="prod">🏭 Khối Sản Xuất</button>
+      </div>
+
+      <!-- TAB: CỬA HÀNG -->
+      <div class="career-panel fade" id="panel-store">
+        <div class="showcase-grid">
+          <div class="show-card">
+            <div class="show-thumb tile-light"><img src="images/logo-maycha.png" alt="MayCha" /></div>
+            <div class="meta"><b>Trà Sữa MayCha</b><span>Trà sữa — “Hạnh phúc trong từng lần hút”</span></div>
+            <button type="button" class="btn-job" data-job="maycha" data-name="MayCha">Xem tuyển dụng MayCha →</button>
+          </div>
+          <div class="show-card">
+            <div class="show-thumb tile-cream"><img src="images/logo-tamhao.png" alt="Hồng Trà Sữa Tam Hảo" /></div>
+            <div class="meta"><b>Hồng Trà Sữa Tam Hảo</b><span>Trà ngon · giá hợp lý · phục vụ chân thành</span></div>
+            <button type="button" class="btn-job" data-job="tamhao" data-name="Hồng Trà Sữa Tam Hảo">Xem tuyển dụng Tam Hảo →</button>
+          </div>
+          <div class="show-card">
+            <div class="show-thumb tile-light"><img src="images/logo-gagion.png" alt="Gà Giòn Sốt Ba Cô Gái" /></div>
+            <div class="meta"><b>Gà Giòn Sốt Ba Cô Gái</b><span>Gà giòn rụm · sốt đặc trưng · combo hời</span></div>
+            <button type="button" class="btn-job" data-job="gagion" data-name="Gà Giòn Sốt Ba Cô Gái">Xem tuyển dụng Gà Giòn Sốt →</button>
+          </div>
+          <div class="show-card">
+            <div class="show-thumb tile-tea"><img src="images/logo-trahu.png" alt="Trà Hú" /></div>
+            <div class="meta"><b>Trà Hú — Đậm Hú Hồn</b><span>Trà cao cấp · tùy chọn tới 8 topping</span></div>
+            <button type="button" class="btn-job" data-job="trahu" data-name="Trà Hú">Xem tuyển dụng Trà Hú →</button>
+          </div>
         </div>
-        <div class="show-card">
-          <div class="show-thumb tile-cream"><img src="images/logo-tamhao.png" alt="Hồng Trà Sữa Tam Hảo" /></div>
-          <div class="meta"><b>Hồng Trà Sữa Tam Hảo</b><span>Trà ngon · giá hợp lý · phục vụ chân thành</span></div>
-          <button type="button" class="btn-job" data-job="tamhao" data-name="Hồng Trà Sữa Tam Hảo">Xem tuyển dụng Tam Hảo →</button>
+      </div>
+
+      <!-- TAB: VĂN PHÒNG -->
+      <div class="career-panel fade" id="panel-office" style="display:none">
+        <div class="showcase-grid">
+          <div class="show-card">
+            <div class="job-thumb"><span class="job-ic">📣</span></div>
+            <div class="meta"><b>Marketing</b><span>Truyền thông · Content · Quảng cáo</span></div>
+            <button type="button" class="btn-job" data-job="marketing" data-name="Marketing">Xem tuyển dụng →</button>
+          </div>
+          <div class="show-card">
+            <div class="job-thumb"><span class="job-ic">🧑‍💼</span></div>
+            <div class="meta"><b>Nhân sự (HR)</b><span>Tuyển dụng · Đào tạo · C&amp;B</span></div>
+            <button type="button" class="btn-job" data-job="hr" data-name="Nhân sự (HR)">Xem tuyển dụng →</button>
+          </div>
+          <div class="show-card">
+            <div class="job-thumb"><span class="job-ic">💻</span></div>
+            <div class="meta"><b>IT</b><span>Hệ thống · Phần mềm · Hạ tầng</span></div>
+            <button type="button" class="btn-job" data-job="it" data-name="IT">Xem tuyển dụng →</button>
+          </div>
+          <div class="show-card">
+            <div class="job-thumb"><span class="job-ic">📊</span></div>
+            <div class="meta"><b>Tài chính – Kế toán</b><span>Kế toán · Tài chính · Kiểm soát</span></div>
+            <button type="button" class="btn-job" data-job="finance" data-name="Tài chính – Kế toán">Xem tuyển dụng →</button>
+          </div>
         </div>
-        <div class="show-card">
-          <div class="show-thumb tile-light"><img src="images/logo-gagion.png" alt="Gà Giòn Sốt Ba Cô Gái" /></div>
-          <div class="meta"><b>Gà Giòn Sốt Ba Cô Gái</b><span>Gà giòn rụm · sốt đặc trưng · combo hời</span></div>
-          <button type="button" class="btn-job" data-job="gagion" data-name="Gà Giòn Sốt Ba Cô Gái">Xem tuyển dụng Gà Giòn Sốt →</button>
-        </div>
-        <div class="show-card">
-          <div class="show-thumb tile-tea"><img src="images/logo-trahu.png" alt="Trà Hú" /></div>
-          <div class="meta"><b>Trà Hú — Đậm Hú Hồn</b><span>Trà cao cấp · tùy chọn tới 8 topping</span></div>
-          <button type="button" class="btn-job" data-job="trahu" data-name="Trà Hú">Xem tuyển dụng Trà Hú →</button>
+      </div>
+
+      <!-- TAB: KHỐI SẢN XUẤT -->
+      <div class="career-panel fade" id="panel-prod" style="display:none">
+        <div class="showcase-grid">
+          <div class="show-card">
+            <div class="job-thumb"><span class="job-ic">🏭</span></div>
+            <div class="meta"><b>Sản xuất / Vận hành</b><span>Sản xuất · Vận hành dây chuyền</span></div>
+            <button type="button" class="btn-job" data-job="sanxuat" data-name="Sản xuất / Vận hành">Xem tuyển dụng →</button>
+          </div>
+          <div class="show-card">
+            <div class="job-thumb"><span class="job-ic">🔬</span></div>
+            <div class="meta"><b>QA / QC</b><span>Kiểm soát chất lượng · ATVSTP</span></div>
+            <button type="button" class="btn-job" data-job="qaqc" data-name="QA / QC">Xem tuyển dụng →</button>
+          </div>
+          <div class="show-card">
+            <div class="job-thumb"><span class="job-ic">📦</span></div>
+            <div class="meta"><b>Kho vận</b><span>Kho · Logistics · Giao vận</span></div>
+            <button type="button" class="btn-job" data-job="khovan" data-name="Kho vận">Xem tuyển dụng →</button>
+          </div>
+          <div class="show-card">
+            <div class="job-thumb"><span class="job-ic">🔧</span></div>
+            <div class="meta"><b>Kỹ thuật / Bảo trì</b><span>Kỹ thuật · Bảo trì thiết bị</span></div>
+            <button type="button" class="btn-job" data-job="kythuat" data-name="Kỹ thuật / Bảo trì">Xem tuyển dụng →</button>
+          </div>
         </div>
       </div>
     </div>
@@ -1748,6 +1877,22 @@
         }
       });
     });
+
+    /* Tab Cơ hội nghề nghiệp (Cửa hàng / Văn phòng / Khối sản xuất) */
+    (function() {
+      var tabs = document.querySelectorAll('.ctab');
+      if (!tabs.length) return;
+      [].forEach.call(tabs, function(b) {
+        b.addEventListener('click', function() {
+          var t = b.getAttribute('data-tab');
+          [].forEach.call(tabs, function(x) { x.classList.toggle('act', x === b); });
+          ['store', 'office', 'prod'].forEach(function(k) {
+            var p = document.getElementById('panel-' + k);
+            if (p) p.style.display = (k === t) ? '' : 'none';
+          });
+        });
+      });
+    })();
 
     /* Popup thông tin tuyển dụng (mỗi thương hiệu 1 nút, nội dung lấy từ dashboard) */
     (function() {
