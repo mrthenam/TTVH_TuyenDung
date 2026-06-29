@@ -1,635 +1,1926 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Tuyển Dụng — Thịnh Thế Vinh Hoa F&B Group | MayCha · Tam Hảo · Gà Giòn Ba Cô Gái</title>
-<meta name="description" content="Gia nhập đại gia đình F&B Thịnh Thế Vinh Hoa. Ứng tuyển ngay vào MayCha, Hồng Trà Sữa Tam Hảo, Gà Giòn Sốt Ba Cô Gái — đào tạo từ A-Z, lộ trình thăng tiến rõ ràng." />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,700&display=swap" rel="stylesheet" />
-<style>
-  :root{
-    --bg:#fff8f0;
-    --bg-soft:#fff1e1;
-    --card:#ffffff;
-    --card-2:#fff6ec;
-    --line:rgba(54,28,18,.10);
-    --line-2:rgba(54,28,18,.18);
-    --txt:#2a1810;
-    --muted:#8b7060;
-    --red:#c69320;
-    --red-2:#a87c16;
-    --gold:#d4af37;
-    --amber:#e6c34d;
-    --green:#2faa5e;
-    --grad:linear-gradient(135deg,#e6c34d 0%,#c69320 100%);
-    --grad-gold:linear-gradient(135deg,#f0d068 0%,#d4af37 100%);
-    --grad-soft:linear-gradient(135deg,rgba(212,175,55,.22),rgba(198,147,32,.09));
-    --radius:18px;
-    --shadow:0 24px 60px -22px rgba(198,147,32,.38);
-    --maxw:1120px;
-    --head:'Playfair Display', Georgia, 'Times New Roman', serif;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth}
-  body{
-    font-family:'Be Vietnam Pro',system-ui,sans-serif;
-    background:var(--bg);color:var(--txt);line-height:1.6;
-    overflow-x:hidden;-webkit-font-smoothing:antialiased;
-  }
-  a{color:inherit;text-decoration:none}
-  img{max-width:100%;display:block}
-  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
-  section{position:relative}
-  .eyebrow{
-    display:inline-flex;align-items:center;gap:8px;
-    font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
-    color:var(--red);background:var(--grad-soft);
-    border:1px solid rgba(198,147,32,.22);
-    padding:7px 16px;border-radius:999px;margin-bottom:18px;
-  }
-  h2.title{font-family:var(--head);font-size:clamp(28px,4.6vw,48px);font-weight:800;line-height:1.15;letter-spacing:-.01em}
-  .lead{color:var(--muted);font-size:clamp(15px,2vw,18px);max-width:680px}
-  .center{text-align:center}
-  .center .lead{margin-left:auto;margin-right:auto}
-  .grad-text{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tuyển Dụng — Thịnh Thế Vinh Hoa </title>
+  <meta name="description" content="Gia nhập đại gia đình F&B Thịnh Thế Vinh Hoa. Ứng tuyển ngay vào MayCha, Hồng Trà Sữa Tam Hảo, Gà Giòn Sốt Ba Cô Gái — đào tạo từ A-Z, lộ trình thăng tiến rõ ràng." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #fff8f0;
+      --bg-soft: #fff1e1;
+      --card: #ffffff;
+      --card-2: #fff6ec;
+      --line: rgba(54, 28, 18, .10);
+      --line-2: rgba(54, 28, 18, .18);
+      --txt: #2a1810;
+      --muted: #8b7060;
+      --red: #c69320;
+      --red-2: #a87c16;
+      --gold: #d4af37;
+      --amber: #e6c34d;
+      --green: #2faa5e;
+      --grad: linear-gradient(135deg, #e6c34d 0%, #c69320 100%);
+      --grad-gold: linear-gradient(135deg, #f0d068 0%, #d4af37 100%);
+      --grad-soft: linear-gradient(135deg, rgba(212, 175, 55, .22), rgba(198, 147, 32, .09));
+      --radius: 18px;
+      --shadow: 0 24px 60px -22px rgba(198, 147, 32, .38);
+      --maxw: 1120px;
+      --head: 'Playfair Display', Georgia, 'Times New Roman', serif;
+    }
 
-  .btn{
-    display:inline-flex;align-items:center;justify-content:center;gap:10px;
-    font-family:inherit;font-weight:800;font-size:16px;cursor:pointer;border:none;
-    padding:16px 30px;border-radius:14px;transition:transform .18s ease,box-shadow .18s ease,background .2s;
-    white-space:nowrap;
-  }
-  .btn-primary{background:var(--grad);color:#fff;box-shadow:0 14px 34px -10px rgba(198,147,32,.55)}
-  .btn-primary:hover{transform:translateY(-3px);box-shadow:0 22px 44px -12px rgba(198,147,32,.7)}
-  .btn-ghost{background:#fff;color:var(--txt);border:1px solid var(--line-2)}
-  .btn-ghost:hover{background:var(--card-2);transform:translateY(-3px)}
-  .btn-block{width:100%}
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
 
-  /* HEADER */
-  header{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:rgba(255,248,240,.82);border-bottom:1px solid var(--line)}
-  .nav{display:flex;align-items:center;justify-content:space-between;height:70px;flex-wrap:wrap;gap:10px}
-  .nav-cta{display:flex;align-items:center;gap:16px}
-  .nav-cta .navlink{font-size:14px;font-weight:700;color:var(--muted);white-space:nowrap}
-  .nav-cta .navlink:hover{color:var(--red)}
-  .brand{display:flex;align-items:center;gap:12px;font-weight:900}
-  .brand .logo-img{height:50px;width:auto;border-radius:10px;display:block}
-  .brand .nm{font-family:var(--head);font-weight:800;font-size:17px;line-height:1.1;letter-spacing:.01em}
-  .brand small{display:block;font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.04em}
-  .nav .btn{padding:11px 22px;font-size:14px}
-  @media(max-width:640px){.brand small{display:none}.brand .nm{font-size:14px}.nav .btn{padding:9px 15px;font-size:13px}.nav-cta{gap:12px}.nav-cta .navlink{font-size:13px}}
-  @media(max-width:560px){
-    .nav{height:auto;justify-content:center;padding:10px 0;gap:8px}
-    .brand{flex:1 1 auto}
-    .nav-cta{flex:1 1 100%;justify-content:center}
-  }
-  @media(max-width:360px){.nav-cta .navlink{font-size:12px}.nav .btn{padding:9px 12px}}
+    html {
+      scroll-behavior: smooth
+    }
 
-  /* HERO */
-  .hero{padding:74px 0 60px;text-align:center;position:relative}
-  .hero::before{content:"";position:absolute;inset:0;z-index:-1;
-    background:radial-gradient(60% 50% at 50% 0%,rgba(212,175,55,.20),transparent 70%),
-               radial-gradient(45% 45% at 82% 25%,rgba(198,147,32,.12),transparent 70%)}
-  .hero-logo{width:140px;height:auto;margin:0 auto 22px;border-radius:18px;box-shadow:0 18px 44px -22px rgba(198,147,32,.5)}
-  .badge-row{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:22px}
-  .pill{font-size:13px;font-weight:800;padding:8px 16px;border-radius:999px;background:#fff;border:1px solid var(--line-2)}
-  .pill.hot{background:rgba(198,147,32,.10);border-color:rgba(198,147,32,.3);color:var(--red)}
-  .hero h1{font-family:var(--head);font-size:clamp(34px,6.4vw,66px);font-weight:800;line-height:1.08;letter-spacing:-.01em;margin:6px auto 18px;max-width:16ch}
-  .hero p.sub{font-size:clamp(16px,2.4vw,21px);color:var(--muted);max-width:660px;margin:0 auto 30px}
-  .hero-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:46px}
+    body {
+      font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--txt);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
 
-  /* STATS */
-  .stats{padding:8px 0 60px}
-  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-  .stat{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:26px 14px;text-align:center;box-shadow:0 18px 40px -30px rgba(198,147,32,.4)}
-  .stat b{display:block;font-size:clamp(26px,4vw,38px);font-weight:900;line-height:1}
-  .stat span{color:var(--muted);font-size:13px;margin-top:6px;display:block}
-  @media(max-width:760px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
+    a {
+      color: inherit;
+      text-decoration: none
+    }
 
-  .sec{padding:72px 0}
-  .sec-head{margin-bottom:44px}
+    img {
+      max-width: 100%;
+      display: block
+    }
 
-  /* BRANDS SHOWCASE */
-  .showcase-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
-  .show-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;transition:transform .2s,box-shadow .2s;box-shadow:0 18px 40px -32px rgba(198,147,32,.5);display:flex;flex-direction:column}
-  .show-card:hover{transform:translateY(-6px);box-shadow:0 26px 50px -28px rgba(198,147,32,.55)}
-  .show-thumb{height:200px;min-height:200px;display:grid;place-items:center;overflow:hidden}
-  .show-thumb img{max-height:156px;max-width:80%;width:auto;height:auto;object-fit:contain}
-  .tile-light{background:#ffffff}
-  .tile-cream{background:linear-gradient(135deg,#f6e7bd 0%,#efd9a0 100%)}
-  .tile-dark{background:#161616}
-  .tile-tea{background:#14463a}
-  .show-card .meta{padding:16px 16px 10px;flex:1}
-  .show-card .meta b{font-size:15px;display:block}
-  .show-card .meta span{font-size:13px;color:var(--muted)}
-  .btn-job{margin:0 12px 16px;padding:11px 10px;border:none;border-radius:12px;background:var(--grad);color:#fff;font-family:inherit;font-weight:800;font-size:13px;white-space:nowrap;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 10px 24px -12px rgba(198,147,32,.6);transition:transform .15s,box-shadow .15s}
-  .btn-job:hover{transform:translateY(-2px);box-shadow:0 16px 30px -12px rgba(198,147,32,.7)}
-  @media(max-width:880px){.showcase-grid{grid-template-columns:repeat(2,1fr)}}
-  @media(max-width:560px){.showcase-grid{grid-template-columns:1fr;max-width:420px;margin:0 auto}}
+    .wrap {
+      max-width: var(--maxw);
+      margin: 0 auto;
+      padding: 0 20px
+    }
 
-  /* POPUP THÔNG TIN TUYỂN DỤNG */
-  .jobmodal-ov{position:fixed;inset:0;background:rgba(42,24,16,.55);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:200;padding:20px}
-  .jobmodal-ov.show{display:flex}
-  .jobmodal{background:#fff;max-width:760px;width:100%;max-height:88vh;display:flex;flex-direction:column;border-radius:18px;overflow:hidden;box-shadow:0 30px 80px -20px rgba(42,24,16,.55)}
-  .jm-head{background:var(--grad);color:#fff;padding:18px 24px;display:flex;align-items:center;gap:12px;flex:none}
-  .jm-head h3{font-family:var(--head);font-size:clamp(18px,3vw,23px);font-weight:800;line-height:1.2;flex:1}
-  .jm-x{background:rgba(255,255,255,.22);border:none;color:#fff;width:36px;height:36px;border-radius:10px;font-size:22px;line-height:1;cursor:pointer;flex:none}
-  .jm-x:hover{background:rgba(255,255,255,.34)}
-  .jm-body{padding:22px 26px 26px;overflow-y:auto;font-size:15px;line-height:1.6;color:var(--txt)}
-  .jm-body h4{font-size:17px;font-weight:800;color:var(--red);margin:20px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--grad-soft)}
-  .jm-body h4:first-child{margin-top:0}
-  .jm-body p{margin:5px 0}
-  .jm-body .lvl{font-weight:800;font-size:15.5px;margin-top:14px}
-  .jm-body .sub{font-weight:700;color:var(--muted);margin-top:10px}
-  .jm-body ul{margin:6px 0 10px;padding-left:22px}
-  .jm-body li{margin:4px 0}
-  .jm-body a{color:#1a73e8;text-decoration:underline;word-break:break-word}
-  .jm-pre{white-space:pre-wrap;word-break:break-word;font-size:14.5px;line-height:1.65;color:var(--txt)}
-  .jm-pre a{color:#1a73e8;text-decoration:underline}
-  @media(max-width:560px){.jm-body{padding:18px 18px 22px}}
+    section {
+      position: relative
+    }
 
-  /* WHY JOIN (cards) */
-  .pain-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
-  .pain{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:26px;display:flex;gap:16px;align-items:flex-start;box-shadow:0 18px 40px -34px rgba(198,147,32,.5)}
-  .pain .ic{flex:none;width:48px;height:48px;border-radius:13px;background:var(--grad-soft);display:grid;place-items:center;font-size:24px}
-  .pain b{font-size:17px;display:block;margin-bottom:4px}
-  .pain p{color:var(--muted);font-size:14px}
-  @media(max-width:680px){.pain-grid{grid-template-columns:1fr}}
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--red);
+      background: var(--grad-soft);
+      border: 1px solid rgba(198, 147, 32, .22);
+      padding: 7px 16px;
+      border-radius: 999px;
+      margin-bottom: 18px;
+    }
 
-  /* POSITIONS */
-  .sessions{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
-  .session{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:28px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;box-shadow:0 18px 40px -34px rgba(198,147,32,.5)}
-  .session:hover{transform:translateY(-6px);box-shadow:0 26px 50px -28px rgba(198,147,32,.55)}
-  .session .num{font-size:54px;font-weight:900;line-height:1;color:rgba(198,147,32,.12);position:absolute;top:14px;right:20px}
-  .session .day{font-size:13px;font-weight:800;color:var(--red);letter-spacing:.05em}
-  .session h3{font-size:20px;font-weight:900;margin:8px 0 12px;line-height:1.25}
-  .session ul{list-style:none;display:grid;gap:9px}
-  .session li{font-size:14px;color:var(--muted);padding-left:26px;position:relative}
-  .session li::before{content:"✓";position:absolute;left:0;color:var(--green);font-weight:900}
-  @media(max-width:820px){.sessions{grid-template-columns:1fr}}
+    h2.title {
+      font-family: var(--head);
+      font-size: clamp(28px, 4.6vw, 48px);
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -.01em
+    }
 
-  /* BENEFITS */
-  .benefits{background:var(--bg-soft)}
-  .ben-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
-  .ben{display:flex;gap:14px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:0 18px 40px -36px rgba(198,147,32,.5)}
-  .ben .ic{flex:none;width:44px;height:44px;border-radius:12px;background:var(--grad-soft);display:grid;place-items:center;font-size:21px}
-  .ben b{display:block;margin-bottom:2px}
-  .ben p{font-size:14px;color:var(--muted)}
-  @media(max-width:680px){.ben-grid{grid-template-columns:1fr}}
+    .lead {
+      color: var(--muted);
+      font-size: clamp(15px, 2vw, 18px);
+      max-width: 680px
+    }
 
-  /* APPLY-BY-BRAND (replaces pricing) */
-  .tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:stretch}
-  .tier{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:30px 26px;display:flex;flex-direction:column;position:relative;box-shadow:0 20px 46px -34px rgba(198,147,32,.5)}
-  .tier.featured{border-color:var(--red);box-shadow:var(--shadow)}
-  .tier .tag{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--grad);color:#fff;font-size:12px;font-weight:800;padding:6px 16px;border-radius:999px}
-  .tier .brandhead{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-  .tier .bicon{width:56px;height:56px;border-radius:13px;display:grid;place-items:center;flex:none;overflow:hidden;border:1px solid var(--line)}
-  .tier .bicon img{max-width:100%;max-height:100%;object-fit:contain;padding:5px}
-  .tier h3{font-size:19px;font-weight:900;line-height:1.15}
-  .tier .role{font-size:13px;color:var(--muted);font-weight:600}
-  .tier ul{list-style:none;display:grid;gap:11px;margin:6px 0 24px;flex:1}
-  .tier li{font-size:14px;padding-left:26px;position:relative;color:var(--txt)}
-  .tier li::before{content:"✓";position:absolute;left:0;color:var(--green);font-weight:900}
-  @media(max-width:820px){.tiers{grid-template-columns:1fr}}
+    .center {
+      text-align: center
+    }
 
-  /* VALUES / ABOUT */
-  .instructor{display:grid;grid-template-columns:.85fr 1.15fr;gap:40px;align-items:center}
-  .ins-photo{aspect-ratio:4/5;border-radius:24px;background:#fff7ea;display:grid;place-items:center;position:relative;overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--line)}
-  .ins-photo img{width:78%;height:auto}
-  .ins-list{list-style:none;display:grid;gap:12px;margin:20px 0 24px}
-  .ins-list li{padding-left:30px;position:relative;color:var(--muted)}
-  .ins-list li::before{content:"★";position:absolute;left:0;color:var(--gold)}
-  .ins-list li b{color:var(--txt)}
-  .mission{background:var(--grad-soft);border:1px solid rgba(198,147,32,.18);border-radius:14px;padding:20px;font-style:italic}
-  @media(max-width:780px){.instructor{grid-template-columns:1fr;gap:24px}}
+    .center .lead {
+      margin-left: auto;
+      margin-right: auto
+    }
 
-  /* TESTIMONIALS */
-  .tg{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
-  .tcard{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:26px;box-shadow:0 18px 40px -36px rgba(198,147,32,.5)}
-  .tcard .top{display:flex;align-items:center;gap:14px;margin-bottom:14px}
-  .tcard .av{width:50px;height:50px;border-radius:50%;background:var(--grad);display:grid;place-items:center;color:#fff;font-weight:900;flex:none}
-  .tcard .who b{display:block}
-  .tcard .who span{font-size:13px;color:var(--muted)}
-  .tcard .result{display:inline-block;font-size:13px;font-weight:800;color:var(--red);background:var(--grad-soft);padding:5px 12px;border-radius:8px;margin-bottom:12px}
-  .tcard p{font-size:15px;color:#4a382f}
-  .stars{color:var(--gold);font-size:14px;letter-spacing:2px;margin-top:12px}
-  @media(max-width:680px){.tg{grid-template-columns:1fr}}
+    .grad-text {
+      background: var(--grad);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent
+    }
 
-  /* PERKS + FORM */
-  .gift{background:var(--bg-soft)}
-  .gift-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center}
-  .gift-parts{display:grid;gap:14px;margin:24px 0}
-  .gpart{display:flex;justify-content:space-between;align-items:center;gap:14px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px}
-  .gpart b{font-size:15px}
-  .gpart span{font-size:13px;color:var(--muted)}
-  .gpart .val{color:var(--red);font-weight:800;white-space:nowrap}
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-family: inherit;
+      font-weight: 800;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      padding: 16px 30px;
+      border-radius: 14px;
+      transition: transform .18s ease, box-shadow .18s ease, background .2s;
+      white-space: nowrap;
+    }
 
-  .form-card{background:#fff;border:1px solid var(--line-2);border-radius:var(--radius);padding:32px;box-shadow:var(--shadow)}
-  .form-card h3{font-size:24px;font-weight:900;margin-bottom:6px}
-  .form-card .fnote{color:var(--muted);font-size:14px;margin-bottom:22px}
-  .field{margin-bottom:16px}
-  .field label{display:block;font-size:13px;font-weight:700;margin-bottom:7px;color:var(--muted)}
-  .field input,.field select{width:100%;padding:14px 16px;border-radius:12px;border:1px solid var(--line-2);background:var(--bg);color:var(--txt);font-family:inherit;font-size:15px;transition:border-color .2s}
-  .field input:focus,.field select:focus{outline:none;border-color:var(--red)}
-  .field input.err{border-color:var(--red)}
-  .errmsg{color:var(--red);font-size:12px;margin-top:5px;display:none}
-  .secure{display:flex;align-items:center;gap:8px;justify-content:center;color:var(--muted);font-size:13px;margin-top:14px}
-  .ok-msg{display:none;text-align:center;padding:30px 10px}
-  .ok-msg .ic{width:70px;height:70px;border-radius:50%;background:rgba(47,170,94,.14);color:var(--green);display:grid;place-items:center;font-size:36px;margin:0 auto 16px}
-  .ok-msg h3{font-size:24px;margin-bottom:8px}
-  .ok-msg p{color:var(--muted)}
-  @media(max-width:820px){.gift-grid{grid-template-columns:1fr;gap:30px}}
-  .apply-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:0 auto 26px;max-width:920px}
-  @media(max-width:760px){.apply-steps{grid-template-columns:1fr}}
-  .form-wide{max-width:920px;margin:0 auto}
-  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-  .form-grid .full{grid-column:1 / -1}
-  @media(max-width:680px){.form-grid{grid-template-columns:1fr}}
-  .field label .req{color:var(--red);margin-left:2px}
-  #formErr{display:none;background:rgba(198,147,32,.08);border:1px solid rgba(198,147,32,.3);color:var(--red);font-size:13px;font-weight:600;padding:11px 14px;border-radius:10px;margin-bottom:16px}
+    .btn-primary {
+      background: var(--grad);
+      color: #fff;
+      box-shadow: 0 14px 34px -10px rgba(198, 147, 32, .55)
+    }
 
-  /* FAQ */
-  .faq-list{max-width:760px;margin:0 auto;display:grid;gap:12px}
-  .faq{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
-  .faq button{width:100%;text-align:left;background:none;border:none;color:var(--txt);font-family:inherit;font-size:16px;font-weight:700;padding:20px 22px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px}
-  .faq button .chev{flex:none;transition:transform .25s;color:var(--red);font-size:20px}
-  .faq.open button .chev{transform:rotate(45deg)}
-  .faq .ans{max-height:0;overflow:hidden;transition:max-height .3s ease}
-  .faq .ans p{padding:0 22px 20px;color:var(--muted);font-size:15px}
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 22px 44px -12px rgba(198, 147, 32, .7)
+    }
 
-  /* FINAL */
-  .final{text-align:center;padding:90px 0}
-  .final::before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(60% 70% at 50% 50%,rgba(212,175,55,.18),transparent 70%)}
-  .final h2{font-family:var(--head);font-size:clamp(30px,5.2vw,54px);font-weight:800;line-height:1.12;max-width:18ch;margin:0 auto 18px}
-  .final .proof{color:var(--muted);margin-bottom:28px;font-weight:700}
-  .final .hero-actions{margin-bottom:14px}
+    .btn-ghost {
+      background: #fff;
+      color: var(--txt);
+      border: 1px solid var(--line-2)
+    }
 
-  footer{border-top:1px solid var(--line);padding:40px 0;text-align:center}
-  footer .brand{justify-content:center;margin-bottom:14px}
-  footer p{color:var(--muted);font-size:14px;margin:4px 0}
-  footer .tagline{color:var(--red);font-weight:800;margin-top:12px;letter-spacing:.03em}
+    .btn-ghost:hover {
+      background: var(--card-2);
+      transform: translateY(-3px)
+    }
 
-  .sticky-cta{position:fixed;left:0;right:0;bottom:0;z-index:60;display:none;padding:12px 16px;background:rgba(255,248,240,.94);backdrop-filter:blur(12px);border-top:1px solid var(--line)}
-  @media(max-width:640px){.sticky-cta{display:block}.sticky-cta .btn{width:100%}body{padding-bottom:80px}}
-  .fade{opacity:0;transform:translateY(26px);transition:opacity .6s ease,transform .6s ease}
-  .fade.in{opacity:1;transform:none}
-</style>
+    .btn-block {
+      width: 100%
+    }
+
+    /* HEADER */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(14px);
+      background: rgba(255, 248, 240, .82);
+      border-bottom: 1px solid var(--line)
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 70px;
+      flex-wrap: wrap;
+      gap: 10px
+    }
+
+    .nav-cta {
+      display: flex;
+      align-items: center;
+      gap: 16px
+    }
+
+    .nav-cta .navlink {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--muted);
+      white-space: nowrap
+    }
+
+    .nav-cta .navlink:hover {
+      color: var(--red)
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 900
+    }
+
+    .brand .logo-img {
+      height: 50px;
+      width: auto;
+      border-radius: 10px;
+      display: block
+    }
+
+    .brand .nm {
+      font-family: var(--head);
+      font-weight: 800;
+      font-size: 17px;
+      line-height: 1.1;
+      letter-spacing: .01em
+    }
+
+    .brand small {
+      display: block;
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 700;
+      letter-spacing: .04em
+    }
+
+    .nav .btn {
+      padding: 11px 22px;
+      font-size: 14px
+    }
+
+    @media(max-width:640px) {
+      .brand small {
+        display: none
+      }
+
+      .brand .nm {
+        font-size: 14px
+      }
+
+      .nav .btn {
+        padding: 9px 15px;
+        font-size: 13px
+      }
+
+      .nav-cta {
+        gap: 12px
+      }
+
+      .nav-cta .navlink {
+        font-size: 13px
+      }
+    }
+
+    @media(max-width:560px) {
+      .nav {
+        height: auto;
+        justify-content: center;
+        padding: 10px 0;
+        gap: 8px
+      }
+
+      .brand {
+        flex: 1 1 auto
+      }
+
+      .nav-cta {
+        flex: 1 1 100%;
+        justify-content: center
+      }
+    }
+
+    @media(max-width:360px) {
+      .nav-cta .navlink {
+        font-size: 12px
+      }
+
+      .nav .btn {
+        padding: 9px 12px
+      }
+    }
+
+    /* HERO */
+    .hero {
+      padding: 74px 0 60px;
+      text-align: center;
+      position: relative
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: radial-gradient(60% 50% at 50% 0%, rgba(212, 175, 55, .20), transparent 70%),
+        radial-gradient(45% 45% at 82% 25%, rgba(198, 147, 32, .12), transparent 70%)
+    }
+
+    .hero-logo {
+      width: 140px;
+      height: auto;
+      margin: 0 auto 22px;
+      border-radius: 18px;
+      box-shadow: 0 18px 44px -22px rgba(198, 147, 32, .5)
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 22px
+    }
+
+    .pill {
+      font-size: 13px;
+      font-weight: 800;
+      padding: 8px 16px;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid var(--line-2)
+    }
+
+    .pill.hot {
+      background: rgba(198, 147, 32, .10);
+      border-color: rgba(198, 147, 32, .3);
+      color: var(--red)
+    }
+
+    .hero h1 {
+      font-family: var(--head);
+      font-size: clamp(34px, 6.4vw, 66px);
+      font-weight: 800;
+      line-height: 1.08;
+      letter-spacing: -.01em;
+      margin: 6px auto 18px;
+      max-width: 16ch
+    }
+
+    .hero p.sub {
+      font-size: clamp(16px, 2.4vw, 21px);
+      color: var(--muted);
+      max-width: 660px;
+      margin: 0 auto 30px
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 46px
+    }
+
+    /* STATS */
+    .stats {
+      padding: 8px 0 60px
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px
+    }
+
+    .stat {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 26px 14px;
+      text-align: center;
+      box-shadow: 0 18px 40px -30px rgba(198, 147, 32, .4)
+    }
+
+    .stat b {
+      display: block;
+      font-size: clamp(26px, 4vw, 38px);
+      font-weight: 900;
+      line-height: 1
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 6px;
+      display: block
+    }
+
+    @media(max-width:760px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr)
+      }
+    }
+
+    .sec {
+      padding: 72px 0
+    }
+
+    .sec-head {
+      margin-bottom: 44px
+    }
+
+    /* BRANDS SHOWCASE */
+    .showcase-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px
+    }
+
+    .show-card {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: transform .2s, box-shadow .2s;
+      box-shadow: 0 18px 40px -32px rgba(198, 147, 32, .5);
+      display: flex;
+      flex-direction: column
+    }
+
+    .show-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 26px 50px -28px rgba(198, 147, 32, .55)
+    }
+
+    .show-thumb {
+      height: 200px;
+      min-height: 200px;
+      display: grid;
+      place-items: center;
+      overflow: hidden
+    }
+
+    .show-thumb img {
+      max-height: 156px;
+      max-width: 80%;
+      width: auto;
+      height: auto;
+      object-fit: contain
+    }
+
+    .tile-light {
+      background: #ffffff
+    }
+
+    .tile-cream {
+      background: linear-gradient(135deg, #f6e7bd 0%, #efd9a0 100%)
+    }
+
+    .tile-dark {
+      background: #161616
+    }
+
+    .tile-tea {
+      background: #14463a
+    }
+
+    .show-card .meta {
+      padding: 16px 16px 10px;
+      flex: 1
+    }
+
+    .show-card .meta b {
+      font-size: 15px;
+      display: block
+    }
+
+    .show-card .meta span {
+      font-size: 13px;
+      color: var(--muted)
+    }
+
+    .btn-job {
+      margin: 0 12px 16px;
+      padding: 11px 10px;
+      border: none;
+      border-radius: 12px;
+      background: var(--grad);
+      color: #fff;
+      font-family: inherit;
+      font-weight: 800;
+      font-size: 13px;
+      white-space: nowrap;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: 0 10px 24px -12px rgba(198, 147, 32, .6);
+      transition: transform .15s, box-shadow .15s
+    }
+
+    .btn-job:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 30px -12px rgba(198, 147, 32, .7)
+    }
+
+    @media(max-width:880px) {
+      .showcase-grid {
+        grid-template-columns: repeat(2, 1fr)
+      }
+    }
+
+    @media(max-width:560px) {
+      .showcase-grid {
+        grid-template-columns: 1fr;
+        max-width: 420px;
+        margin: 0 auto
+      }
+    }
+
+    /* POPUP THÔNG TIN TUYỂN DỤNG */
+    .jobmodal-ov {
+      position: fixed;
+      inset: 0;
+      background: rgba(42, 24, 16, .55);
+      backdrop-filter: blur(3px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 20px
+    }
+
+    .jobmodal-ov.show {
+      display: flex
+    }
+
+    .jobmodal {
+      background: #fff;
+      max-width: 760px;
+      width: 100%;
+      max-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 30px 80px -20px rgba(42, 24, 16, .55)
+    }
+
+    .jm-head {
+      background: var(--grad);
+      color: #fff;
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: none
+    }
+
+    .jm-head h3 {
+      font-family: var(--head);
+      font-size: clamp(18px, 3vw, 23px);
+      font-weight: 800;
+      line-height: 1.2;
+      flex: 1
+    }
+
+    .jm-x {
+      background: rgba(255, 255, 255, .22);
+      border: none;
+      color: #fff;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+      flex: none
+    }
+
+    .jm-x:hover {
+      background: rgba(255, 255, 255, .34)
+    }
+
+    .jm-body {
+      padding: 22px 26px 26px;
+      overflow-y: auto;
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--txt)
+    }
+
+    .jm-body h4 {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--red);
+      margin: 20px 0 10px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid var(--grad-soft)
+    }
+
+    .jm-body h4:first-child {
+      margin-top: 0
+    }
+
+    .jm-body p {
+      margin: 5px 0
+    }
+
+    .jm-body .lvl {
+      font-weight: 800;
+      font-size: 15.5px;
+      margin-top: 14px
+    }
+
+    .jm-body .sub {
+      font-weight: 700;
+      color: var(--muted);
+      margin-top: 10px
+    }
+
+    .jm-body ul {
+      margin: 6px 0 10px;
+      padding-left: 22px
+    }
+
+    .jm-body li {
+      margin: 4px 0
+    }
+
+    .jm-body a {
+      color: #1a73e8;
+      text-decoration: underline;
+      word-break: break-word
+    }
+
+    .jm-pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: var(--txt)
+    }
+
+    .jm-pre a {
+      color: #1a73e8;
+      text-decoration: underline
+    }
+
+    @media(max-width:560px) {
+      .jm-body {
+        padding: 18px 18px 22px
+      }
+    }
+
+    /* WHY JOIN (cards) */
+    .pain-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px
+    }
+
+    .pain {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 26px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      box-shadow: 0 18px 40px -34px rgba(198, 147, 32, .5)
+    }
+
+    .pain .ic {
+      flex: none;
+      width: 48px;
+      height: 48px;
+      border-radius: 13px;
+      background: var(--grad-soft);
+      display: grid;
+      place-items: center;
+      font-size: 24px
+    }
+
+    .pain b {
+      font-size: 17px;
+      display: block;
+      margin-bottom: 4px
+    }
+
+    .pain p {
+      color: var(--muted);
+      font-size: 14px
+    }
+
+    @media(max-width:680px) {
+      .pain-grid {
+        grid-template-columns: 1fr
+      }
+    }
+
+    /* POSITIONS */
+    .sessions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px
+    }
+
+    .session {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+      transition: transform .2s, box-shadow .2s;
+      box-shadow: 0 18px 40px -34px rgba(198, 147, 32, .5)
+    }
+
+    .session:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 26px 50px -28px rgba(198, 147, 32, .55)
+    }
+
+    .session .num {
+      font-size: 54px;
+      font-weight: 900;
+      line-height: 1;
+      color: rgba(198, 147, 32, .12);
+      position: absolute;
+      top: 14px;
+      right: 20px
+    }
+
+    .session .day {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--red);
+      letter-spacing: .05em
+    }
+
+    .session h3 {
+      font-size: 20px;
+      font-weight: 900;
+      margin: 8px 0 12px;
+      line-height: 1.25
+    }
+
+    .session ul {
+      list-style: none;
+      display: grid;
+      gap: 9px
+    }
+
+    .session li {
+      font-size: 14px;
+      color: var(--muted);
+      padding-left: 26px;
+      position: relative
+    }
+
+    .session li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: var(--green);
+      font-weight: 900
+    }
+
+    @media(max-width:820px) {
+      .sessions {
+        grid-template-columns: 1fr
+      }
+    }
+
+    /* BENEFITS */
+    .benefits {
+      background: var(--bg-soft)
+    }
+
+    .ben-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px
+    }
+
+    .ben {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 22px;
+      box-shadow: 0 18px 40px -36px rgba(198, 147, 32, .5)
+    }
+
+    .ben .ic {
+      flex: none;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: var(--grad-soft);
+      display: grid;
+      place-items: center;
+      font-size: 21px
+    }
+
+    .ben b {
+      display: block;
+      margin-bottom: 2px
+    }
+
+    .ben p {
+      font-size: 14px;
+      color: var(--muted)
+    }
+
+    @media(max-width:680px) {
+      .ben-grid {
+        grid-template-columns: 1fr
+      }
+    }
+
+    /* APPLY-BY-BRAND (replaces pricing) */
+    .tiers {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      align-items: stretch
+    }
+
+    .tier {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 30px 26px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-shadow: 0 20px 46px -34px rgba(198, 147, 32, .5)
+    }
+
+    .tier.featured {
+      border-color: var(--red);
+      box-shadow: var(--shadow)
+    }
+
+    .tier .tag {
+      position: absolute;
+      top: -13px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--grad);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+      padding: 6px 16px;
+      border-radius: 999px
+    }
+
+    .tier .brandhead {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px
+    }
+
+    .tier .bicon {
+      width: 56px;
+      height: 56px;
+      border-radius: 13px;
+      display: grid;
+      place-items: center;
+      flex: none;
+      overflow: hidden;
+      border: 1px solid var(--line)
+    }
+
+    .tier .bicon img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      padding: 5px
+    }
+
+    .tier h3 {
+      font-size: 19px;
+      font-weight: 900;
+      line-height: 1.15
+    }
+
+    .tier .role {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 600
+    }
+
+    .tier ul {
+      list-style: none;
+      display: grid;
+      gap: 11px;
+      margin: 6px 0 24px;
+      flex: 1
+    }
+
+    .tier li {
+      font-size: 14px;
+      padding-left: 26px;
+      position: relative;
+      color: var(--txt)
+    }
+
+    .tier li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: var(--green);
+      font-weight: 900
+    }
+
+    @media(max-width:820px) {
+      .tiers {
+        grid-template-columns: 1fr
+      }
+    }
+
+    /* VALUES / ABOUT */
+    .instructor {
+      display: grid;
+      grid-template-columns: .85fr 1.15fr;
+      gap: 40px;
+      align-items: center
+    }
+
+    .ins-photo {
+      aspect-ratio: 4/5;
+      border-radius: 24px;
+      background: #fff7ea;
+      display: grid;
+      place-items: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--line)
+    }
+
+    .ins-photo img {
+      width: 78%;
+      height: auto
+    }
+
+    .ins-list {
+      list-style: none;
+      display: grid;
+      gap: 12px;
+      margin: 20px 0 24px
+    }
+
+    .ins-list li {
+      padding-left: 30px;
+      position: relative;
+      color: var(--muted)
+    }
+
+    .ins-list li::before {
+      content: "★";
+      position: absolute;
+      left: 0;
+      color: var(--gold)
+    }
+
+    .ins-list li b {
+      color: var(--txt)
+    }
+
+    .mission {
+      background: var(--grad-soft);
+      border: 1px solid rgba(198, 147, 32, .18);
+      border-radius: 14px;
+      padding: 20px;
+      font-style: italic
+    }
+
+    @media(max-width:780px) {
+      .instructor {
+        grid-template-columns: 1fr;
+        gap: 24px
+      }
+    }
+
+    /* TESTIMONIALS */
+    .tg {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px
+    }
+
+    .tcard {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 26px;
+      box-shadow: 0 18px 40px -36px rgba(198, 147, 32, .5)
+    }
+
+    .tcard .top {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 14px
+    }
+
+    .tcard .av {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--grad);
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 900;
+      flex: none
+    }
+
+    .tcard .who b {
+      display: block
+    }
+
+    .tcard .who span {
+      font-size: 13px;
+      color: var(--muted)
+    }
+
+    .tcard .result {
+      display: inline-block;
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--red);
+      background: var(--grad-soft);
+      padding: 5px 12px;
+      border-radius: 8px;
+      margin-bottom: 12px
+    }
+
+    .tcard p {
+      font-size: 15px;
+      color: #4a382f
+    }
+
+    .stars {
+      color: var(--gold);
+      font-size: 14px;
+      letter-spacing: 2px;
+      margin-top: 12px
+    }
+
+    @media(max-width:680px) {
+      .tg {
+        grid-template-columns: 1fr
+      }
+    }
+
+    /* PERKS + FORM */
+    .gift {
+      background: var(--bg-soft)
+    }
+
+    .gift-grid {
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 40px;
+      align-items: center
+    }
+
+    .gift-parts {
+      display: grid;
+      gap: 14px;
+      margin: 24px 0
+    }
+
+    .gpart {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px 18px
+    }
+
+    .gpart b {
+      font-size: 15px
+    }
+
+    .gpart span {
+      font-size: 13px;
+      color: var(--muted)
+    }
+
+    .gpart .val {
+      color: var(--red);
+      font-weight: 800;
+      white-space: nowrap
+    }
+
+    .form-card {
+      background: #fff;
+      border: 1px solid var(--line-2);
+      border-radius: var(--radius);
+      padding: 32px;
+      box-shadow: var(--shadow)
+    }
+
+    .form-card h3 {
+      font-size: 24px;
+      font-weight: 900;
+      margin-bottom: 6px
+    }
+
+    .form-card .fnote {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 22px
+    }
+
+    .field {
+      margin-bottom: 16px
+    }
+
+    .field label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 7px;
+      color: var(--muted)
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--line-2);
+      background: var(--bg);
+      color: var(--txt);
+      font-family: inherit;
+      font-size: 15px;
+      transition: border-color .2s
+    }
+
+    .field input:focus,
+    .field select:focus {
+      outline: none;
+      border-color: var(--red)
+    }
+
+    .field input.err {
+      border-color: var(--red)
+    }
+
+    .errmsg {
+      color: var(--red);
+      font-size: 12px;
+      margin-top: 5px;
+      display: none
+    }
+
+    .secure {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 14px
+    }
+
+    .ok-msg {
+      display: none;
+      text-align: center;
+      padding: 30px 10px
+    }
+
+    .ok-msg .ic {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: rgba(47, 170, 94, .14);
+      color: var(--green);
+      display: grid;
+      place-items: center;
+      font-size: 36px;
+      margin: 0 auto 16px
+    }
+
+    .ok-msg h3 {
+      font-size: 24px;
+      margin-bottom: 8px
+    }
+
+    .ok-msg p {
+      color: var(--muted)
+    }
+
+    @media(max-width:820px) {
+      .gift-grid {
+        grid-template-columns: 1fr;
+        gap: 30px
+      }
+    }
+
+    .apply-steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin: 0 auto 26px;
+      max-width: 920px
+    }
+
+    @media(max-width:760px) {
+      .apply-steps {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .form-wide {
+      max-width: 920px;
+      margin: 0 auto
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px
+    }
+
+    .form-grid .full {
+      grid-column: 1 / -1
+    }
+
+    @media(max-width:680px) {
+      .form-grid {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .field label .req {
+      color: var(--red);
+      margin-left: 2px
+    }
+
+    #formErr {
+      display: none;
+      background: rgba(198, 147, 32, .08);
+      border: 1px solid rgba(198, 147, 32, .3);
+      color: var(--red);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 11px 14px;
+      border-radius: 10px;
+      margin-bottom: 16px
+    }
+
+    /* FAQ */
+    .faq-list {
+      max-width: 760px;
+      margin: 0 auto;
+      display: grid;
+      gap: 12px
+    }
+
+    .faq {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden
+    }
+
+    .faq button {
+      width: 100%;
+      text-align: left;
+      background: none;
+      border: none;
+      color: var(--txt);
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 700;
+      padding: 20px 22px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px
+    }
+
+    .faq button .chev {
+      flex: none;
+      transition: transform .25s;
+      color: var(--red);
+      font-size: 20px
+    }
+
+    .faq.open button .chev {
+      transform: rotate(45deg)
+    }
+
+    .faq .ans {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height .3s ease
+    }
+
+    .faq .ans p {
+      padding: 0 22px 20px;
+      color: var(--muted);
+      font-size: 15px
+    }
+
+    /* FINAL */
+    .final {
+      text-align: center;
+      padding: 90px 0
+    }
+
+    .final::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: radial-gradient(60% 70% at 50% 50%, rgba(212, 175, 55, .18), transparent 70%)
+    }
+
+    .final h2 {
+      font-family: var(--head);
+      font-size: clamp(30px, 5.2vw, 54px);
+      font-weight: 800;
+      line-height: 1.12;
+      max-width: 18ch;
+      margin: 0 auto 18px
+    }
+
+    .final .proof {
+      color: var(--muted);
+      margin-bottom: 28px;
+      font-weight: 700
+    }
+
+    .final .hero-actions {
+      margin-bottom: 14px
+    }
+
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 40px 0;
+      text-align: center
+    }
+
+    footer .brand {
+      justify-content: center;
+      margin-bottom: 14px
+    }
+
+    footer p {
+      color: var(--muted);
+      font-size: 14px;
+      margin: 4px 0
+    }
+
+    footer .tagline {
+      color: var(--red);
+      font-weight: 800;
+      margin-top: 12px;
+      letter-spacing: .03em
+    }
+
+    .sticky-cta {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 60;
+      display: none;
+      padding: 12px 16px;
+      background: rgba(255, 248, 240, .94);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid var(--line)
+    }
+
+    @media(max-width:640px) {
+      .sticky-cta {
+        display: block
+      }
+
+      .sticky-cta .btn {
+        width: 100%
+      }
+
+      body {
+        padding-bottom: 80px
+      }
+    }
+
+    .fade {
+      opacity: 0;
+      transform: translateY(26px);
+      transition: opacity .6s ease, transform .6s ease
+    }
+
+    .fade.in {
+      opacity: 1;
+      transform: none
+    }
+  </style>
 </head>
+
 <body>
 
-<!-- HEADER -->
-<header>
-  <div class="wrap nav">
-    <a href="#top" class="brand">
-      <img src="images/logo-ttvh.jpg" alt="Thịnh Thế Vinh Hoa" class="logo-img" />
-      <div class="nm">Thịnh Thế Vinh Hoa<small>F&amp;B Group</small></div>
-    </a>
-    <div class="nav-cta">
-      <a href="dao-tao.html" class="navlink">Đăng ký đào tạo</a>
-      <a href="#ungtuyen" class="btn btn-primary">Ứng tuyển ngay</a>
-    </div>
-  </div>
-</header>
-
-<!-- HERO -->
-<section class="hero" id="top">
-  <div class="wrap">
-    <img src="images/logo-ttvh.jpg" alt="Thịnh Thế Vinh Hoa F&amp;B Group" class="hero-logo" />
-    <div class="badge-row">
-      <span class="pill hot">● ĐANG TUYỂN GẤP</span>
-      <span class="pill">Toàn thời gian &amp; Bán thời gian</span>
-      <span class="pill">Đào tạo từ A–Z</span>
-    </div>
-    <h1>Gia nhập đại gia đình <span class="grad-text">F&amp;B Thịnh Thế Vinh Hoa</span></h1>
-    <p class="sub">Cùng MayCha, Hồng Trà Sữa Tam Hảo và Gà Giòn Sốt Ba Cô Gái phục vụ hàng ngàn nụ cười mỗi ngày. Không cần kinh nghiệm — chúng tôi đào tạo, bạn chỉ cần thái độ tốt và muốn phát triển.</p>
-    <div class="hero-actions">
-      <a href="#ungtuyen" class="btn btn-primary">ỨNG TUYỂN NGAY →</a>
-      <a href="dao-tao.html" class="btn btn-ghost">Đăng ký đào tạo</a>
-    </div>
-  </div>
-</section>
-
-
-<!-- BRANDS SHOWCASE -->
-<section class="sec">
-  <div class="wrap">
-    <div class="sec-head center fade">
-      <span class="eyebrow">Hệ sinh thái</span>
-      <h2 class="title">4 thương hiệu — <span class="grad-text">một mái nhà</span></h2>
-      <p class="lead">Bạn sẽ làm việc tại một trong các thương hiệu đang được giới trẻ yêu thích của Thịnh Thế Vinh Hoa F&amp;B Group.</p>
-    </div>
-    <div class="showcase-grid fade">
-      <div class="show-card">
-        <div class="show-thumb tile-light"><img src="images/logo-maycha.png" alt="MayCha" /></div>
-        <div class="meta"><b>MayCha</b><span>Trà sữa — “Hạnh phúc trong từng lần hút”</span></div>
-        <button type="button" class="btn-job" data-job="maycha" data-name="MayCha">Xem tuyển dụng MayCha →</button>
-      </div>
-      <div class="show-card">
-        <div class="show-thumb tile-cream"><img src="images/logo-tamhao.png" alt="Hồng Trà Sữa Tam Hảo" /></div>
-        <div class="meta"><b>Hồng Trà Sữa Tam Hảo</b><span>Trà ngon · giá hợp lý · phục vụ chân thành</span></div>
-        <button type="button" class="btn-job" data-job="tamhao" data-name="Hồng Trà Sữa Tam Hảo">Xem tuyển dụng Tam Hảo →</button>
-      </div>
-      <div class="show-card">
-        <div class="show-thumb tile-light"><img src="images/logo-gagion.png" alt="Gà Giòn Sốt Ba Cô Gái" /></div>
-        <div class="meta"><b>Gà Giòn Sốt Ba Cô Gái</b><span>Gà giòn rụm · sốt đặc trưng · combo hời</span></div>
-        <button type="button" class="btn-job" data-job="gagion" data-name="Gà Giòn Sốt Ba Cô Gái">Xem tuyển dụng Gà Giòn Sốt →</button>
-      </div>
-      <div class="show-card">
-        <div class="show-thumb tile-tea"><img src="images/logo-trahu.png" alt="Trà Hú" /></div>
-        <div class="meta"><b>Trà Hú — Đậm Hú Hồn</b><span>Trà cao cấp · tùy chọn tới 8 topping</span></div>
-        <button type="button" class="btn-job" data-job="trahu" data-name="Trà Hú">Xem tuyển dụng Trà Hú →</button>
+  <!-- HEADER -->
+  <header>
+    <div class="wrap nav">
+      <a href="#top" class="brand">
+        <img src="images/logo-ttvh.jpg" alt="Thịnh Thế Vinh Hoa" class="logo-img" />
+        <div class="nm">Thịnh Thế Vinh Hoa<small>Vững thời - Sáng vận - Đẹp danh</small></div>
+      </a>
+      <div class="nav-cta">
+        <a href="dao-tao.html" class="navlink">Đăng ký đào tạo</a>
+        <a href="#ungtuyen" class="btn btn-primary">Ứng tuyển ngay</a>
       </div>
     </div>
-  </div>
-</section>
+  </header>
 
-<!-- POPUP THÔNG TIN TUYỂN DỤNG -->
-<div class="jobmodal-ov" id="jobModal">
-  <div class="jobmodal">
-    <div class="jm-head">
-      <h3 id="jmTitle">🍗 Tụi mình tìm đồng đội cho Gà rán</h3>
-      <button class="jm-x" id="jobModalX" type="button">×</button>
+  <!-- HERO -->
+  <section class="hero" id="top">
+    <div class="wrap">
+      <img src="images/logo-ttvh.jpg" alt="Thịnh Thế Vinh Hoa F&amp;B Group" class="hero-logo" />
+      <div class="badge-row">
+        <span class="pill hot">● ĐANG TUYỂN GẤP</span>
+        <span class="pill">Toàn thời gian &amp; Bán thời gian</span>
+        <span class="pill">Khối Kho</span>
+        <span class="pill">Khối Kho & Xưởng Sản Xuất</span>
+      </div>
+      <h1>Gia nhập đại gia đình <span class="grad-text"> Thịnh Thế Vinh Hoa</span></h1>
+      <p class="sub">Bạn không cần là người giỏi nhất, chỉ cần bạn là người muốn phát triển nhất. Hãy để Thịnh Thế Vinh Hoa làm bước đệm đưa bạn đi xa!
+        Chạm Vinh Hoa - Sáng Tầm Sự Nghiệp</p>
+      <div class="hero-actions">
+        <a href="#ungtuyen" class="btn btn-primary">ỨNG TUYỂN NGAY →</a>
+        <a href="dao-tao.html" class="btn btn-ghost">Đăng ký đào tạo</a>
+      </div>
     </div>
-    <div class="jm-body">
-      <div id="jmContent" class="jm-pre"></div>
+  </section>
 
-      <div style="text-align:center;margin-top:22px">
-        <a href="#ungtuyen" class="btn btn-primary" id="jobApplyBtn">Ứng tuyển ngay →</a>
+
+  <!-- BRANDS SHOWCASE -->
+  <section class="sec">
+    <div class="wrap">
+      <div class="sec-head center fade">
+        <span class="eyebrow">Hệ sinh thái</span>
+        <h2 class="title">4 thương hiệu — <span class="grad-text">một mái nhà</span></h2>
+        <p class="lead">Bạn sẽ làm việc tại một trong các thương hiệu đang được giới trẻ yêu thích của Thịnh Thế Vinh Hoa F&amp;B Group.</p>
+      </div>
+      <div class="showcase-grid fade">
+        <div class="show-card">
+          <div class="show-thumb tile-light"><img src="images/logo-maycha.png" alt="MayCha" /></div>
+          <div class="meta"><b>MayCha</b><span>Trà sữa — “Hạnh phúc trong từng lần hút”</span></div>
+          <button type="button" class="btn-job" data-job="maycha" data-name="MayCha">Xem tuyển dụng MayCha →</button>
+        </div>
+        <div class="show-card">
+          <div class="show-thumb tile-cream"><img src="images/logo-tamhao.png" alt="Hồng Trà Sữa Tam Hảo" /></div>
+          <div class="meta"><b>Hồng Trà Sữa Tam Hảo</b><span>Trà ngon · giá hợp lý · phục vụ chân thành</span></div>
+          <button type="button" class="btn-job" data-job="tamhao" data-name="Hồng Trà Sữa Tam Hảo">Xem tuyển dụng Tam Hảo →</button>
+        </div>
+        <div class="show-card">
+          <div class="show-thumb tile-light"><img src="images/logo-gagion.png" alt="Gà Giòn Sốt Ba Cô Gái" /></div>
+          <div class="meta"><b>Gà Giòn Sốt Ba Cô Gái</b><span>Gà giòn rụm · sốt đặc trưng · combo hời</span></div>
+          <button type="button" class="btn-job" data-job="gagion" data-name="Gà Giòn Sốt Ba Cô Gái">Xem tuyển dụng Gà Giòn Sốt →</button>
+        </div>
+        <div class="show-card">
+          <div class="show-thumb tile-tea"><img src="images/logo-trahu.png" alt="Trà Hú" /></div>
+          <div class="meta"><b>Trà Hú — Đậm Hú Hồn</b><span>Trà cao cấp · tùy chọn tới 8 topping</span></div>
+          <button type="button" class="btn-job" data-job="trahu" data-name="Trà Hú">Xem tuyển dụng Trà Hú →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- POPUP THÔNG TIN TUYỂN DỤNG -->
+  <div class="jobmodal-ov" id="jobModal">
+    <div class="jobmodal">
+      <div class="jm-head">
+        <h3 id="jmTitle">🍗 Tụi mình tìm đồng đội cho Gà rán</h3>
+        <button class="jm-x" id="jobModalX" type="button">×</button>
+      </div>
+      <div class="jm-body">
+        <div id="jmContent" class="jm-pre"></div>
+
+        <div style="text-align:center;margin-top:22px">
+          <a href="#ungtuyen" class="btn btn-primary" id="jobApplyBtn">Ứng tuyển ngay →</a>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
 
-<!-- BENEFITS -->
-<section class="sec benefits">
-  <div class="wrap">
-    <div class="sec-head center fade">
-      <span class="eyebrow">Quyền lợi</span>
-      <h2 class="title">Bạn nhận được gì khi <span class="grad-text">về với nhà TTVH</span></h2>
-    </div>
-    <div class="ben-grid fade">
-      <div class="ben"><div class="ic">💵</div><div><b>Thu nhập cạnh tranh</b><p>Lương cứng + thưởng doanh số + thưởng chuyên cần, trả đúng hạn.</p></div></div>
-      <div class="ben"><div class="ic">🍵</div><div><b>Hỗ trợ ăn ca &amp; đồ uống</b><p>Được dùng sản phẩm, hỗ trợ bữa ăn trong ca làm việc.</p></div></div>
-      <div class="ben"><div class="ic">🎓</div><div><b>Đào tạo miễn phí</b><p>Học nghề pha chế, vận hành, kỹ năng phục vụ chuyên nghiệp.</p></div></div>
-      <div class="ben"><div class="ic">🚀</div><div><b>Cơ hội thăng tiến thật</b><p>Đề bạt nội bộ minh bạch khi cửa hàng mở rộng.</p></div></div>
-    </div>
-  </div>
-</section>
-
-<!-- PERKS + FORM -->
-<section class="sec gift" id="ungtuyen">
-  <div class="wrap">
-    <div class="sec-head center fade">
-      <span class="eyebrow">Ứng tuyển nhanh</span>
-      <h2 class="title">Đăng ký <span class="grad-text">ứng tuyển</span></h2>
-      <p class="lead" style="margin:10px auto 0">Không cần CV cầu kỳ. Điền thông tin, đội ngũ Nhân sự sẽ liên hệ phỏng vấn trong 24–48 giờ.</p>
-    </div>
-
-    <div class="apply-steps fade">
-      <div class="gpart"><div><b>Bước 1 — Điền thông tin</b><span style="display:block">Thông tin cá nhân &amp; vị trí</span></div><span class="val">1 phút</span></div>
-      <div class="gpart"><div><b>Bước 2 — HR liên hệ</b><span style="display:block">Gọi/Zalo hẹn lịch phỏng vấn</span></div><span class="val">24–48h</span></div>
-      <div class="gpart"><div><b>Bước 3 — Phỏng vấn &amp; nhận việc</b><span style="display:block">Đào tạo &amp; bắt đầu đi làm</span></div><span class="val">Ngay</span></div>
-    </div>
-
-    <div class="form-card form-wide fade">
-      <form id="regForm" novalidate>
-        <div id="formErr">Vui lòng điền đầy đủ các mục bắt buộc có dấu (*).</div>
-        <div class="form-grid">
-          <div class="field">
-            <label for="name">Họ và tên <span class="req">*</span></label>
-            <input type="text" id="name" name="name" placeholder="Nguyễn Văn A" />
-          </div>
-          <div class="field">
-            <label for="gender">Giới tính <span class="req">*</span></label>
-            <select id="gender" name="gender">
-              <option value="" disabled selected>Chọn giới tính</option>
-              <option>Nam</option>
-              <option>Nữ</option>
-              <option>Khác</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="birthday">Ngày sinh <span class="req">*</span></label>
-            <input type="date" id="birthday" name="birthday" />
-          </div>
-          <div class="field">
-            <label for="phone">Điện thoại <span class="req">*</span></label>
-            <input type="tel" id="phone" name="phone" placeholder="0901 234 567" />
-          </div>
-          <div class="field">
-            <label for="email">Email <span class="req">*</span></label>
-            <input type="email" id="email" name="email" placeholder="ban@email.com" />
-          </div>
-          <div class="field">
-            <label for="idcard">CMT/Căn cước/Hộ chiếu <span class="req">*</span></label>
-            <input type="text" id="idcard" name="idcard" placeholder="Số CMND/CCCD/Hộ chiếu" />
-          </div>
-          <div class="field">
-            <label for="address">Chỗ ở hiện nay <span class="req">*</span></label>
-            <input type="text" id="address" name="address" placeholder="Số nhà, đường..." />
-          </div>
-          <div class="field">
-            <label for="region">Xã phường, Quận huyện, Tỉnh thành <span class="req">*</span></label>
-            <input type="text" id="region" name="region" placeholder="VD: P. Xuân Hòa, TP.HCM" />
-          </div>
-          <div class="field">
-            <label for="workarea">Nơi ở &amp; khu vực mong muốn làm việc <span class="req">*</span></label>
-            <select id="workarea" name="workarea">
-              <option value="" disabled selected>Chọn khu vực</option>
-              <option>Quận 1</option><option>Quận 3</option><option>Quận 4</option>
-              <option>Quận 5</option><option>Quận 6</option><option>Quận 7</option>
-              <option>Quận 8</option><option>Quận 10</option><option>Quận 11</option>
-              <option>Quận 12</option><option>Quận Bình Thạnh</option><option>Quận Gò Vấp</option>
-              <option>Quận Phú Nhuận</option><option>Quận Tân Bình</option><option>Quận Tân Phú</option>
-              <option>Quận Bình Tân</option><option>TP. Thủ Đức</option><option>Huyện Hóc Môn</option>
-              <option>Huyện Bình Chánh</option><option>Huyện Củ Chi</option><option>Huyện Nhà Bè</option>
-              <option>Khác</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="position">Vị trí ứng tuyển <span class="req">*</span></label>
-            <select id="position" name="position">
-              <option value="" disabled selected>Chọn vị trí ứng tuyển</option>
-              <option>Quản lý cửa hàng</option>
-              <option>Trưởng ca</option>
-              <option>Nhân viên Full-time (có &gt; 6 tháng kinh nghiệm)</option>
-              <option>Nhân viên Part-time (có &gt; 6 tháng kinh nghiệm)</option>
-              <option>Nhân viên Part-time (chưa có kinh nghiệm)</option>
-              <option>Nhân viên Full-time (chưa có kinh nghiệm nhưng làm được 8 tiếng)</option>
-              <option>Nhân viên thời vụ Tết</option>
-              <option>Nhân viên Part-time (ca đêm)</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="brand">Thương hiệu ứng tuyển <span class="req">*</span></label>
-            <select id="brand" name="brand">
-              <option value="" disabled selected>Chọn thương hiệu</option>
-              <option>MayCha</option>
-              <option>Hồng Trà Sữa Tam Hảo</option>
-              <option>Gà Giòn Sốt Ba Cô Gái</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="referrer">Người giới thiệu</label>
-            <input type="text" id="referrer" name="referrer" placeholder="Tên người giới thiệu (nếu có)" />
+  <!-- BENEFITS -->
+  <section class="sec benefits">
+    <div class="wrap">
+      <div class="sec-head center fade">
+        <span class="eyebrow">Quyền lợi</span>
+        <h2 class="title">Bạn nhận được gì khi <span class="grad-text">về với nhà TTVH</span></h2>
+      </div>
+      <div class="ben-grid fade">
+        <div class="ben">
+          <div class="ic">💵</div>
+          <div><b>Thu nhập cạnh tranh</b>
+            <p>Lương cứng + thưởng doanh số + thưởng chuyên cần, trả đúng hạn.</p>
           </div>
         </div>
-        <button type="submit" class="btn btn-primary btn-block" style="margin-top:6px">GỬI HỒ SƠ ỨNG TUYỂN →</button>
-        <div class="secure">🔒 Bảo mật thông tin · Phản hồi trong 24–48h</div>
-      </form>
-      <div class="ok-msg" id="okMsg">
-        <div class="ic">✓</div>
-        <h3>ỨNG TUYỂN THÀNH CÔNG</h3>
-        <p>Bạn đã gửi thông tin ứng tuyển thành công, chúng tôi sẽ liên hệ với bạn trong thời gian sớm nhất. Xin chân thành cảm ơn!</p>
+        <div class="ben">
+          <div class="ic">🍵</div>
+          <div><b>Hỗ trợ chỗ ở, ăn ca &amp; đồ uống cho nhân viên Toàn thời gian và Công Nhân Sản Xuất</b>
+            <p>Liên hệ phòng Nhân Sự để biết thêm thông tin chi tiết.</p>
+          </div>
+        </div>
+        <div class="ben">
+          <div class="ic">🎓</div>
+          <div><b>Đào tạo miễn phí</b>
+            <p>Học nghề pha chế, vận hành, kỹ năng phục vụ chuyên nghiệp.</p>
+          </div>
+        </div>
+        <div class="ben">
+          <div class="ic">🚀</div>
+          <div><b>Cơ hội thăng tiến thật</b>
+            <p>Đề bạt nội bộ minh bạch khi cửa hàng mở rộng.</p>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- FAQ -->
-<section class="sec">
-  <div class="wrap">
-    <div class="sec-head center fade">
-      <span class="eyebrow">Giải đáp</span>
-      <h2 class="title">Câu hỏi <span class="grad-text">thường gặp</span></h2>
+  <!-- PERKS + FORM -->
+  <section class="sec gift" id="ungtuyen">
+    <div class="wrap">
+      <div class="sec-head center fade">
+        <span class="eyebrow">Ứng tuyển liền tay</span>
+        <h2 class="title">Ứng tuyển <span class="grad-text">ngay</span></h2>
+        <p class="lead" style="margin:10px auto 0">Không cần CV cầu kỳ. Điền thông tin, đội ngũ Nhân sự sẽ liên hệ phỏng vấn trong 24–48 giờ.</p>
+      </div>
+
+      <div class="apply-steps fade">
+        <div class="gpart">
+          <div><b>Bước 1 — Điền thông tin</b><span style="display:block">Thông tin cá nhân &amp; vị trí</span></div><span class="val">1 phút</span>
+        </div>
+        <div class="gpart">
+          <div><b>Bước 2 — Phòng nhân sự liên hệ</b><span style="display:block">Gọi/Zalo hẹn lịch phỏng vấn</span></div><span class="val">24–48h</span>
+        </div>
+        <div class="gpart">
+          <div><b>Bước 3 — Phỏng vấn &amp; nhận việc</b><span style="display:block">Đào tạo &amp; bắt đầu đi làm</span></div><span class="val">Ngay</span>
+        </div>
+      </div>
+
+      <div class="form-card form-wide fade">
+        <form id="regForm" novalidate>
+          <div id="formErr">Vui lòng điền đầy đủ các mục bắt buộc có dấu (*).</div>
+          <div class="form-grid">
+            <div class="field">
+              <label for="name">Họ và tên <span class="req">*</span></label>
+              <input type="text" id="name" name="name" placeholder="Nguyễn Văn A" />
+            </div>
+            <div class="field">
+              <label for="gender">Giới tính <span class="req">*</span></label>
+              <select id="gender" name="gender">
+                <option value="" disabled selected>Chọn giới tính</option>
+                <option>Nam</option>
+                <option>Nữ</option>
+                <option>Khác</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="birthday">Ngày sinh <span class="req">*</span></label>
+              <input type="date" id="birthday" name="birthday" />
+            </div>
+            <div class="field">
+              <label for="phone">Điện thoại <span class="req">*</span></label>
+              <input type="tel" id="phone" name="phone" placeholder="0901 234 567" />
+            </div>
+            <div class="field">
+              <label for="email">Email <span class="req">*</span></label>
+              <input type="email" id="email" name="email" placeholder="ban@email.com" />
+            </div>
+            <div class="field">
+              <label for="idcard">CMT/Căn cước/Hộ chiếu <span class="req">*</span></label>
+              <input type="text" id="idcard" name="idcard" placeholder="Số CMND/CCCD/Hộ chiếu" />
+            </div>
+            <div class="field">
+              <label for="address">Chỗ ở hiện nay <span class="req">*</span></label>
+              <input type="text" id="address" name="address" placeholder="Số nhà, đường..." />
+            </div>
+            <div class="field">
+              <label for="region">Xã phường, Quận huyện, Tỉnh thành <span class="req">*</span></label>
+              <input type="text" id="region" name="region" placeholder="VD: P. Xuân Hòa, TP.HCM" />
+            </div>
+            <div class="field">
+              <label for="workarea">Nơi ở &amp; khu vực mong muốn làm việc <span class="req">*</span></label>
+              <select id="workarea" name="workarea">
+                <option value="" disabled selected>Chọn khu vực</option>
+                <option>Quận 1</option>
+                <option>Quận 3</option>
+                <option>Quận 4</option>
+                <option>Quận 5</option>
+                <option>Quận 6</option>
+                <option>Quận 7</option>
+                <option>Quận 8</option>
+                <option>Quận 10</option>
+                <option>Quận 11</option>
+                <option>Quận 12</option>
+                <option>Quận Bình Thạnh</option>
+                <option>Quận Gò Vấp</option>
+                <option>Quận Phú Nhuận</option>
+                <option>Quận Tân Bình</option>
+                <option>Quận Tân Phú</option>
+                <option>Quận Bình Tân</option>
+                <option>TP. Thủ Đức</option>
+                <option>Huyện Hóc Môn</option>
+                <option>Huyện Bình Chánh</option>
+                <option>Huyện Củ Chi</option>
+                <option>Huyện Nhà Bè</option>
+                <option>Khác</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="position">Vị trí ứng tuyển <span class="req">*</span></label>
+              <select id="position" name="position">
+                <option value="" disabled selected>Chọn vị trí ứng tuyển</option>
+                <option>Quản lý cửa hàng</option>
+                <option>Trưởng ca</option>
+                <option>Nhân viên Full-time (có &gt; 6 tháng kinh nghiệm)</option>
+                <option>Nhân viên Part-time (có &gt; 6 tháng kinh nghiệm)</option>
+                <option>Nhân viên Part-time (chưa có kinh nghiệm)</option>
+                <option>Nhân viên Full-time (chưa có kinh nghiệm nhưng làm được 8 tiếng)</option>
+                <option>Nhân viên thời vụ Tết</option>
+                <option>Nhân viên Part-time (ca đêm)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="brand">Thương hiệu ứng tuyển <span class="req">*</span></label>
+              <select id="brand" name="brand">
+                <option value="" disabled selected>Chọn thương hiệu</option>
+                <option>MayCha</option>
+                <option>Hồng Trà Sữa Tam Hảo</option>
+                <option>Gà Giòn Sốt Ba Cô Gái</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="referrer">Người giới thiệu</label>
+              <input type="text" id="referrer" name="referrer" placeholder="Tên người giới thiệu (nếu có)" />
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block" style="margin-top:6px">GỬI HỒ SƠ ỨNG TUYỂN →</button>
+          <div class="secure">🔒 Bảo mật thông tin · Phản hồi trong 24–48h</div>
+        </form>
+        <div class="ok-msg" id="okMsg">
+          <div class="ic">✓</div>
+          <h3>ỨNG TUYỂN THÀNH CÔNG</h3>
+          <p>Bạn đã gửi thông tin ứng tuyển thành công, chúng tôi sẽ liên hệ với bạn trong thời gian sớm nhất. Xin chân thành cảm ơn!</p>
+        </div>
+      </div>
     </div>
-    <div class="faq-list fade">
-      <div class="faq"><button>Em chưa có kinh nghiệm pha chế có ứng tuyển được không?<span class="chev">+</span></button><div class="ans"><p>Hoàn toàn được. Bạn sẽ được đào tạo từ đầu theo quy trình chuẩn. Chỉ cần thái độ tốt và tinh thần học hỏi.</p></div></div>
-      <div class="faq"><button>Có nhận làm bán thời gian (part-time) không?<span class="chev">+</span></button><div class="ans"><p>Có. Chúng tôi có ca linh hoạt sáng/tối phù hợp với sinh viên và người đi làm, sắp xếp theo lịch của bạn.</p></div></div>
-      <div class="faq"><button>Mức lương và quyền lợi thế nào?<span class="chev">+</span></button><div class="ans"><p>Lương cứng cạnh tranh + thưởng doanh số + thưởng chuyên cần, hỗ trợ ăn ca/đồ uống và đào tạo miễn phí. Mức cụ thể trao đổi khi phỏng vấn theo vị trí.</p></div></div>
-      <div class="faq"><button>Sau khi nộp hồ sơ bao lâu thì được liên hệ?<span class="chev">+</span></button><div class="ans"><p>Đội ngũ Nhân sự sẽ liên hệ qua điện thoại/Zalo trong vòng 24–48 giờ để hẹn lịch phỏng vấn.</p></div></div>
-      <div class="faq"><button>Làm việc ở đâu?<span class="chev">+</span></button><div class="ans"><p>Tại hệ thống cửa hàng các thương hiệu và văn phòng của công ty ở TP.HCM. Bạn có thể chọn khu vực thuận tiện khi phỏng vấn.</p></div></div>
-      <div class="faq"><button>Có lộ trình thăng tiến không?<span class="chev">+</span></button><div class="ans"><p>Có. Lộ trình minh bạch: nhân viên → ca trưởng → quản lý cửa hàng, đề bạt nội bộ khi hệ thống mở rộng.</p></div></div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="sec">
+    <div class="wrap">
+      <div class="sec-head center fade">
+        <span class="eyebrow">Giải đáp</span>
+        <h2 class="title">Câu hỏi <span class="grad-text">thường gặp</span></h2>
+      </div>
+      <div class="faq-list fade">
+        <div class="faq"><button>Em chưa có kinh nghiệm pha chế có ứng tuyển được không?<span class="chev">+</span></button>
+          <div class="ans">
+            <p>Hoàn toàn được. Bạn sẽ được đào tạo từ đầu theo quy trình chuẩn. Chỉ cần thái độ tốt và tinh thần học hỏi.</p>
+          </div>
+        </div>
+        <div class="faq"><button>Có nhận làm bán thời gian (part-time) không?<span class="chev">+</span></button>
+          <div class="ans">
+            <p>Có. Chúng tôi có ca linh hoạt sáng/tối phù hợp với sinh viên và người đi làm, sắp xếp theo lịch của bạn.</p>
+          </div>
+        </div>
+        <div class="faq"><button>Mức lương và quyền lợi thế nào?<span class="chev">+</span></button>
+          <div class="ans">
+            <p>Lương cứng cạnh tranh + thưởng doanh số + thưởng chuyên cần, hỗ trợ ăn ca/đồ uống và đào tạo miễn phí. Mức cụ thể trao đổi khi phỏng vấn theo vị trí.</p>
+          </div>
+        </div>
+        <div class="faq"><button>Sau khi nộp hồ sơ bao lâu thì được liên hệ?<span class="chev">+</span></button>
+          <div class="ans">
+            <p>Đội ngũ Nhân sự sẽ liên hệ qua điện thoại/Zalo trong vòng 24–48 giờ để hẹn lịch phỏng vấn.</p>
+          </div>
+        </div>
+        <div class="faq"><button>Làm việc ở đâu?<span class="chev">+</span></button>
+          <div class="ans">
+            <p>Tại hệ thống cửa hàng các thương hiệu và văn phòng của công ty ở TP.HCM. Bạn có thể chọn khu vực thuận tiện khi phỏng vấn.</p>
+          </div>
+        </div>
+        <div class="faq"><button>Có lộ trình thăng tiến không?<span class="chev">+</span></button>
+          <div class="ans">
+            <p>Có. Lộ trình minh bạch: nhân viên → ca trưởng → quản lý cửa hàng, đề bạt nội bộ khi hệ thống mở rộng.</p>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- FINAL CTA -->
-<section class="final">
-  <div class="wrap fade">
-    <h2>Một công việc tử tế, một nơi để bạn lớn lên cùng</h2>
-    <p class="proof">⭐ Đào tạo từ A–Z · Lộ trình thăng tiến rõ ràng · Môi trường trẻ trung</p>
-    <div class="hero-actions">
-      <a href="#ungtuyen" class="btn btn-primary">ỨNG TUYỂN NGAY →</a>
-      <a href="mailto:hr@maycha.com.vn" class="btn btn-ghost">Liên hệ HR</a>
+  <!-- FINAL CTA -->
+  <section class="final">
+    <div class="wrap fade">
+      <h2>Một công việc tử tế, một nơi để bạn lớn lên cùng</h2>
+      <p class="proof">⭐ Đào tạo từ A–Z · Lộ trình thăng tiến rõ ràng · Môi trường trẻ trung</p>
+      <div class="hero-actions">
+        <a href="#ungtuyen" class="btn btn-primary">ỨNG TUYỂN NGAY →</a>
+        <a href="mailto:hr@maycha.com.vn" class="btn btn-ghost">Liên hệ HR</a>
+      </div>
+      <p class="proof" style="margin:0">📍 35 Huỳnh Tịnh Của, P. Xuân Hòa, TP.HCM · ✉ hr@maycha.com.vn</p>
     </div>
-    <p class="proof" style="margin:0">📍 35 Huỳnh Tịnh Của, P. Xuân Hòa, TP.HCM · ✉ hr@maycha.com.vn</p>
-  </div>
-</section>
+  </section>
 
-<!-- FOOTER -->
-<footer>
-  <div class="wrap">
-    <div class="brand"><img src="images/logo-ttvh.jpg" alt="Thịnh Thế Vinh Hoa" class="logo-img" /><div class="nm">Thịnh Thế Vinh Hoa F&amp;B Group</div></div>
-    <p>© 2026 Thịnh Thế Vinh Hoa F&amp;B Group · 35 Huỳnh Tịnh Của, P. Xuân Hòa, TP.HCM</p>
-    <p>MayCha · Hồng Trà Sữa Tam Hảo · Gà Giòn Sốt Ba Cô Gái · Trà Hú</p>
-    <p class="tagline">Vững thời · Sáng vận · Đẹp danh</p>
-  </div>
-</footer>
+  <!-- FOOTER -->
+  <footer>
+    <div class="wrap">
+      <div class="brand"><img src="images/logo-ttvh.jpg" alt="Thịnh Thế Vinh Hoa" class="logo-img" />
+        <div class="nm">Thịnh Thế Vinh Hoa F&amp;B Group</div>
+      </div>
+      <p>© 2026 Thịnh Thế Vinh Hoa F&amp;B Group · 35 Huỳnh Tịnh Của, P. Xuân Hòa, TP.HCM</p>
+      <p>MayCha · Hồng Trà Sữa Tam Hảo · Gà Giòn Sốt Ba Cô Gái · Trà Hú</p>
+      <p class="tagline">Vững thời · Sáng vận · Đẹp danh</p>
+    </div>
+  </footer>
 
-<div class="sticky-cta"><a href="#ungtuyen" class="btn btn-primary">ỨNG TUYỂN NGAY</a></div>
+  <div class="sticky-cta"><a href="#ungtuyen" class="btn btn-primary">ỨNG TUYỂN NGAY</a></div>
 
-<script>
-/* FAQ accordion */
-document.querySelectorAll('.faq button').forEach(function(btn){
-  btn.addEventListener('click',function(){
-    var item=btn.parentElement,ans=item.querySelector('.ans'),open=item.classList.contains('open');
-    document.querySelectorAll('.faq').forEach(function(f){f.classList.remove('open');f.querySelector('.ans').style.maxHeight=null;});
-    if(!open){item.classList.add('open');ans.style.maxHeight=ans.scrollHeight+'px';}
-  });
-});
-
-/* Popup thông tin tuyển dụng (mỗi thương hiệu 1 nút, nội dung lấy từ dashboard) */
-(function(){
-  var ov=document.getElementById('jobModal'); if(!ov) return;
-  var content=document.getElementById('jmContent'), title=document.getElementById('jmTitle');
-  var RECRUIT={};
-  fetch('/api/recruitment').then(function(r){return r.json();}).then(function(d){
-    (d.rows||[]).forEach(function(r){ RECRUIT[r.brand]=r; });
-  }).catch(function(){});
-  function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-  function linkify(t){ return esc(t).replace(/(https?:\/\/[^\s<]+)/g,function(u){return '<a href="'+u+'" target="_blank" rel="noopener">'+u+'</a>';}); }
-  function openJob(job,name){
-    var rec=RECRUIT[job]||{}, c=(rec.content||'').trim();
-    title.textContent = rec.title || ('📋 Thông tin tuyển dụng — '+name);
-    content.innerHTML = c ? linkify(c)
-      : 'Thông tin tuyển dụng của <b>'+esc(name)+'</b> đang được cập nhật.\n\nBạn vui lòng để lại hồ sơ qua form Đăng ký ứng tuyển bên dưới — đội ngũ Nhân sự sẽ liên hệ và tư vấn vị trí phù hợp nhất với bạn nhé! 🧡';
-    ov.querySelector('.jm-body').scrollTop=0;
-    ov.classList.add('show'); document.body.style.overflow='hidden';
-  }
-  function close(){ ov.classList.remove('show'); document.body.style.overflow=''; }
-  [].forEach.call(document.querySelectorAll('.btn-job'),function(b){
-    b.addEventListener('click',function(){ openJob(b.getAttribute('data-job'), b.getAttribute('data-name')); });
-  });
-  document.getElementById('jobModalX').addEventListener('click',close);
-  var ab=document.getElementById('jobApplyBtn'); if(ab) ab.addEventListener('click',close);
-  ov.addEventListener('click',function(e){ if(e.target===ov) close(); });
-  document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
-})();
-
-/* Form validation + submit (demo) */
-(function(){
-  var form=document.getElementById('regForm');
-  var required=['name','gender','birthday','phone','email','idcard','address','region','workarea','position','brand'];
-  var optional=['referrer'];
-  form.addEventListener('submit',function(e){
-    e.preventDefault();
-    var ok=true, firstBad=null;
-    required.forEach(function(id){
-      var el=document.getElementById(id); var v=(el.value||'').trim(); var bad=!v;
-      if(id==='phone') bad=!/^[0-9\s().+-]{8,}$/.test(v);
-      if(id==='email') bad=!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-      el.classList.toggle('err',bad);
-      if(bad){ ok=false; if(!firstBad) firstBad=el; }
-    });
-    var fe=document.getElementById('formErr');
-    if(!ok){ fe.textContent='Vui lòng điền đầy đủ các mục bắt buộc có dấu (*).'; fe.style.display='block'; if(firstBad){ firstBad.focus(); firstBad.scrollIntoView({behavior:'smooth',block:'center'}); } return; }
-    fe.style.display='none';
-
-    var data={};
-    required.concat(optional).forEach(function(id){ var el=document.getElementById(id); if(el) data[id]=el.value.trim(); });
-
-    // Lấy chiến dịch & nguồn từ URL (vd mở form qua link/QR: ?campaign=123&source_id=49)
-    var qs=new URLSearchParams(location.search);
-    var camp=qs.get('campaign_current_id')||qs.get('campaign');
-    var campCode=qs.get('campaign_code');
-    var src=qs.get('source_id')||qs.get('source');
-    if(camp) data.campaign_current_id=camp;
-    if(campCode) data.campaign_code=campCode;
-    if(src) data.source_id=src;
-
-    var btn=form.querySelector('button[type="submit"]'); var oldTxt=btn.textContent;
-    btn.disabled=true; btn.textContent='Đang gửi hồ sơ…';
-    fetch('/api/apply',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
-      .then(function(r){return r.json();})
-      .then(function(res){
-        btn.disabled=false; btn.textContent=oldTxt;
-        if(res && res.ok){
-          form.style.display='none';
-          var ok=document.getElementById('okMsg'); ok.style.display='block'; ok.scrollIntoView({behavior:'smooth',block:'center'});
-        } else {
-          fe.textContent='Gửi hồ sơ chưa thành công: '+((res&&res.error)||'lỗi không xác định')+'. Vui lòng thử lại hoặc liên hệ HR.';
-          fe.style.display='block'; fe.scrollIntoView({behavior:'smooth',block:'center'});
+  <script>
+    /* FAQ accordion */
+    document.querySelectorAll('.faq button').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var item = btn.parentElement,
+          ans = item.querySelector('.ans'),
+          open = item.classList.contains('open');
+        document.querySelectorAll('.faq').forEach(function(f) {
+          f.classList.remove('open');
+          f.querySelector('.ans').style.maxHeight = null;
+        });
+        if (!open) {
+          item.classList.add('open');
+          ans.style.maxHeight = ans.scrollHeight + 'px';
         }
-      })
-      .catch(function(){
-        btn.disabled=false; btn.textContent=oldTxt;
-        fe.textContent='Không gửi được hồ sơ (lỗi mạng / server chưa chạy). Vui lòng thử lại.';
-        fe.style.display='block';
       });
-  });
-  // bỏ viền đỏ khi người dùng sửa
-  form.addEventListener('input',function(e){ if(e.target.classList.contains('err')) e.target.classList.remove('err'); });
-})();
+    });
 
-/* Reveal on scroll */
-(function(){
-  var obs=new IntersectionObserver(function(en){en.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');obs.unobserve(e.target);}});},{threshold:.12});
-  document.querySelectorAll('.fade').forEach(function(el){obs.observe(el);});
-})();
-</script>
-<script src="chat.js"></script>
+    /* Popup thông tin tuyển dụng (mỗi thương hiệu 1 nút, nội dung lấy từ dashboard) */
+    (function() {
+      var ov = document.getElementById('jobModal');
+      if (!ov) return;
+      var content = document.getElementById('jmContent'),
+        title = document.getElementById('jmTitle');
+      var RECRUIT = {};
+      fetch('/api/recruitment').then(function(r) {
+        return r.json();
+      }).then(function(d) {
+        (d.rows || []).forEach(function(r) {
+          RECRUIT[r.brand] = r;
+        });
+      }).catch(function() {});
+
+      function esc(s) {
+        return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+
+      function linkify(t) {
+        return esc(t).replace(/(https?:\/\/[^\s<]+)/g, function(u) {
+          return '<a href="' + u + '" target="_blank" rel="noopener">' + u + '</a>';
+        });
+      }
+
+      function openJob(job, name) {
+        var rec = RECRUIT[job] || {},
+          c = (rec.content || '').trim();
+        title.textContent = rec.title || ('📋 Thông tin tuyển dụng — ' + name);
+        content.innerHTML = c ? linkify(c) :
+          'Thông tin tuyển dụng của <b>' + esc(name) + '</b> đang được cập nhật.\n\nBạn vui lòng để lại hồ sơ qua form Đăng ký ứng tuyển bên dưới — đội ngũ Nhân sự sẽ liên hệ và tư vấn vị trí phù hợp nhất với bạn nhé! 🧡';
+        ov.querySelector('.jm-body').scrollTop = 0;
+        ov.classList.add('show');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function close() {
+        ov.classList.remove('show');
+        document.body.style.overflow = '';
+      }
+      [].forEach.call(document.querySelectorAll('.btn-job'), function(b) {
+        b.addEventListener('click', function() {
+          openJob(b.getAttribute('data-job'), b.getAttribute('data-name'));
+        });
+      });
+      document.getElementById('jobModalX').addEventListener('click', close);
+      var ab = document.getElementById('jobApplyBtn');
+      if (ab) ab.addEventListener('click', close);
+      ov.addEventListener('click', function(e) {
+        if (e.target === ov) close();
+      });
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') close();
+      });
+    })();
+
+    /* Form validation + submit (demo) */
+    (function() {
+      var form = document.getElementById('regForm');
+      var required = ['name', 'gender', 'birthday', 'phone', 'email', 'idcard', 'address', 'region', 'workarea', 'position', 'brand'];
+      var optional = ['referrer'];
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var ok = true,
+          firstBad = null;
+        required.forEach(function(id) {
+          var el = document.getElementById(id);
+          var v = (el.value || '').trim();
+          var bad = !v;
+          if (id === 'phone') bad = !/^[0-9\s().+-]{8,}$/.test(v);
+          if (id === 'email') bad = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+          el.classList.toggle('err', bad);
+          if (bad) {
+            ok = false;
+            if (!firstBad) firstBad = el;
+          }
+        });
+        var fe = document.getElementById('formErr');
+        if (!ok) {
+          fe.textContent = 'Vui lòng điền đầy đủ các mục bắt buộc có dấu (*).';
+          fe.style.display = 'block';
+          if (firstBad) {
+            firstBad.focus();
+            firstBad.scrollIntoView({
+              behavior: 'smooth',
+              block: 'center'
+            });
+          }
+          return;
+        }
+        fe.style.display = 'none';
+
+        var data = {};
+        required.concat(optional).forEach(function(id) {
+          var el = document.getElementById(id);
+          if (el) data[id] = el.value.trim();
+        });
+
+        // Lấy chiến dịch & nguồn từ URL (vd mở form qua link/QR: ?campaign=123&source_id=49)
+        var qs = new URLSearchParams(location.search);
+        var camp = qs.get('campaign_current_id') || qs.get('campaign');
+        var campCode = qs.get('campaign_code');
+        var src = qs.get('source_id') || qs.get('source');
+        if (camp) data.campaign_current_id = camp;
+        if (campCode) data.campaign_code = campCode;
+        if (src) data.source_id = src;
+
+        var btn = form.querySelector('button[type="submit"]');
+        var oldTxt = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Đang gửi hồ sơ…';
+        fetch('/api/apply', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+          })
+          .then(function(r) {
+            return r.json();
+          })
+          .then(function(res) {
+            btn.disabled = false;
+            btn.textContent = oldTxt;
+            if (res && res.ok) {
+              form.style.display = 'none';
+              var ok = document.getElementById('okMsg');
+              ok.style.display = 'block';
+              ok.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+              });
+            } else {
+              fe.textContent = 'Gửi hồ sơ chưa thành công: ' + ((res && res.error) || 'lỗi không xác định') + '. Vui lòng thử lại hoặc liên hệ HR.';
+              fe.style.display = 'block';
+              fe.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+              });
+            }
+          })
+          .catch(function() {
+            btn.disabled = false;
+            btn.textContent = oldTxt;
+            fe.textContent = 'Không gửi được hồ sơ (lỗi mạng / server chưa chạy). Vui lòng thử lại.';
+            fe.style.display = 'block';
+          });
+      });
+      // bỏ viền đỏ khi người dùng sửa
+      form.addEventListener('input', function(e) {
+        if (e.target.classList.contains('err')) e.target.classList.remove('err');
+      });
+    })();
+
+    /* Reveal on scroll */
+    (function() {
+      var obs = new IntersectionObserver(function(en) {
+        en.forEach(function(e) {
+          if (e.isIntersecting) {
+            e.target.classList.add('in');
+            obs.unobserve(e.target);
+          }
+        });
+      }, {
+        threshold: .12
+      });
+      document.querySelectorAll('.fade').forEach(function(el) {
+        obs.observe(el);
+      });
+    })();
+  </script>
+  <script src="chat.js"></script>
 </body>
+
 </html>
