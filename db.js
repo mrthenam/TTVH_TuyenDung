@@ -19,6 +19,7 @@ const memSettings = new Map();       // k -> v (fallback RAM)
 const memLog = [];                   // lịch sử chỉnh sửa (fallback RAM)
 const memRecruit = new Map();        // thông tin tuyển dụng theo thương hiệu (fallback RAM)
 const memGallery = [];               // Khoảnh khắc Vinh Hoa: [{id,url,sort_order}] (fallback RAM)
+const memJobs = [];                  // Việc làm (tuyển dụng): [{id,...,sort_order}] (fallback RAM)
 // dùng chung cho cả 2 chế độ:
 const typing = new Map();    // convId -> ts
 const sessions = new Map();  // token -> {username, displayName, ts}
@@ -53,6 +54,9 @@ async function init() {
       brand text PRIMARY KEY, name text, title text, content text, updated_at bigint)`);
     await pool.query(`CREATE TABLE IF NOT EXISTS gallery(
       id bigserial PRIMARY KEY, url text, sort_order int)`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS jobs(
+      id bigserial PRIMARY KEY, title text, salary text, location text, deadline text,
+      jobtype text, dept text, description text, sort_order int)`);
     console.log(' [db] Đã kết nối PostgreSQL — lưu chat bền vững.');
   } else {
     console.log(' [db] Không có DATABASE_URL/pg — lưu chat tạm trong RAM.');
@@ -338,6 +342,58 @@ async function seedGallery(urls) {
   for (let i = 0; i < urls.length; i++) await addGallery(urls[i]);
 }
 
+// ----- Việc làm (tuyển dụng) -----
+const JOB_COLS = ['title', 'salary', 'location', 'deadline', 'jobtype', 'dept', 'description'];
+function jobOut(x) { return { id: Number(x.id), title: x.title || '', salary: x.salary || '', location: x.location || '', deadline: x.deadline || '', jobtype: x.jobtype || '', dept: x.dept || '', description: x.description || '', sort_order: x.sort_order }; }
+async function listJobs() {
+  if (HAS_PG) { const r = await pool.query('SELECT * FROM jobs ORDER BY sort_order ASC, id ASC'); return r.rows.map(jobOut); }
+  return [...memJobs].sort((a, b) => (a.sort_order - b.sort_order) || (a.id - b.id)).map(jobOut);
+}
+async function getJob(id) {
+  if (HAS_PG) { const r = await pool.query('SELECT * FROM jobs WHERE id=$1', [id]); return r.rows[0] ? jobOut(r.rows[0]) : null; }
+  const x = memJobs.find(j => String(j.id) === String(id)); return x ? jobOut(x) : null;
+}
+async function addJob(j) {
+  j = j || {};
+  if (HAS_PG) {
+    const m = await pool.query('SELECT COALESCE(MAX(sort_order),-1)+1 AS n FROM jobs');
+    const r = await pool.query(
+      `INSERT INTO jobs(title,salary,location,deadline,jobtype,dept,description,sort_order)
+       VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id`,
+      [j.title || '', j.salary || '', j.location || '', j.deadline || '', j.jobtype || '', j.dept || '', j.description || '', m.rows[0].n]);
+    return Number(r.rows[0].id);
+  }
+  const id = memJobs.reduce((a, x) => Math.max(a, x.id), 0) + 1;
+  const so = memJobs.reduce((a, x) => Math.max(a, x.sort_order), -1) + 1;
+  memJobs.push({ id, title: j.title || '', salary: j.salary || '', location: j.location || '', deadline: j.deadline || '', jobtype: j.jobtype || '', dept: j.dept || '', description: j.description || '', sort_order: so });
+  return id;
+}
+async function updateJob(id, j) {
+  j = j || {};
+  if (HAS_PG) {
+    const r = await pool.query(
+      `UPDATE jobs SET title=$2,salary=$3,location=$4,deadline=$5,jobtype=$6,dept=$7,description=$8 WHERE id=$1`,
+      [id, j.title || '', j.salary || '', j.location || '', j.deadline || '', j.jobtype || '', j.dept || '', j.description || '']);
+    return r.rowCount;
+  }
+  const x = memJobs.find(m => String(m.id) === String(id)); if (!x) return 0;
+  JOB_COLS.forEach(k => { x[k] = j[k] || ''; }); return 1;
+}
+async function deleteJob(id) {
+  if (HAS_PG) { const r = await pool.query('DELETE FROM jobs WHERE id=$1', [id]); return r.rowCount; }
+  const i = memJobs.findIndex(x => String(x.id) === String(id)); if (i >= 0) { memJobs.splice(i, 1); return 1; } return 0;
+}
+async function reorderJobs(ids) {
+  if (!Array.isArray(ids)) return;
+  if (HAS_PG) { for (let i = 0; i < ids.length; i++) await pool.query('UPDATE jobs SET sort_order=$2 WHERE id=$1', [ids[i], i]); return; }
+  ids.forEach((id, i) => { const r = memJobs.find(x => String(x.id) === String(id)); if (r) r.sort_order = i; });
+}
+async function seedJobs(arr) {
+  if (!arr || !arr.length) return;
+  const ex = await listJobs(); if (ex.length) return;
+  for (const j of arr) await addJob(j);
+}
+
 // ----- settings (key-value) -----
 async function getSetting(k) {
   if (HAS_PG) { const r = await pool.query('SELECT v FROM settings WHERE k=$1', [k]); return r.rows[0] ? r.rows[0].v : null; }
@@ -359,5 +415,6 @@ module.exports = {
   listBrandCampaigns, setBrandCampaign, deleteBrandCampaign, getBrandCampaignMap, seedBrandCampaigns,
   listRecruitment, setRecruitment, seedRecruitment,
   listGallery, addGallery, deleteGallery, reorderGallery, seedGallery,
+  listJobs, getJob, addJob, updateJob, deleteJob, reorderJobs, seedJobs,
   getSetting, setSetting
 };

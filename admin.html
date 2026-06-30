@@ -123,6 +123,15 @@
   .youtag{font-size:10px;font-weight:800;color:#fff;background:var(--green);padding:2px 8px;border-radius:99px;margin-left:6px}
   .fld textarea{width:100%;border:1px solid var(--line-2);border-radius:10px;padding:11px 13px;font-family:inherit;font-size:14px;background:var(--bg);color:var(--txt);resize:vertical;line-height:1.5}
   .fld textarea:focus{outline:none;border-color:var(--red)}
+  /* việc làm (admin) */
+  .jobs-admin{display:flex;flex-direction:column;gap:12px}
+  .jobrow{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:14px}
+  .jobrow .ji{flex:1;min-width:0}
+  .jobrow h4{font-size:15.5px;font-weight:800;margin-bottom:3px}
+  .jobrow .jm{font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 14px}
+  .jobrow .jm b{color:var(--green);font-weight:700}
+  .jobrow .jdept{font-size:11.5px;font-weight:700;color:var(--red);background:rgba(212,175,55,.15);border-radius:999px;padding:3px 10px;flex:none}
+  .jobrow .ja{display:flex;gap:8px;flex:none}
   /* khoảnh khắc vinh hoa */
   .galbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
   .galbar input#g_url{flex:1;min-width:240px;border:1px solid var(--line-2);border-radius:11px;padding:10px 14px;font-family:inherit;font-size:13.5px;background:var(--card)}
@@ -273,6 +282,7 @@
       <button class="navbtn" id="tabRecruit"><span class="ic">📢</span><span class="t">Thông tin tuyển dụng</span></button>
       <button class="navbtn" id="tabGallery"><span class="ic">📸</span><span class="t">Khoảnh khắc Vinh Hoa</span></button>
       <button class="navbtn" id="tabForm"><span class="ic">📝</span><span class="t">Form đào tạo</span></button>
+      <button class="navbtn" id="tabJobs"><span class="ic">💼</span><span class="t">Việc làm (tuyển dụng)</span></button>
       <button class="navbtn" id="tabLog"><span class="ic">📝</span><span class="t">Lịch sử chỉnh sửa</span></button>
       <div class="foot">© 2026 TTVH F&B</div>
     </aside>
@@ -399,6 +409,16 @@
         </div>
       </div>
 
+      <!-- VIỆC LÀM (TUYỂN DỤNG) -->
+      <div class="trainview" id="viewJobs" style="display:none">
+        <div class="pagehd">
+          <div><h1>💼 Việc làm (tuyển dụng)</h1><div class="sub" id="jobsCount">Quản lý danh sách công việc hiển thị ở trang Tuyển dụng.</div></div>
+          <div class="spacer"></div>
+          <div class="tbar"><a class="btn" href="viec-lam.html" target="_blank">↗ Mở trang</a><button class="btn primary" id="jobAddBtn">+ Thêm công việc</button></div>
+        </div>
+        <div id="jobsList" class="jobs-admin"></div>
+      </div>
+
       <!-- LỊCH SỬ CHỈNH SỬA -->
       <div class="trainview" id="viewLog" style="display:none">
         <div class="pagehd">
@@ -450,6 +470,40 @@
     <div class="mf">
       <button class="btn" id="tmCancel">Hủy</button>
       <button class="btn primary" id="tmSave">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL THÊM/SỬA VIỆC LÀM -->
+<div class="overlay" id="jmodal">
+  <div class="modal">
+    <div class="mh"><h3 id="jmTitle">Thêm công việc</h3><button class="x" id="jmX">×</button></div>
+    <div class="mb">
+      <div id="jmErr"></div>
+      <input type="hidden" id="j_id" />
+      <div class="grid2">
+        <div class="fld full"><label>Tên công việc <span class="req">*</span></label><input id="j_title" type="text" placeholder="VD: Nhân Viên Pha Chế Trà Sữa" /></div>
+        <div class="fld"><label>Mức lương</label><input id="j_salary" type="text" placeholder="VD: 8 - 10 triệu / Thỏa thuận" /></div>
+        <div class="fld"><label>Khối</label>
+          <select id="j_dept">
+            <option value="">— Chọn —</option>
+            <option>Cửa hàng</option>
+            <option>Văn phòng</option>
+            <option>Khối sản xuất</option>
+          </select>
+        </div>
+        <div class="fld"><label>Hình thức</label><input id="j_jobtype" type="text" placeholder="VD: Toàn thời gian" /></div>
+        <div class="fld"><label>Hạn nộp</label><input id="j_deadline" type="date" /></div>
+        <div class="fld full"><label>Địa điểm làm việc</label><input id="j_location" type="text" placeholder="VD: 35 Huỳnh Tịnh Của (Quận 3), Hồ Chí Minh" /></div>
+        <div class="fld full"><label>Mô tả chi tiết</label>
+          <textarea id="j_description" spellcheck="false" style="min-height:260px;font-size:13.5px"></textarea>
+          <p class="hintnote">Gõ tiêu đề mục trên 1 dòng riêng (Mô tả công việc / Yêu cầu ứng viên / Quyền lợi được hưởng) và mỗi ý bắt đầu bằng dấu <b>•</b> để hiển thị đẹp như TopCV.</p>
+        </div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn" id="jmCancel">Hủy</button>
+      <button class="btn primary" id="jmSave">Lưu</button>
     </div>
   </div>
 </div>
@@ -562,6 +616,7 @@ function switchView(v) {
   $('#viewRecruit').style.display = v === 'recruit' ? 'flex' : 'none';
   $('#viewGallery').style.display = v === 'gallery' ? 'flex' : 'none';
   $('#viewForm').style.display = v === 'form' ? 'flex' : 'none';
+  $('#viewJobs').style.display = v === 'jobs' ? 'flex' : 'none';
   $('#viewLog').style.display = v === 'log' ? 'flex' : 'none';
   $('#tabChat').classList.toggle('act', v === 'chat');
   $('#tabTrain').classList.toggle('act', v === 'train');
@@ -570,6 +625,7 @@ function switchView(v) {
   $('#tabRecruit').classList.toggle('act', v === 'recruit');
   $('#tabGallery').classList.toggle('act', v === 'gallery');
   $('#tabForm').classList.toggle('act', v === 'form');
+  $('#tabJobs').classList.toggle('act', v === 'jobs');
   $('#tabLog').classList.toggle('act', v === 'log');
   if (v === 'train') { loadTraining(null, true); startTrainSync(); } else { stopTrainSync(); }
   if (v === 'staff') loadStaff();
@@ -577,6 +633,7 @@ function switchView(v) {
   if (v === 'recruit') loadRecruit();
   if (v === 'gallery') loadGallery();
   if (v === 'form') loadTrainingForm();
+  if (v === 'jobs') loadJobs();
   if (v === 'log') loadLog();
 }
 // Định kỳ kéo dữ liệu mới (form/chatbot) rồi tự đẩy lên Google Sheet khi đang mở tab Đào tạo
@@ -591,6 +648,74 @@ $('#tabLog').addEventListener('click', function () { switchView('log'); });
 $('#tabRecruit').addEventListener('click', function () { switchView('recruit'); });
 $('#tabGallery').addEventListener('click', function () { switchView('gallery'); });
 $('#tabForm').addEventListener('click', function () { switchView('form'); });
+$('#tabJobs').addEventListener('click', function () { switchView('jobs'); });
+
+/* ===== VIỆC LÀM (TUYỂN DỤNG) ===== */
+var JOBS_CACHE = [];
+function jdmy(s) { var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s || ''); return m ? (m[3] + '/' + m[2] + '/' + m[1]) : (s || ''); }
+function loadJobs() {
+  api('/api/agent/jobs').then(function (d) {
+    JOBS_CACHE = (d && d.rows) || [];
+    $('#jobsCount').textContent = JOBS_CACHE.length + ' công việc · hiển thị ở trang Tuyển dụng';
+    if (!JOBS_CACHE.length) { $('#jobsList').innerHTML = '<div style="color:var(--muted);padding:24px">Chưa có công việc nào. Bấm “+ Thêm công việc”.</div>'; return; }
+    $('#jobsList').innerHTML = JOBS_CACHE.map(function (j) {
+      return '<div class="jobrow">' +
+        '<div class="ji"><h4>' + esc(j.title) + '</h4><div class="jm">' +
+        (j.salary ? '<b>' + esc(j.salary) + '</b>' : '') +
+        (j.location ? '<span>📍 ' + esc(j.location) + '</span>' : '') +
+        (j.deadline ? '<span>⏳ ' + esc(jdmy(j.deadline)) + '</span>' : '') +
+        '</div></div>' +
+        (j.dept ? '<span class="jdept">' + esc(j.dept) + '</span>' : '') +
+        '<div class="ja"><button class="btn" data-edit="' + j.id + '">Sửa</button><button class="btn danger" data-del="' + j.id + '">Xóa</button></div>' +
+        '</div>';
+    }).join('');
+  }).catch(function (e) { if (e.message === '401') logout(); });
+}
+function openJobModal(j) {
+  j = j || {};
+  $('#jmTitle').textContent = j.id ? 'Sửa công việc' : 'Thêm công việc';
+  $('#jmErr').style.display = 'none';
+  $('#j_id').value = j.id || '';
+  $('#j_title').value = j.title || '';
+  $('#j_salary').value = j.salary || '';
+  $('#j_dept').value = j.dept || '';
+  $('#j_jobtype').value = j.jobtype || '';
+  $('#j_deadline').value = (j.deadline || '').slice(0, 10);
+  $('#j_location').value = j.location || '';
+  $('#j_description').value = j.description || '';
+  $('#jmodal').classList.add('show');
+}
+$('#jobAddBtn').addEventListener('click', function () { openJobModal(null); });
+$('#jmX').addEventListener('click', function () { $('#jmodal').classList.remove('show'); });
+$('#jmCancel').addEventListener('click', function () { $('#jmodal').classList.remove('show'); });
+$('#jobsList').addEventListener('click', function (e) {
+  var ed = e.target.getAttribute('data-edit'), dl = e.target.getAttribute('data-del');
+  if (ed) { var j = JOBS_CACHE.find(function (x) { return String(x.id) === String(ed); }); openJobModal(j); }
+  if (dl) {
+    var jj = JOBS_CACHE.find(function (x) { return String(x.id) === String(dl); });
+    if (confirm('Xóa công việc “' + (jj ? jj.title : '') + '”?')) {
+      api('/api/agent/jobs/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: dl }) })
+        .then(function () { toast('Đã xóa.'); loadJobs(); }).catch(function () { toast('Lỗi.'); });
+    }
+  }
+});
+$('#jmSave').addEventListener('click', function () {
+  var data = {
+    id: $('#j_id').value || undefined,
+    title: $('#j_title').value.trim(),
+    salary: $('#j_salary').value.trim(),
+    dept: $('#j_dept').value.trim(),
+    jobtype: $('#j_jobtype').value.trim(),
+    deadline: $('#j_deadline').value.trim(),
+    location: $('#j_location').value.trim(),
+    description: $('#j_description').value
+  };
+  if (!data.title) { var er = $('#jmErr'); er.textContent = 'Vui lòng nhập tên công việc.'; er.style.display = 'block'; er.className = ''; er.style.color = '#d6342a'; return; }
+  var btn = $('#jmSave'); btn.disabled = true; var old = btn.textContent; btn.textContent = 'Đang lưu…';
+  api('/api/agent/jobs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+    .then(function (res) { btn.disabled = false; btn.textContent = old; if (res && res.ok) { $('#jmodal').classList.remove('show'); toast('Đã lưu công việc.'); loadJobs(); } else toast('Lưu thất bại.'); })
+    .catch(function (e) { btn.disabled = false; btn.textContent = old; if (e.message === '401') return logout(); toast('Lỗi kết nối.'); });
+});
 
 /* ===== FORM ĐÀO TẠO ===== */
 function loadTrainingForm() {

@@ -246,6 +246,30 @@ async function handleChat(req, res, url, loadConfig) {
       // Lịch sử chỉnh sửa / thông báo
       if (p === '/api/agent/log' && req.method === 'GET') return sendJson(res, 200, { rows: await db.listTrainingLog(+url.searchParams.get('limit') || 100) });
 
+      // Việc làm (tuyển dụng)
+      if (p === '/api/agent/jobs' && req.method === 'GET') return sendJson(res, 200, { rows: await db.listJobs() });
+      if (p === '/api/agent/jobs' && req.method === 'POST') {
+        const b = await readBody(req) || {};
+        const j = {
+          title: (b.title || '').toString().trim(),
+          salary: (b.salary || '').toString().trim(),
+          location: (b.location || '').toString().trim(),
+          deadline: (b.deadline || '').toString().trim(),
+          jobtype: (b.jobtype || '').toString().trim(),
+          dept: (b.dept || '').toString().trim(),
+          description: (b.description || '').toString()
+        };
+        if (!j.title) return sendJson(res, 400, { error: 'Thiếu tên công việc' });
+        if (b.id) { await db.updateJob(b.id, j); return sendJson(res, 200, { ok: true, id: Number(b.id) }); }
+        const id = await db.addJob(j); return sendJson(res, 200, { ok: true, id });
+      }
+      if (p === '/api/agent/jobs/delete' && req.method === 'POST') {
+        const b = await readBody(req) || {}; await db.deleteJob(b.id); return sendJson(res, 200, { ok: true });
+      }
+      if (p === '/api/agent/jobs/reorder' && req.method === 'POST') {
+        const b = await readBody(req) || {}; await db.reorderJobs(b.ids || []); return sendJson(res, 200, { ok: true });
+      }
+
       // Cấu hình form đào tạo
       if (p === '/api/agent/trainingform' && req.method === 'GET') {
         const v = await db.getSetting('trainingform');

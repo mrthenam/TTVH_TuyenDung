@@ -435,6 +435,11 @@ const server = http.createServer(async (req, res) => {
     try { return sendJson(res, 200, await stores.getStores(loadConfig(), url.searchParams.get('refresh') === '1')); }
     catch (e) { return sendJson(res, 200, {}); }
   }
+  // Danh sách việc làm (công khai cho trang tuyen-dung.html)
+  if (url.pathname === '/api/jobs' && req.method === 'GET') {
+    try { return sendJson(res, 200, { rows: await db.listJobs() }); }
+    catch (e) { return sendJson(res, 200, { rows: [] }); }
+  }
   // Cấu hình form đào tạo (công khai cho trang dao-tao.html)
   if (url.pathname === '/api/trainingform' && req.method === 'GET') {
     try { const v = await db.getSetting('trainingform'); return sendJson(res, 200, (v && JSON.parse(v)) || TRAININGFORM_DEFAULTS); }
@@ -587,6 +592,7 @@ chatbot.init()
     'images/anh vinh danh/5.jpg'
   ]))
   .then(async () => { if (!(await db.getSetting('trainingform'))) await db.setSetting('trainingform', JSON.stringify(TRAININGFORM_DEFAULTS)); })
+  .then(() => { try { return db.seedJobs(JSON.parse(fs.readFileSync(path.join(__dirname, 'jobs-seed.json'), 'utf8'))); } catch (e) { console.warn(' [jobs] seed lỗi:', e.message); } })
   .catch((e) => console.error(' [db] init lỗi:', e.message));
 server.listen(PORT, () => {
   console.log('--------------------------------------------------');

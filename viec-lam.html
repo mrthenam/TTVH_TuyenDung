@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tuyển dụng - Thịnh Thế Vinh Hoa F&B Group</title>
+  <meta name="description" content="Cơ hội việc làm tại Thịnh Thế Vinh Hoa F&B Group — MayCha · Hồng Trà Sữa Tam Hảo · Gà Giòn Sốt Ba Cô Gái · Trà Hú. Xem danh sách công việc và mô tả chi tiết." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #fbf7ef;
+      --card: #ffffff;
+      --txt: #2a1810;
+      --muted: #8b7060;
+      --line: #eadfce;
+      --red: #c69320;
+      --gold: #d4af37;
+      --amber: #e6c34d;
+      --green: #2faa5e;
+      --grad: linear-gradient(135deg, #e6c34d 0%, #c69320 100%);
+      --head: 'Playfair Display', Georgia, 'Times New Roman', serif;
+      --maxw: 1180px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0 }
+    html { scroll-behavior: smooth }
+    body { font-family: 'Be Vietnam Pro', system-ui, sans-serif; color: var(--txt); background: var(--bg); line-height: 1.6; -webkit-font-smoothing: antialiased }
+    a { color: inherit; text-decoration: none }
+    .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 20px }
+
+    /* ===== HEADER ===== */
+    header { position: sticky; top: 0; z-index: 50; background: rgba(251, 247, 239, .92); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line) }
+    .nav { display: flex; align-items: center; justify-content: space-between; height: 68px; gap: 16px }
+    .brand { display: flex; align-items: center; gap: 12px; min-width: 0 }
+    .brand img { width: 42px; height: 42px; border-radius: 10px; object-fit: cover; flex: none }
+    .brand .nm { font-family: var(--head); font-weight: 800; font-size: 18px; line-height: 1.1 }
+    .brand .nm small { display: block; font-family: 'Be Vietnam Pro', sans-serif; font-weight: 500; font-size: 11px; color: var(--muted); letter-spacing: .3px }
+    .nav-cta { display: flex; align-items: center; gap: 14px; flex: none }
+    .navlink { font-weight: 600; font-size: 14.5px; color: var(--txt) }
+    .navlink:hover { color: var(--red) }
+    .btn { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 14.5px; border-radius: 999px; padding: 10px 20px; cursor: pointer; border: none; transition: transform .12s, box-shadow .12s }
+    .btn-primary { background: var(--grad); color: #fff; box-shadow: 0 10px 24px -10px rgba(198, 147, 32, .6) }
+    .btn-primary:hover { transform: translateY(-1px) }
+    .btn-ghost { background: #fff; color: var(--red); border: 1.5px solid var(--gold) }
+
+    /* ===== COMPANY HERO ===== */
+    .chero { background: linear-gradient(135deg, rgba(230, 195, 77, .16), rgba(198, 147, 32, .06)); border-bottom: 1px solid var(--line) }
+    .chero .wrap { padding: 34px 20px 30px; display: flex; gap: 24px; align-items: center; flex-wrap: wrap }
+    .chero .logo { width: 96px; height: 96px; border-radius: 18px; object-fit: cover; border: 3px solid #fff; box-shadow: 0 14px 30px -12px rgba(198, 147, 32, .5); flex: none }
+    .chero .ci { flex: 1; min-width: 260px }
+    .chero h1 { font-family: var(--head); font-size: clamp(22px, 3.4vw, 32px); font-weight: 900; line-height: 1.15 }
+    .chero .tag { color: var(--red); font-weight: 600; margin-top: 2px }
+    .chero .stats { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px }
+    .chip { background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font-size: 13px; font-weight: 600; color: var(--txt) }
+    .chip b { color: var(--red) }
+    .intro { color: var(--muted); font-size: 14.5px; margin-top: 14px; max-width: 760px }
+    .intro.collapsed { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden }
+    .introtoggle { color: var(--red); font-weight: 600; font-size: 13.5px; cursor: pointer; background: none; border: none; padding: 4px 0 }
+
+    /* ===== LAYOUT ===== */
+    .main { padding: 26px 20px 60px }
+    .toolbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 18px }
+    .tabs { display: flex; gap: 8px; flex-wrap: wrap }
+    .tab { background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 8px 16px; font-weight: 600; font-size: 13.5px; cursor: pointer; color: var(--muted) }
+    .tab.act { background: var(--grad); color: #fff; border-color: transparent }
+    .search { margin-left: auto; position: relative }
+    .search input { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 10px 16px 10px 38px; font-family: inherit; font-size: 14px; width: 260px; max-width: 60vw; color: var(--txt) }
+    .search input:focus { outline: none; border-color: var(--gold) }
+    .search .si { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted) }
+
+    .layout { display: grid; grid-template-columns: 400px 1fr; gap: 22px; align-items: start }
+    .joblist { display: flex; flex-direction: column; gap: 12px }
+    .jcount { font-size: 13.5px; color: var(--muted); margin-bottom: 2px }
+    .jcard { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 15px 16px; cursor: pointer; transition: border-color .15s, box-shadow .15s, transform .1s }
+    .jcard:hover { border-color: var(--gold); box-shadow: 0 12px 26px -16px rgba(198, 147, 32, .5) }
+    .jcard.act { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(212, 175, 55, .35) }
+    .jcard h3 { font-size: 16px; font-weight: 700; line-height: 1.3 }
+    .jcard .sal { color: var(--green); font-weight: 700; font-size: 14px; margin-top: 4px }
+    .jcard .meta { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 8px; font-size: 13px; color: var(--muted) }
+    .jcard .meta span { display: inline-flex; align-items: center; gap: 5px }
+    .jcard .dept { display: inline-block; margin-top: 9px; font-size: 11.5px; font-weight: 600; color: var(--red); background: rgba(212, 175, 55, .14); border-radius: 999px; padding: 3px 10px }
+
+    /* detail */
+    .detail { position: sticky; top: 90px; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 26px 28px; min-height: 320px }
+    .detail .dtitle { font-family: var(--head); font-size: 24px; font-weight: 800; line-height: 1.2 }
+    .detail .dsal { color: var(--green); font-weight: 800; font-size: 18px; margin-top: 8px }
+    .dmeta { display: flex; flex-wrap: wrap; gap: 12px; margin: 14px 0 4px }
+    .dmeta .mi { background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 9px 13px; font-size: 13.5px; min-width: 140px }
+    .dmeta .mi .k { color: var(--muted); font-size: 12px }
+    .dmeta .mi .v { font-weight: 700 }
+    .dactions { display: flex; gap: 10px; flex-wrap: wrap; margin: 18px 0 6px }
+    .ddesc { margin-top: 14px; border-top: 1px dashed var(--line); padding-top: 16px }
+    .ddesc h4 { font-family: var(--head); font-size: 17px; font-weight: 800; color: var(--red); margin: 18px 0 8px }
+    .ddesc h4:first-child { margin-top: 0 }
+    .ddesc ul { margin: 0 0 6px; padding-left: 4px; list-style: none }
+    .ddesc li { position: relative; padding-left: 20px; margin-bottom: 6px; font-size: 14.5px }
+    .ddesc li::before { content: "•"; position: absolute; left: 4px; color: var(--gold); font-weight: 900 }
+    .ddesc p { font-size: 14.5px; margin-bottom: 8px }
+    .backbtn { display: none; background: none; border: none; color: var(--red); font-weight: 700; font-size: 14px; cursor: pointer; margin-bottom: 12px }
+    .empty { color: var(--muted); text-align: center; padding: 60px 20px }
+
+    .foot { border-top: 1px solid var(--line); padding: 24px 20px; text-align: center; color: var(--muted); font-size: 13.5px }
+    .foot a { color: var(--red); font-weight: 600 }
+
+    @media (max-width: 880px) {
+      .layout { grid-template-columns: 1fr }
+      .detail { position: fixed; inset: 0; z-index: 80; border-radius: 0; overflow-y: auto; display: none; padding: 20px }
+      .detail.open { display: block }
+      .backbtn { display: inline-flex; align-items: center; gap: 6px }
+      .navlink { display: none }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="wrap nav">
+      <a href="index.html" class="brand">
+        <img src="images/logo-ttvh.jpg" alt="Thịnh Thế Vinh Hoa" />
+        <div class="nm">Thịnh Thế Vinh Hoa<small>Vững thời - Sáng vận - Đẹp danh</small></div>
+      </a>
+      <div class="nav-cta">
+        <a href="index.html" class="navlink">Trang chủ</a>
+        <a href="dao-tao.html" class="navlink">Đăng ký đào tạo</a>
+        <a href="index.html#ungtuyen" class="btn btn-primary">Ứng tuyển ngay</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- COMPANY HERO -->
+  <section class="chero">
+    <div class="wrap">
+      <img src="images/logo-ttvh.jpg" alt="Thịnh Thế Vinh Hoa F&B Group" class="logo" />
+      <div class="ci">
+        <h1>Công Ty Cổ Phần Thịnh Thế Vinh Hoa</h1>
+        <div class="tag">MayCha · Hồng Trà Sữa Tam Hảo · Gà Giòn Sốt Ba Cô Gái · Trà Hú</div>
+        <div class="stats">
+          <span class="chip"><b>200+</b> chi nhánh toàn quốc</span>
+          <span class="chip"><b>4</b> thương hiệu F&amp;B</span>
+          <span class="chip" id="jobChip"><b>—</b> vị trí đang tuyển</span>
+        </div>
+        <p class="intro collapsed" id="intro">Thịnh Thế Vinh Hoa là đơn vị đang sở hữu và vận hành các thương hiệu nổi tiếng trên thị trường: Chuỗi Trà Sữa MayCha, Chuỗi Hồng Trà Sữa Tam Hảo, Gà Giòn Sốt Ba Cô Gái và Trà Hú. Chúng tôi hân hạnh trở thành một trong nhiều địa điểm yêu thích của giới trẻ khi muốn thưởng thức những thức uống thơm ngon. Qua nhiều năm xây dựng và phát triển, tính đến hiện tại MayCha và Tam Hảo đã sở hữu hơn 200 chi nhánh tại TP. Hồ Chí Minh, Đồng Nai, Bình Dương, Bà Rịa - Vũng Tàu, Long An, Tiền Giang, An Giang, Cần Thơ, Lâm Đồng, Đà Nẵng, Huế và nhiều tỉnh thành khác — vẫn đang tiếp tục mở rộng. Với mục tiêu nhân rộng mô hình và phát triển cửa hàng mới liên tục trong các năm tiếp theo, chúng tôi mong muốn có mặt khắp mọi nơi để phục vụ khách hàng.</p>
+        <button class="introtoggle" id="introToggle">Xem thêm ▾</button>
+      </div>
+    </div>
+  </section>
+
+  <main class="main wrap">
+    <div class="toolbar">
+      <div class="tabs" id="tabs">
+        <button class="tab act" data-dept="">Tất cả</button>
+        <button class="tab" data-dept="Cửa hàng">Cửa hàng</button>
+        <button class="tab" data-dept="Văn phòng">Văn phòng</button>
+        <button class="tab" data-dept="Khối sản xuất">Khối sản xuất</button>
+      </div>
+      <div class="search">
+        <span class="si">🔍</span>
+        <input type="text" id="q" placeholder="Tìm theo tên công việc…" />
+      </div>
+    </div>
+
+    <div class="layout">
+      <div>
+        <div class="jcount" id="jcount"></div>
+        <div class="joblist" id="joblist"></div>
+      </div>
+      <div class="detail" id="detail">
+        <div class="empty">Đang tải danh sách công việc…</div>
+      </div>
+    </div>
+  </main>
+
+  <div class="foot">
+    Nguồn tin tuyển dụng chính thức ·
+    <a href="index.html">Trang chủ</a> ·
+    <a href="dao-tao.html">Đăng ký đào tạo</a>
+  </div>
+
+  <script>
+    var JOBS = [], filtered = [], curDept = '', curQ = '', selId = null;
+    var listEl = document.getElementById('joblist');
+    var detailEl = document.getElementById('detail');
+    var countEl = document.getElementById('jcount');
+
+    function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    function dmy(s) { var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s || ''); return m ? (m[3] + '/' + m[2] + '/' + m[1]) : (s || ''); }
+
+    // Render mô tả: tiêu đề mục in đậm, gạch đầu dòng, đoạn văn
+    var HEADINGS = ['Mô tả công việc', 'Yêu cầu ứng viên', 'Quyền lợi được hưởng', 'Quyền lợi', 'Chi tiết công việc:', 'Địa điểm làm việc', 'Thời gian làm việc'];
+    function renderDesc(txt) {
+      var lines = String(txt || '').split('\n').map(function (s) { return s.trim(); }).filter(Boolean);
+      var html = '', inUl = false;
+      function closeUl() { if (inUl) { html += '</ul>'; inUl = false; } }
+      lines.forEach(function (ln) {
+        var isHead = HEADINGS.indexOf(ln) >= 0 || (/^Đối với/.test(ln) && ln.length < 40);
+        if (ln.charAt(0) === '•') {
+          if (!inUl) { html += '<ul>'; inUl = true; }
+          html += '<li>' + esc(ln.replace(/^•\s*/, '')) + '</li>';
+        } else if (isHead) {
+          closeUl(); html += '<h4>' + esc(ln) + '</h4>';
+        } else {
+          closeUl(); html += '<p>' + esc(ln) + '</p>';
+        }
+      });
+      closeUl();
+      return html;
+    }
+
+    function applyFilter() {
+      filtered = JOBS.filter(function (j) {
+        if (curDept && j.dept !== curDept) return false;
+        if (curQ && (j.title || '').toLowerCase().indexOf(curQ) < 0) return false;
+        return true;
+      });
+      renderList();
+    }
+
+    function renderList() {
+      countEl.textContent = filtered.length + ' công việc';
+      if (!filtered.length) { listEl.innerHTML = '<div class="empty">Không có công việc phù hợp.</div>'; return; }
+      listEl.innerHTML = filtered.map(function (j) {
+        return '<div class="jcard' + (String(j.id) === String(selId) ? ' act' : '') + '" data-id="' + j.id + '">' +
+          '<h3>' + esc(j.title) + '</h3>' +
+          (j.salary ? '<div class="sal">' + esc(j.salary) + '</div>' : '') +
+          '<div class="meta">' +
+          (j.location ? '<span>📍 ' + esc(j.location) + '</span>' : '') +
+          (j.jobtype ? '<span>🕒 ' + esc(j.jobtype) + '</span>' : '') +
+          (j.deadline ? '<span>⏳ Hạn: ' + esc(dmy(j.deadline)) + '</span>' : '') +
+          '</div>' +
+          (j.dept ? '<span class="dept">' + esc(j.dept) + '</span>' : '') +
+          '</div>';
+      }).join('');
+    }
+
+    function selectJob(id) {
+      var j = JOBS.find(function (x) { return String(x.id) === String(id); });
+      if (!j) return;
+      selId = id;
+      document.querySelectorAll('.jcard').forEach(function (c) { c.classList.toggle('act', c.getAttribute('data-id') === String(id)); });
+      detailEl.innerHTML =
+        '<button class="backbtn" id="backBtn">← Quay lại danh sách</button>' +
+        '<div class="dtitle">' + esc(j.title) + '</div>' +
+        (j.salary ? '<div class="dsal">' + esc(j.salary) + '</div>' : '') +
+        '<div class="dmeta">' +
+        (j.location ? '<div class="mi"><div class="k">Địa điểm</div><div class="v">' + esc(j.location) + '</div></div>' : '') +
+        (j.jobtype ? '<div class="mi"><div class="k">Hình thức</div><div class="v">' + esc(j.jobtype) + '</div></div>' : '') +
+        (j.deadline ? '<div class="mi"><div class="k">Hạn nộp</div><div class="v">' + esc(dmy(j.deadline)) + '</div></div>' : '') +
+        (j.dept ? '<div class="mi"><div class="k">Khối</div><div class="v">' + esc(j.dept) + '</div></div>' : '') +
+        '</div>' +
+        '<div class="dactions">' +
+        '<a href="index.html#ungtuyen" class="btn btn-primary">Ứng tuyển ngay →</a>' +
+        '<a href="dao-tao.html" class="btn btn-ghost">Đăng ký đào tạo</a>' +
+        '</div>' +
+        '<div class="ddesc">' + renderDesc(j.description) + '</div>';
+      detailEl.classList.add('open');
+      detailEl.scrollTop = 0;
+      var bb = document.getElementById('backBtn');
+      if (bb) bb.addEventListener('click', function () { detailEl.classList.remove('open'); });
+    }
+
+    listEl.addEventListener('click', function (e) {
+      var card = e.target.closest('.jcard'); if (card) selectJob(card.getAttribute('data-id'));
+    });
+    document.getElementById('tabs').addEventListener('click', function (e) {
+      var t = e.target.closest('.tab'); if (!t) return;
+      document.querySelectorAll('.tab').forEach(function (x) { x.classList.remove('act'); });
+      t.classList.add('act'); curDept = t.getAttribute('data-dept'); applyFilter();
+    });
+    document.getElementById('q').addEventListener('input', function () { curQ = this.value.trim().toLowerCase(); applyFilter(); });
+
+    var intro = document.getElementById('intro'), iToggle = document.getElementById('introToggle');
+    iToggle.addEventListener('click', function () {
+      intro.classList.toggle('collapsed');
+      iToggle.textContent = intro.classList.contains('collapsed') ? 'Xem thêm ▾' : 'Thu gọn ▴';
+    });
+
+    fetch('/api/jobs').then(function (r) { return r.json(); }).then(function (d) {
+      JOBS = (d && d.rows) || [];
+      document.querySelector('#jobChip b').textContent = JOBS.length;
+      applyFilter();
+      if (JOBS.length && window.innerWidth > 880) selectJob(JOBS[0].id);
+      else detailEl.innerHTML = '<div class="empty">Chọn một công việc để xem mô tả chi tiết.</div>';
+    }).catch(function () {
+      detailEl.innerHTML = '<div class="empty">Không tải được danh sách công việc.</div>';
+    });
+  </script>
+</body>
+
+</html>
