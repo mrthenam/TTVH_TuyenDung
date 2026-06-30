@@ -55,9 +55,9 @@ function brandFromName(name) {
   return null;
 }
 
-async function getStores(cfg) {
+async function getStores(cfg, force) {
   const now = Date.now();
-  if (cache && now - cacheAt < TTL) return cache;
+  if (!force && cache && now - cacheAt < TTL) return cache;
   const url = process.env.STORES_SHEET_CSV || (cfg && cfg.stores && cfg.stores.sheetCsv) || DEFAULT_CSV;
   try {
     const rows = parseCsv(await fetchText(url));

@@ -246,6 +246,24 @@ async function handleChat(req, res, url, loadConfig) {
       // Lịch sử chỉnh sửa / thông báo
       if (p === '/api/agent/log' && req.method === 'GET') return sendJson(res, 200, { rows: await db.listTrainingLog(+url.searchParams.get('limit') || 100) });
 
+      // Cấu hình form đào tạo
+      if (p === '/api/agent/trainingform' && req.method === 'GET') {
+        const v = await db.getSetting('trainingform');
+        return sendJson(res, 200, (v && JSON.parse(v)) || {});
+      }
+      if (p === '/api/agent/trainingform' && req.method === 'POST') {
+        const b = await readBody(req) || {};
+        const cfg = {
+          title: (b.title || '').toString(),
+          desc: (b.desc || '').toString(),
+          dateNote: (b.dateNote || '').toString(),
+          positions: Array.isArray(b.positions) ? b.positions.map(String).map(s => s.trim()).filter(Boolean) : [],
+          modes: Array.isArray(b.modes) ? b.modes.map(String).map(s => s.trim()).filter(Boolean) : []
+        };
+        await db.setSetting('trainingform', JSON.stringify(cfg));
+        return sendJson(res, 200, { ok: true });
+      }
+
       // Khoảnh khắc Vinh Hoa (gallery)
       if (p === '/api/agent/gallery' && req.method === 'GET') return sendJson(res, 200, { rows: await db.listGallery() });
       if (p === '/api/agent/gallery' && req.method === 'POST') {

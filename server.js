@@ -432,8 +432,13 @@ const server = http.createServer(async (req, res) => {
   }
   // Danh sách cửa hàng theo thương hiệu (đọc từ Google Sheet, cache) — cho form đào tạo
   if (url.pathname === '/api/stores' && req.method === 'GET') {
-    try { return sendJson(res, 200, await stores.getStores(loadConfig())); }
+    try { return sendJson(res, 200, await stores.getStores(loadConfig(), url.searchParams.get('refresh') === '1')); }
     catch (e) { return sendJson(res, 200, {}); }
+  }
+  // Cấu hình form đào tạo (công khai cho trang dao-tao.html)
+  if (url.pathname === '/api/trainingform' && req.method === 'GET') {
+    try { const v = await db.getSetting('trainingform'); return sendJson(res, 200, (v && JSON.parse(v)) || TRAININGFORM_DEFAULTS); }
+    catch (e) { return sendJson(res, 200, TRAININGFORM_DEFAULTS); }
   }
   // Khoảnh khắc Vinh Hoa (công khai cho carousel trang chủ)
   if (url.pathname === '/api/gallery' && req.method === 'GET') {
@@ -560,6 +565,14 @@ const RECRUIT_DEFAULTS = [
 ].concat(DEPT_OFFICE.map(function (d) { return { brand: d.brand, name: d.name, title: 'Thông tin tuyển dụng — ' + d.name, content: deptContent(d.role, 'tại văn phòng TP.HCM') }; }))
   .concat(DEPT_PROD.map(function (d) { return { brand: d.brand, name: d.name, title: 'Thông tin tuyển dụng — ' + d.name, content: deptContent(d.role, d.place) }; }));
 
+const TRAININGFORM_DEFAULTS = {
+  title: 'TTVH - Thông Tin Đăng Ký Tham Gia Lớp Đào Tạo Đầu Vào',
+  desc: 'Khi bạn gửi biểu mẫu này, nó sẽ không tự động thu thập các chi tiết của bạn như tên và địa chỉ email trừ khi bạn tự cung cấp nó.',
+  dateNote: '(Lưu ý: Ngày bắt đầu lớp đào tạo là cố định Thứ 2 hoặc Thứ 5 hàng tuần, bạn vui lòng xem lịch hiện tại rồi chọn một trong hai ngày này. Ví dụ: Bạn phỏng vấn đạt vào ngày Thứ 6 - 18/12, bạn có thể chọn đào tạo vào Thứ 2 - 21/12 HOẶC Thứ 5 - 24/12 tùy theo lịch rảnh của bạn)',
+  positions: ['Quản Lý (SM)', 'Giám Sát (SL)', 'Tổ Trưởng (ASF)', 'Nhân Viên Full-time (SF)', 'Nhân Viên Part-time (Staff)'],
+  modes: ['Tham gia trực tiếp toàn bộ', 'Tham gia Online ngày đầu - trực tiếp ngày thứ hai', 'Tham gia Online toàn bộ']
+};
+
 chatbot.init()
   .then(() => {
     const bc = cfg.oneOffice && cfg.oneOffice.create && cfg.oneOffice.create.brandCampaigns;
@@ -573,6 +586,7 @@ chatbot.init()
     'images/anh vinh danh/4.jpg',
     'images/anh vinh danh/5.jpg'
   ]))
+  .then(async () => { if (!(await db.getSetting('trainingform'))) await db.setSetting('trainingform', JSON.stringify(TRAININGFORM_DEFAULTS)); })
   .catch((e) => console.error(' [db] init lỗi:', e.message));
 server.listen(PORT, () => {
   console.log('--------------------------------------------------');
