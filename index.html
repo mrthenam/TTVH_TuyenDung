@@ -1380,8 +1380,10 @@
 
     /* KHOẢNH KHẮC VINH HOA (carousel) */
     .kk-wrap{position:relative;max-width:940px;margin:0 auto}
-    .kk-viewport{display:flex;align-items:center;justify-content:center;background:var(--grad-soft);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;min-height:260px;box-shadow:var(--shadow)}
-    .kk-viewport img{max-width:100%;max-height:620px;width:auto;height:auto;display:block;transition:opacity .35s ease}
+    /* Khung CỐ ĐỊNH; nền mờ phủ kín khung theo ảnh; ảnh chính nằm trên (contain) */
+    .kk-viewport{position:relative;width:100%;aspect-ratio:16/9;max-height:72vh;background:#0e1116;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+    .kk-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(26px) brightness(.78);transform:scale(1.18);transition:opacity .35s ease}
+    .kk-img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;z-index:1;transition:opacity .35s ease}
     .kk-arrow{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:48px;border-radius:50%;border:1px solid var(--line-2);background:rgba(255,255,255,.92);color:var(--txt);font-size:28px;line-height:1;cursor:pointer;display:grid;place-items:center;z-index:2;box-shadow:0 10px 24px -10px rgba(0,0,0,.28);transition:background .15s,transform .15s}
     .kk-arrow:hover{background:#fff;transform:translateY(-50%) scale(1.06)}
     .kk-prev{left:-12px}
@@ -1856,7 +1858,7 @@
       </div>
       <div class="kk-wrap fade" id="kkWrap" style="display:none">
         <button type="button" class="kk-arrow kk-prev" id="kkPrev" aria-label="Ảnh trước">‹</button>
-        <div class="kk-viewport"><img id="kkImg" alt="Khoảnh khắc Vinh Hoa" /></div>
+        <div class="kk-viewport"><img class="kk-bg" id="kkBg" alt="" aria-hidden="true" /><img class="kk-img" id="kkImg" alt="Khoảnh khắc Vinh Hoa" /></div>
         <button type="button" class="kk-arrow kk-next" id="kkNext" aria-label="Ảnh sau">›</button>
         <div class="kk-dots" id="kkDots"></div>
       </div>
@@ -1928,7 +1930,7 @@
     (function() {
       var wrap = document.getElementById('kkWrap');
       if (!wrap) return;
-      var img = document.getElementById('kkImg'), dots = document.getElementById('kkDots');
+      var img = document.getElementById('kkImg'), bg = document.getElementById('kkBg'), dots = document.getElementById('kkDots');
       var slides = [], idx = 0, timer = null;
       fetch('/api/gallery').then(function(r) { return r.json(); }).then(function(d) {
         slides = (d.rows || []).map(function(x) { return x.url; }).filter(Boolean);
@@ -1936,13 +1938,13 @@
         wrap.style.display = 'block';
         dots.innerHTML = slides.map(function(_, i) { return '<button type="button" class="kk-dot' + (i === 0 ? ' act' : '') + '" data-i="' + i + '" aria-label="Ảnh ' + (i + 1) + '"></button>'; }).join('');
         [].forEach.call(dots.children, function(b) { b.onclick = function() { show(+b.getAttribute('data-i')); restart(); }; });
-        img.src = slides[0]; img.style.opacity = '1';
+        img.src = slides[0]; bg.src = slides[0]; img.style.opacity = '1';
         start();
       }).catch(function() {});
       function show(i) {
         idx = (i + slides.length) % slides.length;
         img.style.opacity = '0';
-        setTimeout(function() { img.src = slides[idx]; img.style.opacity = '1'; }, 180);
+        setTimeout(function() { img.src = slides[idx]; bg.src = slides[idx]; img.style.opacity = '1'; }, 180);
         [].forEach.call(dots.children, function(b, j) { b.classList.toggle('act', j === idx); });
       }
       function start() { timer = setInterval(function() { show(idx + 1); }, 10000); }
