@@ -124,7 +124,16 @@
   .ok-panel h3{color:var(--red);font-size:24px;font-weight:700;margin-bottom:12px}
   .ok-panel p{color:var(--muted);max-width:460px;margin:0 auto 24px}
   .ok-panel .btn-send{background:var(--btn)}
+  /* TomSelect khớp giao diện form */
+  .ts-wrapper .ts-control{border:1px solid var(--line-2);border-radius:10px;padding:9px 13px;font-family:inherit;font-size:15px;background:#fff;min-height:46px;box-shadow:none}
+  .ts-wrapper.focus .ts-control{border-color:var(--focus);box-shadow:0 0 0 1px var(--focus)}
+  .ts-wrapper.err .ts-control{border-color:var(--red);box-shadow:0 0 0 1px var(--red)}
+  .ts-dropdown{border:1px solid var(--line-2);border-radius:10px;font-size:14.5px}
+  .ts-dropdown .active{background:var(--grad-soft);color:var(--txt)}
+  .ts-dropdown .option{padding:9px 13px}
 </style>
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 </head>
 <body>
 
@@ -205,116 +214,19 @@
       </div>
 
       <div class="q">
-        <div class="qlabel"><span class="num">9.</span>Cửa Hàng Bạn Làm Việc <span class="req">*</span></div>
-        <div class="hint">(Tên Cửa Hàng rất quan trọng, bạn cố gắng kiên nhẫn kéo đến cửa hàng của mình và lựa chọn chính xác nha. Nếu bạn cần hỗ trợ hãy liên hệ anh/chị Nhân Sự đã hẹn bạn phỏng vấn hoặc Anh/Chị quản lý ở cửa hàng)</div>
-        <select id="store" class="ans">
-          <option value="" disabled selected>Chọn câu trả lời của bạn</option>
-          <option>MC001-38 Trịnh Đình Trọng</option>
-          <option>MC002-41 Nguyễn Văn Nghi</option>
-          <option>MC003-214 Nguyễn Thượng Hiền</option>
-          <option>MC004-250 Nguyễn Tri Phương</option>
-          <option>MC005-65 Ngô Tất Tố</option>
-          <option>MC006-74 Đồng Đen</option>
-          <option>MC007-117 Cao Thắng</option>
-          <option>MC008-197 Tôn Đản</option>
-          <option>MC010-45 Vạn Kiếp</option>
-          <option>MC011-33 Thạch Lam</option>
-          <option>MC012-92B Hậu Giang</option>
-          <option>MC013-86 Nguyễn Huệ</option>
-          <option>MC017-161 Đường Số 1, P. An Lạc</option>
-          <option>MC018-483 Lê Văn Sỹ</option>
-          <option>MC021-11 Trần Quốc Toản</option>
-          <option>MC022-139 Cao Đạt</option>
-          <option>MC023-5A Thích Quảng Đức</option>
-          <option>MC024-227 Thống Nhất</option>
-          <option>MC025-177 Tô Hiến Thành</option>
-          <option>MC026-479 Điện Biên Phủ</option>
-          <option>MC027-137 Bờ Bao Tân Thắng</option>
-          <option>MC028-181 Tân Quy</option>
-          <option>MC029-127 Hà Tôn Quyền</option>
-          <option>MC030-269 Tân Hòa Đông</option>
-          <option>MC035-742 Lê Đức Thọ</option>
-          <option>MC036-319 Phạm Văn Chiêu</option>
-          <option>MC037-128 Phổ Quang</option>
-          <option>MC039-122 Lê Văn Thọ</option>
-          <option>MC041-161 Nguyễn Duy Trinh</option>
-          <option>MC043-47B Phan Huy Ích</option>
-          <option>MC044-9 Phan Văn Hớn</option>
-          <option>MC047-14/1B Nguyễn Văn Quá</option>
-          <option>MC048-390 Phan Huy Ích</option>
-          <option>MC050-12 Tô Ngọc Vân</option>
-          <option>MC051-21 Rạch Bùng Binh</option>
-          <option>MC052-73/1 Nguyễn Ảnh Thủ</option>
-          <option>MC053-55 Cô Bắc</option>
-          <option>MC055-160 Nguyễn Thị Nhỏ</option>
-          <option>MC057-11 Phạm Hữu Lầu</option>
-          <option>MC058-56 Hoàng Diệu 2</option>
-          <option>MC059-334 Đỗ Xuân Hợp</option>
-          <option>MC060-123 Nơ Trang Long</option>
-          <option>MC061-79 Lạc Long Quân</option>
-          <option>MC062-73 Lê Văn Việt</option>
-          <option>MC063-198 Nguyễn Xí</option>
-          <option>MC064-58 Bành Văn Trân</option>
-          <option>MC065-398 Nguyễn Văn Tăng</option>
-          <option>MC066-66 Nguyễn Ảnh Thủ</option>
-          <option>MC067-9 CMT8, Thuận An</option>
-          <option>MC068-880 Đường 22/12, Thuận An</option>
-          <option>MC069-62 Nguyễn An Ninh, Dĩ An</option>
-          <option>MC070-318D Phạm Hùng</option>
-          <option>MC071- 5/9 Nguyễn Ái Quốc, Phường Long Bình</option>
-          <option>MC072-245 Tân Hương</option>
-          <option>MC073-849 Tỉnh lộ 10</option>
-          <option>MC074-235 Phạm Văn Thuận, Phường Tam Hiệp</option>
-          <option>MC075-111 Lê Trọng Tấn</option>
-          <option>MC076-145 Lê Văn Quới</option>
-          <option>MC077-165 Bình Phú</option>
-          <option>MC078-490 Huỳnh Tấn Phát</option>
-          <option>MC079-2/4 Tôn Đức Thắng, Long Xuyên</option>
-          <option>MC080-66 Hiệp Bình, Thủ Đức</option>
-          <option>MC081-214 Nam Kỳ Khởi Nghĩa, Mỹ Tho</option>
-          <option>MC083-236 Hùng Vương, Tân An</option>
-          <option>MC085-58/2A Quang Trung, Hóc Môn</option>
-          <option>MC088-179A Phú Lợi, Thủ Dầu Một</option>
-          <option>MC089-15C Mậu Thân, Cần Thơ</option>
-          <option>MC090-16/1 Phan Văn Hớn</option>
-          <option>MC092-58 Nguyễn Trung Trực, Kiên Giang</option>
-          <option>MC096-38 Đường 3, Thủ Đức</option>
-          <option>MC097-30/18 Quốc lộ 50</option>
-          <option>MC098-185 Bùi Đình Tuý</option>
-          <option>MC099-182 Tân Sơn Nhì</option>
-          <option>MC101-421 Hồ Học Lãm</option>
-          <option>MC102-213E Nguyễn Văn Cừ</option>
-          <option>MC103-18 Lê Văn Lương</option>
-          <option>MC104-500 Cách Mạng Tháng Tám, Thủ Dầu Một</option>
-          <option>MC105-312 Bùi Thị Xuân, Đà Lạt</option>
-          <option>MC106-Tòa A3-A5, Khu B, Ký Túc Xá ĐHQG, Dĩ An</option>
-          <option>MC107- Yola, 52 Hoàng Trọng Mậu, Quận 7</option>
-          <option>MC108-27A Quốc Hương</option>
-          <option>MC109-192 Nguyễn Thị Tú</option>
-          <option>MC110- 138 Bình Quới</option>
-          <option>MC113-Go An Lạc, 1231 QL1A, P. Bình Trị Đông</option>
-          <option>MC115-406 Nguyễn Tri Phương</option>
-          <option>MC117-11 Khu Hòa Bình, Đà Lạt</option>
-          <option>MC118-The Garden Mall</option>
-          <option>MC121-90 Bùi Hữu Nghĩa</option>
-          <option>MC122-607 Hà Huy Giáp</option>
-          <option>MC124-Vạn Hạnh Mall</option>
-          <option>MC125-199 Đinh Đức Thiện</option>
-          <option>MC128-2B1 Ngô Văn Năm</option>
-          <option>MC129-91/1 Lâm Văn Bền</option>
-          <option>MC130-Viettel Tower, 283 Cách Mạng Tháng Tám</option>
-          <option>MC131-37 Tạ Quang Bửu</option>
-          <option>MC132-39 Nguyễn Huệ</option>
-          <option>MC134-64 Nguyễn Gia Trí</option>
-          <option>MC135-Co.opMart Thống Nhất, Dĩ An</option>
-          <option>MC136-234 Phan Trung, Biên Hòa</option>
-          <option>MC137-Aeon Tân Phú</option>
-          <option>MC138-77/6 Tô Vĩnh Diện, Dĩ An (77 Lương Định Của)</option>
-          <option>MC139-Lotte Quận 7, 469 Nguyễn Hữu Thọ</option>
-          <option>MC140-394 Dương Quảng Hàm</option>
-          <option value="__other__">Khác (chưa có trong danh sách)</option>
+        <div class="qlabel"><span class="num">9.</span>Thương Hiệu Bạn Ứng Tuyển <span class="req">*</span></div>
+        <select id="brand" class="ans" style="max-width:520px">
+          <option value="" disabled selected>Chọn thương hiệu</option>
+          <option value="Trà Sữa MayCha">Trà Sữa MayCha</option>
+          <option value="Hồng Trà Sữa Tam Hảo">Hồng Trà Sữa Tam Hảo</option>
+          <option value="Gà Giòn Sốt Ba Cô Gái">Gà Giòn Sốt Ba Cô Gái</option>
         </select>
-        <input type="text" id="store_other" class="ans" style="max-width:520px;margin-top:10px;display:none" placeholder="Nhập tên cửa hàng của bạn" />
+      </div>
+
+      <div class="q">
+        <div class="qlabel"><span class="num">10.</span>Cửa Hàng Bạn Làm Việc <span class="req">*</span></div>
+        <div class="hint">(Chọn thương hiệu trước, sau đó gõ để tìm và chọn cửa hàng của bạn. Tên cửa hàng rất quan trọng, vui lòng chọn chính xác.)</div>
+        <select id="store" class="ans" placeholder="Chọn thương hiệu trước…"></select>
       </div>
 
       <div id="formErr">Vui lòng điền đầy đủ các mục bắt buộc có dấu (*).</div>
@@ -366,12 +278,29 @@
 
   document.querySelectorAll('.opts').forEach(function(g){ g.addEventListener('change',function(){ g.classList.remove('err'); }); });
 
-  // cửa hàng "Khác" -> hiện ô nhập
-  var storeSel=document.getElementById('store'), storeOther=document.getElementById('store_other');
-  storeSel.addEventListener('change',function(){
-    storeOther.style.display = storeSel.value==='__other__' ? 'block':'none';
-    storeSel.classList.remove('err');
+  // ===== Cửa hàng theo thương hiệu + tìm kiếm (TomSelect) =====
+  var MAYCHA_STORES=["MC001-38 Trịnh Đình Trọng","MC002-41 Nguyễn Văn Nghi","MC003-214 Nguyễn Thượng Hiền","MC004-250 Nguyễn Tri Phương","MC005-65 Ngô Tất Tố","MC006-74 Đồng Đen","MC007-117 Cao Thắng","MC008-197 Tôn Đản","MC010-45 Vạn Kiếp","MC011-33 Thạch Lam","MC012-92B Hậu Giang","MC013-86 Nguyễn Huệ","MC017-161 Đường Số 1, P. An Lạc","MC018-483 Lê Văn Sỹ","MC021-11 Trần Quốc Toản","MC022-139 Cao Đạt","MC023-5A Thích Quảng Đức","MC024-227 Thống Nhất","MC025-177 Tô Hiến Thành","MC026-479 Điện Biên Phủ","MC027-137 Bờ Bao Tân Thắng","MC028-181 Tân Quy","MC029-127 Hà Tôn Quyền","MC030-269 Tân Hòa Đông","MC035-742 Lê Đức Thọ","MC036-319 Phạm Văn Chiêu","MC037-128 Phổ Quang","MC039-122 Lê Văn Thọ","MC041-161 Nguyễn Duy Trinh","MC043-47B Phan Huy Ích","MC044-9 Phan Văn Hớn","MC047-14/1B Nguyễn Văn Quá","MC048-390 Phan Huy Ích","MC050-12 Tô Ngọc Vân","MC051-21 Rạch Bùng Binh","MC052-73/1 Nguyễn Ảnh Thủ","MC053-55 Cô Bắc","MC055-160 Nguyễn Thị Nhỏ","MC057-11 Phạm Hữu Lầu","MC058-56 Hoàng Diệu 2","MC059-334 Đỗ Xuân Hợp","MC060-123 Nơ Trang Long","MC061-79 Lạc Long Quân","MC062-73 Lê Văn Việt","MC063-198 Nguyễn Xí","MC064-58 Bành Văn Trân","MC065-398 Nguyễn Văn Tăng","MC066-66 Nguyễn Ảnh Thủ","MC067-9 CMT8, Thuận An","MC068-880 Đường 22/12, Thuận An","MC069-62 Nguyễn An Ninh, Dĩ An","MC070-318D Phạm Hùng","MC071- 5/9 Nguyễn Ái Quốc, Phường Long Bình","MC072-245 Tân Hương","MC073-849 Tỉnh lộ 10","MC074-235 Phạm Văn Thuận, Phường Tam Hiệp","MC075-111 Lê Trọng Tấn","MC076-145 Lê Văn Quới","MC077-165 Bình Phú","MC078-490 Huỳnh Tấn Phát","MC079-2/4 Tôn Đức Thắng, Long Xuyên","MC080-66 Hiệp Bình, Thủ Đức","MC081-214 Nam Kỳ Khởi Nghĩa, Mỹ Tho","MC083-236 Hùng Vương, Tân An","MC085-58/2A Quang Trung, Hóc Môn","MC088-179A Phú Lợi, Thủ Dầu Một","MC089-15C Mậu Thân, Cần Thơ","MC090-16/1 Phan Văn Hớn","MC092-58 Nguyễn Trung Trực, Kiên Giang","MC096-38 Đường 3, Thủ Đức","MC097-30/18 Quốc lộ 50","MC098-185 Bùi Đình Tuý","MC099-182 Tân Sơn Nhì","MC101-421 Hồ Học Lãm","MC102-213E Nguyễn Văn Cừ","MC103-18 Lê Văn Lương","MC104-500 Cách Mạng Tháng Tám, Thủ Dầu Một","MC105-312 Bùi Thị Xuân, Đà Lạt","MC106-Tòa A3-A5, Khu B, Ký Túc Xá ĐHQG, Dĩ An","MC107- Yola, 52 Hoàng Trọng Mậu, Quận 7","MC108-27A Quốc Hương","MC109-192 Nguyễn Thị Tú","MC110- 138 Bình Quới","MC113-Go An Lạc, 1231 QL1A, P. Bình Trị Đông","MC115-406 Nguyễn Tri Phương","MC117-11 Khu Hòa Bình, Đà Lạt","MC118-The Garden Mall","MC121-90 Bùi Hữu Nghĩa","MC122-607 Hà Huy Giáp","MC124-Vạn Hạnh Mall","MC125-199 Đinh Đức Thiện","MC128-2B1 Ngô Văn Năm","MC129-91/1 Lâm Văn Bền","MC130-Viettel Tower, 283 Cách Mạng Tháng Tám","MC131-37 Tạ Quang Bửu","MC132-39 Nguyễn Huệ","MC134-64 Nguyễn Gia Trí","MC135-Co.opMart Thống Nhất, Dĩ An","MC136-234 Phan Trung, Biên Hòa","MC137-Aeon Tân Phú","MC138-77/6 Tô Vĩnh Diện, Dĩ An (77 Lương Định Của)","MC139-Lotte Quận 7, 469 Nguyễn Hữu Thọ","MC140-394 Dương Quảng Hàm"];
+  var STORES={ 'Trà Sữa MayCha':MAYCHA_STORES, 'Hồng Trà Sữa Tam Hảo':[], 'Gà Giòn Sốt Ba Cô Gái':[] };
+  var brandSel=document.getElementById("brand");
+  var storeTS=new TomSelect("#store",{
+    maxOptions:1000, create:true, persist:false,
+    createFilter:function(s){ return s.trim().length>0; },
+    placeholder:"Chọn thương hiệu trước…",
+    render:{ no_results:function(){ return "<div class=\"no-results\">Không thấy — gõ rồi Enter để thêm cửa hàng của bạn.</div>"; } }
   });
+  storeTS.disable();
+  function fillStores(brand){
+    storeTS.clearOptions(); storeTS.clear(true);
+    var list=STORES[brand]||[];
+    list.forEach(function(s){ storeTS.addOption({value:s,text:s}); });
+    storeTS.refreshOptions(false);
+    if(brand){ storeTS.enable(); storeTS.settings.placeholder=list.length?"Gõ để tìm cửa hàng…":"Gõ tên cửa hàng của bạn…"; }
+    else { storeTS.disable(); storeTS.settings.placeholder="Chọn thương hiệu trước…"; }
+    var ctrl=storeTS.control_input; if(ctrl) ctrl.setAttribute("placeholder", storeTS.settings.placeholder);
+    storeTS.wrapper.classList.remove("err");
+  }
+  brandSel.addEventListener("change",function(){ brandSel.classList.remove("err"); fillStores(brandSel.value); });
+  storeTS.on("change",function(){ storeTS.wrapper.classList.remove("err"); });
 
   function val(id){ var el=document.getElementById(id); return el?(el.value||'').trim():''; }
   function radio(name){ var el=form.querySelector('input[name="'+name+'"]:checked'); return el?el.value:''; }
@@ -424,10 +353,12 @@
     // hình thức
     if(!radio('mode')){ ok=false; document.getElementById('opts-mode').classList.add('err'); if(!firstBad) firstBad=document.getElementById('opts-mode'); }
 
+    // thương hiệu
+    var brandVal=brandSel.value;
+    if(!brandVal){ ok=false; brandSel.classList.add('err'); if(!firstBad) firstBad=brandSel; }
     // cửa hàng
-    var storeVal=storeSel.value;
-    if(storeVal==='__other__') storeVal=storeOther.value.trim();
-    if(!storeVal || storeSel.value===''){ ok=false; storeSel.classList.add('err'); if(storeSel.value==='__other__') storeOther.classList.add('err'); if(!firstBad) firstBad=storeSel; }
+    var storeVal=(storeTS.getValue()||'').trim();
+    if(!storeVal){ ok=false; storeTS.wrapper.classList.add('err'); if(!firstBad) firstBad=storeTS.control_input||storeTS.wrapper; }
 
     if(!ok){
       fe.textContent='Vui lòng điền đầy đủ các mục bắt buộc có dấu (*).';
@@ -441,7 +372,7 @@
       name:val('name'), phone:val('phone'), email:val('email'),
       province:val('province'), district:val('district'),
       position:posVal, mode:radio('mode'),
-      sess_date:val('sess_date'), store:storeVal
+      sess_date:val('sess_date'), brand:brandVal, store:storeVal
     };
 
     var btn=form.querySelector('button[type="submit"]'); var old=btn.textContent;
@@ -468,11 +399,10 @@
 
   document.getElementById('againBtn').addEventListener('click',function(){
     form.reset();
-    document.getElementById('store_other').style.display='none';
     Object.keys(validators).forEach(function(id){ document.getElementById(id).classList.remove('valid','err'); setMsg(id,''); });
     document.getElementById('opts-position').classList.remove('err');
     document.getElementById('opts-mode').classList.remove('err');
-    document.getElementById('store').classList.remove('err');
+    brandSel.classList.remove('err'); fillStores('');
     okPanel.style.display='none'; form.style.display='block';
     window.scrollTo({top:0,behavior:'smooth'});
   });
