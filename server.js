@@ -18,6 +18,7 @@ const chatbot = require('./chatbot');
 const db = require('./db');
 const sheet = require('./sheet');
 const notify = require('./notify');
+const stores = require('./stores');
 
 const ROOT = __dirname;
 const CONFIG_PATH = path.join(ROOT, 'config.json');
@@ -428,6 +429,11 @@ const server = http.createServer(async (req, res) => {
   if (url.pathname === '/api/recruitment' && req.method === 'GET') {
     try { return sendJson(res, 200, { rows: await db.listRecruitment() }); }
     catch (e) { return sendJson(res, 200, { rows: [] }); }
+  }
+  // Danh sách cửa hàng theo thương hiệu (đọc từ Google Sheet, cache) — cho form đào tạo
+  if (url.pathname === '/api/stores' && req.method === 'GET') {
+    try { return sendJson(res, 200, await stores.getStores(loadConfig())); }
+    catch (e) { return sendJson(res, 200, {}); }
   }
   // Khoảnh khắc Vinh Hoa (công khai cho carousel trang chủ)
   if (url.pathname === '/api/gallery' && req.method === 'GET') {
