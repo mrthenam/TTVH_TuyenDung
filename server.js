@@ -262,7 +262,70 @@ function readBody(req) {
   });
 }
 
-// Tạo ứng viên mới trên 1Office từ dữ liệu form (đẩy vào Kanban).
+// Chuẩn hóa SĐT để so khớp (bỏ mọi ký tự không phải số).
+function normPhone(s) { return String(s == null ? '' : s).replace(/\D/g, ''); }
+
+// Tra cứu ứng viên trên 1Office theo SĐT (dùng bộ lọc keyword "s"). Trả về mảng bản ghi TRÙNG khớp SĐT.
+function oneOfficeFindByPhone(phoneRaw, cfg) {
+  return new Promise((resolve) => {
+    const o = cfg.oneOffice || {};
+    const phone = normPhone(phoneRaw);
+    if (!phone) return resolve([]);
+    const et = (o.endpointTokens && o.endpointTokens.candidates) || '';
+    const token = (et && !/^PASTE_|^$/.test(et)) ? et : o.token;
+    if (!token || /PASTE_|YOUR_/i.test(token)) return resolve([]);
+    const path = (o.endpoints && o.endpoints.candidates) || '/api/recruitment/candidate/gets';
+    let u;
+    try { u = /^https?:\/\//i.test(path) ? new URL(path) : new URL(path, o.baseUrl); }
+    catch (e) { return resolve([]); }
+    u.searchParams.set(o.tokenParam || 'access_token', token);
+    u.searchParams.set('limit', '20');
+    u.searchParams.set('filters', JSON.stringify([{ s: phoneRaw }]));
+    const lib = u.protocol === 'http:' ? http : https;
+    const rq = lib.get(u, (up) => {
+      let raw = ''; up.setEncoding('utf8'); up.on('data', (d) => (raw += d));
+      up.on('end', () => {
+        let arr = [];
+        try { const j = JSON.parse(raw); if (Array.isArray(j.data)) arr = j.data; } catch (e) {}
+        resolve(arr.filter((x) => normPhone(x.phone) === phone));
+      });
+    });
+    rq.on('error', () => resolve([]));
+    rq.setTimeout(15000, () => { rq.destroy(); resolve([]); });
+  });
+}
+
+// Gửi 1 payload tới 1Office (insert/update). Trả Promise { ok, error, result, sent }.
+function oneOfficeSend(endpointPath, payload, cfg, token) {
+  return new Promise((resolve) => {
+    const o = cfg.oneOffice || {};
+    let targetUrl;
+    try { targetUrl = /^https?:\/\//i.test(endpointPath) ? new URL(endpointPath) : new URL(endpointPath, o.baseUrl); }
+    catch (e) { return resolve({ ok: false, error: 'endpoint không hợp lệ: ' + e.message }); }
+    targetUrl.searchParams.set(o.tokenParam || 'access_token', token);
+    const clean = {};
+    for (const k in payload) { if (payload[k] !== '' && payload[k] != null) clean[k] = payload[k]; }
+    const body = new URLSearchParams(clean).toString();
+    const lib = targetUrl.protocol === 'http:' ? http : https;
+    const upstream = lib.request(targetUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Content-Length': Buffer.byteLength(body), 'Accept': 'application/json' },
+      timeout: 20000
+    }, (up) => {
+      let raw = ''; up.setEncoding('utf8'); up.on('data', (d) => (raw += d));
+      up.on('end', () => {
+        let j; try { j = JSON.parse(raw); } catch (e) { j = null; }
+        if (j && j.error === true) return resolve({ ok: false, error: '1Office: ' + (j.message || j.code), raw: j });
+        resolve({ ok: true, result: j || raw.slice(0, 300), sent: Object.keys(clean) });
+      });
+    });
+    upstream.on('timeout', () => { upstream.destroy(); resolve({ ok: false, error: 'Hết thời gian chờ khi gọi 1Office.' }); });
+    upstream.on('error', (e) => resolve({ ok: false, error: 'Lỗi gọi 1Office: ' + e.message }));
+    upstream.write(body); upstream.end();
+  });
+}
+
+// Nhận hồ sơ ứng tuyển: chặn nếu SĐT nằm trong Blacklist; đã có hồ sơ thì CẬP NHẬT (cho đăng ký lại), chưa có thì TẠO MỚI.
 async function createCandidate(form, cfg, res) {
   const o = cfg.oneOffice || {};
   const c = o.create || {};
@@ -274,7 +337,21 @@ async function createCandidate(form, cfg, res) {
     return sendJson(res, 428, { error: 'Chưa có token GHI hợp lệ để tạo ứng viên (oneOffice.create.token).' });
   }
 
-  // Map field form -> field 1Office theo cấu hình; gộp thêm các field cố định (vd campaign).
+  // 1) Tra cứu theo SĐT: chặn Blacklist (status = 'Blacklist'); phát hiện hồ sơ đã tồn tại.
+  //    Nếu tra cứu lỗi/timeout -> KHÔNG chặn nhầm, vẫn cho nộp bình thường.
+  let existing = null;
+  try {
+    const matches = await oneOfficeFindByPhone(form.phone, cfg);
+    if (matches.some((x) => (x.status || '').trim() === 'Blacklist')) {
+      return sendJson(res, 200, {
+        ok: false, blacklisted: true,
+        error: 'Số điện thoại này hiện nằm trong danh sách hạn chế tiếp nhận hồ sơ. Vui lòng liên hệ phòng Nhân sự (hr@maycha.com.vn) để được hỗ trợ.'
+      });
+    }
+    existing = matches.find((x) => x.code) || null;
+  } catch (e) { existing = null; }
+
+  // 2) Map field form -> field 1Office theo cấu hình; gộp thêm các field cố định (vd campaign).
   const map = c.fieldMap || {};
   const payload = Object.assign({}, c.extra || {});
   for (const k in form) {
@@ -292,34 +369,19 @@ async function createCandidate(form, cfg, res) {
   if (payload.birthday && /^\d{4}-\d{2}-\d{2}$/.test(payload.birthday)) {
     const p = payload.birthday.split('-'); payload.birthday = p[2] + '/' + p[1] + '/' + p[0];
   }
-  // code BẮT BUỘC & duy nhất -> tự sinh nếu chưa có
-  if (!payload.code) payload.code = (c.codePrefix || 'WEB') + Date.now();
-  // bỏ các field cố định để rỗng (vd campaign_current_id chưa cấu hình)
-  for (const k in payload) { if (payload[k] === '' || payload[k] == null) delete payload[k]; }
 
-  let targetUrl;
-  try {
-    targetUrl = /^https?:\/\//i.test(c.endpoint) ? new URL(c.endpoint) : new URL(c.endpoint, o.baseUrl);
-  } catch (e) { return sendJson(res, 500, { error: 'create.endpoint không hợp lệ: ' + e.message }); }
-  targetUrl.searchParams.set(o.tokenParam || 'access_token', token);
-
-  const body = new URLSearchParams(payload).toString();
-  const lib = targetUrl.protocol === 'http:' ? http : https;
-  const upstream = lib.request(targetUrl, {
-    method: c.method || 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Content-Length': Buffer.byteLength(body), 'Accept': 'application/json' },
-    timeout: 20000
-  }, (up) => {
-    let raw = ''; up.setEncoding('utf8'); up.on('data', (d) => (raw += d));
-    up.on('end', () => {
-      let j; try { j = JSON.parse(raw); } catch (e) { j = null; }
-      if (j && j.error === true) return sendJson(res, 200, { ok: false, error: '1Office: ' + (j.message || j.code) });
-      sendJson(res, 200, { ok: true, result: j || raw.slice(0, 300), sent: Object.keys(payload) });
-    });
-  });
-  upstream.on('timeout', () => { upstream.destroy(); sendJson(res, 504, { error: 'Hết thời gian chờ khi gọi 1Office.' }); });
-  upstream.on('error', (e) => sendJson(res, 502, { error: 'Lỗi gọi 1Office: ' + e.message }));
-  upstream.write(body); upstream.end();
+  // 3) Đã có hồ sơ (không blacklist) -> CẬP NHẬT hồ sơ cũ theo code (đăng ký lại, tránh lỗi trùng SĐT).
+  //    Chưa có -> TẠO MỚI với code tự sinh (duy nhất).
+  let r;
+  if (existing) {
+    const updateEndpoint = c.updateEndpoint || c.endpoint.replace(/\/insert(?=$|\?|#)/, '/update');
+    r = await oneOfficeSend(updateEndpoint, Object.assign({}, payload, { code: existing.code }), cfg, token);
+    if (r.ok) return sendJson(res, 200, { ok: true, updated: true, result: r.result });
+    return sendJson(res, 200, { ok: false, error: r.error });
+  }
+  r = await oneOfficeSend(c.endpoint, Object.assign({}, payload, { code: payload.code || (c.codePrefix || 'WEB') + Date.now() }), cfg, token);
+  if (r.ok) return sendJson(res, 200, { ok: true, updated: false, result: r.result, sent: r.sent });
+  return sendJson(res, 200, { ok: false, error: r.error });
 }
 
 const server = http.createServer(async (req, res) => {
