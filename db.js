@@ -45,6 +45,7 @@ async function init() {
       mode text, note text, ts bigint)`);
     await pool.query(`ALTER TABLE training ADD COLUMN IF NOT EXISTS province text`);
     await pool.query(`ALTER TABLE training ADD COLUMN IF NOT EXISTS district text`);
+    await pool.query(`ALTER TABLE training ADD COLUMN IF NOT EXISTS updated_at bigint`);
     await pool.query(`CREATE TABLE IF NOT EXISTS brand_campaigns(
       brand text PRIMARY KEY, code text, name text, updated_at bigint)`);
     await pool.query(`CREATE TABLE IF NOT EXISTS settings(k text PRIMARY KEY, v text)`);
@@ -188,34 +189,37 @@ async function addTraining(r) {
   };
   if (HAS_PG) {
     const r2 = await pool.query(
-      `INSERT INTO training(name,phone,email,province,district,brand,position,store,course,sess_date,sess_time,mode,note,ts)
-       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING id`,
-      [row.name, row.phone, row.email, row.province, row.district, row.brand, row.position, row.store, row.course, row.sess_date, row.sess_time, row.mode, row.note, ts]);
+      `INSERT INTO training(name,phone,email,province,district,brand,position,store,course,sess_date,sess_time,mode,note,ts,updated_at)
+       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) RETURNING id`,
+      [row.name, row.phone, row.email, row.province, row.district, row.brand, row.position, row.store, row.course, row.sess_date, row.sess_time, row.mode, row.note, ts, ts]);
     return r2.rows[0].id;
   }
   const id = memTraining.length + 1;
-  memTraining.push(Object.assign({ id, ts }, row));
+  memTraining.push(Object.assign({ id, ts, updated_at: ts }, row));
   return id;
 }
 async function listTraining() {
   if (HAS_PG) {
     const r = await pool.query('SELECT * FROM training ORDER BY ts DESC LIMIT 500');
-    return r.rows.map(x => Object.assign({}, x, { ts: Number(x.ts) }));
+    return r.rows.map(x => Object.assign({}, x, { ts: Number(x.ts), updated_at: Number(x.updated_at || x.ts) }));
   }
   return [...memTraining].sort((a, b) => b.ts - a.ts);
 }
 const TRAIN_COLS = ['name', 'phone', 'email', 'province', 'district', 'brand', 'position', 'store', 'course', 'sess_date', 'sess_time', 'mode', 'note'];
 async function updateTraining(id, r) {
+  const now = Date.now();
   if (HAS_PG) {
     const sets = [], vals = []; let i = 1;
     TRAIN_COLS.forEach(c => { if (c in r) { sets.push(c + '=$' + (++i)); vals.push(r[c]); } });
     if (!sets.length) return 0;
+    sets.push('updated_at=$' + (++i)); vals.push(now);   // ghi mốc thời điểm sửa
     const res = await pool.query('UPDATE training SET ' + sets.join(',') + ' WHERE id=$1', [id, ...vals]);
     return res.rowCount;
   }
   const row = memTraining.find(x => String(x.id) === String(id));
   if (!row) return 0;
   TRAIN_COLS.forEach(c => { if (c in r) row[c] = r[c]; });
+  row.updated_at = now;
   return 1;
 }
 async function deleteTraining(id) {
