@@ -2143,9 +2143,18 @@
         ov.classList.remove('show');
         document.body.style.overflow = '';
       }
+      var OFFICE_JOBS = ['marketing', 'hr', 'it', 'finance'];
+      var SANXUAT_JOBS = ['sanxuat', 'qaqc', 'khovan', 'kythuat'];
       [].forEach.call(document.querySelectorAll('.btn-job'), function(b) {
         b.addEventListener('click', function() {
-          openJob(b.getAttribute('data-job'), b.getAttribute('data-name'));
+          var job = b.getAttribute('data-job');
+          if (OFFICE_JOBS.indexOf(job) >= 0) {
+            window.location.href = 'viec-lam.html?dept=office';
+          } else if (SANXUAT_JOBS.indexOf(job) >= 0) {
+            window.location.href = 'viec-lam.html?dept=sanxuat';
+          } else {
+            openJob(job, b.getAttribute('data-name'));
+          }
         });
       });
       document.getElementById('jobModalX').addEventListener('click', close);

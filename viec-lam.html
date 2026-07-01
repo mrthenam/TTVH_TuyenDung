@@ -277,11 +277,24 @@
       iToggle.textContent = intro.classList.contains('collapsed') ? 'Xem thêm ▾' : 'Thu gọn ▴';
     });
 
+    /* Pre-select tab from URL param ?dept=office|sanxuat|store */
+    (function () {
+      var DEPT_MAP = { office: 'Văn phòng', sanxuat: 'Khối sản xuất', store: 'Cửa hàng' };
+      var p = new URLSearchParams(location.search).get('dept');
+      if (p && DEPT_MAP[p]) {
+        curDept = DEPT_MAP[p];
+        document.querySelectorAll('.tab').forEach(function (t) {
+          var match = t.getAttribute('data-dept') === curDept;
+          t.classList.toggle('act', match);
+        });
+      }
+    })();
+
     fetch('/api/jobs').then(function (r) { return r.json(); }).then(function (d) {
       JOBS = (d && d.rows) || [];
       document.querySelector('#jobChip b').textContent = JOBS.length;
       applyFilter();
-      if (JOBS.length && window.innerWidth > 880) selectJob(JOBS[0].id);
+      if (JOBS.length && window.innerWidth > 880) selectJob(filtered[0] ? filtered[0].id : JOBS[0].id);
       else detailEl.innerHTML = '<div class="empty">Chọn một công việc để xem mô tả chi tiết.</div>';
     }).catch(function () {
       detailEl.innerHTML = '<div class="empty">Không tải được danh sách công việc.</div>';
