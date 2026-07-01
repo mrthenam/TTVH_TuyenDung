@@ -1561,27 +1561,130 @@
     }
 
     footer {
-      border-top: 1px solid var(--line);
-      padding: 40px 0;
-      text-align: center
+      background: #7a1515;
+      padding: 52px 0 28px;
+      color: #f5ede0;
     }
 
-    footer .brand {
-      justify-content: center;
-      margin-bottom: 14px
+    .ft-grid {
+      display: grid;
+      grid-template-columns: 1.7fr 1fr 1fr;
+      gap: 52px;
+      align-items: start;
     }
 
-    footer p {
-      color: var(--muted);
-      font-size: 14px;
-      margin: 4px 0
+    .ft-brand-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
     }
 
-    footer .tagline {
-      color: var(--red);
+    .ft-brand-row img {
+      width: 54px;
+      height: 54px;
+      border-radius: 12px;
+      object-fit: cover;
+      background: #fff;
+      flex: none;
+    }
+
+    .ft-brand-name {
+      font-family: var(--head);
       font-weight: 800;
-      margin-top: 12px;
-      letter-spacing: .03em
+      font-size: 17px;
+      color: #f5ede0;
+      line-height: 1.2;
+    }
+
+    .ft-desc {
+      font-size: 14px;
+      color: rgba(245,237,224,.78);
+      line-height: 1.65;
+      margin-bottom: 14px;
+    }
+
+    .ft-desc em { font-style: italic; }
+
+    .ft-info {
+      font-size: 13.5px;
+      color: rgba(245,237,224,.78);
+      margin-bottom: 7px;
+      line-height: 1.55;
+    }
+
+    .ft-info a {
+      color: #f5ede0;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .ft-info a:hover { color: var(--gold); }
+
+    .ft-map {
+      margin-top: 16px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid rgba(245,237,224,.18);
+    }
+
+    .ft-map iframe { display: block; }
+
+    .ft-map-link {
+      display: inline-block;
+      margin-top: 9px;
+      font-size: 13px;
+      color: rgba(245,237,224,.65);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .ft-map-link:hover { color: var(--gold); }
+
+    .ft-col h4 {
+      font-family: var(--head);
+      color: var(--gold);
+      font-size: 15.5px;
+      font-weight: 700;
+      margin-bottom: 18px;
+      letter-spacing: .03em;
+    }
+
+    .ft-col ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .ft-col ul li { margin-bottom: 11px; }
+
+    .ft-col ul li a {
+      font-size: 14px;
+      color: rgba(245,237,224,.78);
+      transition: color .15s;
+    }
+
+    .ft-col ul li a:hover { color: var(--gold); }
+
+    .ft-col ul li a.ft-bold {
+      font-weight: 700;
+      color: #f5ede0;
+    }
+
+    .ft-bottom {
+      margin-top: 38px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(245,237,224,.15);
+      text-align: center;
+      font-size: 12.5px;
+      color: rgba(245,237,224,.45);
+    }
+
+    @media(max-width:860px) {
+      .ft-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+    }
+
+    @media(max-width:540px) {
+      .ft-grid { grid-template-columns: 1fr; gap: 28px; }
     }
 
     .sticky-cta {
@@ -2016,12 +2119,47 @@
   <!-- FOOTER -->
   <footer>
     <div class="wrap">
-      <div class="brand"><img src="images/logo-ttvh.jpg" alt="Thịnh Thế Vinh Hoa" class="logo-img" />
-        <div class="nm">Thịnh Thế Vinh Hoa F&amp;B Group</div>
+      <div class="ft-grid">
+
+        <!-- Cột trái: thông tin công ty -->
+        <div class="ft-left">
+          <div class="ft-brand-row">
+            <img src="images/logo-ttvh.jpg" alt="Thịnh Thế Vinh Hoa" />
+            <span class="ft-brand-name">Thịnh Thế Vinh Hoa</span>
+          </div>
+          <p class="ft-desc">Hệ sinh thái F&amp;B đa thương hiệu. <em>Vũng thời · Sáng vận · Đẹp danh.</em></p>
+          <p class="ft-info"><strong>Địa chỉ:</strong> Số 35, đường Huỳnh Tịnh Của, phường Xuân Hòa, TP. Hồ Chí Minh, Việt Nam</p>
+          <p class="ft-info">Hotline: <a href="tel:02871080719">028 7108 0719</a></p>
+          <p class="ft-info">Email tuyển dụng: <a href="mailto:hr@maycha.com.vn">hr@maycha.com.vn</a></p>
+          <div class="ft-map">
+            <iframe src="https://maps.google.com/maps?q=35+Huynh+Tinh+Cua+Quan+3+Ho+Chi+Minh&output=embed&z=16" width="100%" height="180" style="border:0" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          </div>
+          <a class="ft-map-link" href="https://maps.google.com/?q=35+Huynh+Tinh+Cua+Quan+3+Ho+Chi+Minh" target="_blank" rel="noopener">Mở trong Google Maps →</a>
+        </div>
+
+        <!-- Cột giữa: thương hiệu -->
+        <div class="ft-col">
+          <h4>Thương hiệu</h4>
+          <ul>
+            <li><a href="#">Maycha</a></li>
+            <li><a href="#" class="ft-bold">Hồng Trà Sữa Tam Hảo</a></li>
+            <li><a href="#">Gà Giòn Sốt Ba Cô Gái</a></li>
+            <li><a href="#">Trà Hú – Đậm Hú Hồn</a></li>
+          </ul>
+        </div>
+
+        <!-- Cột phải: kết nối -->
+        <div class="ft-col">
+          <h4>Kết nối</h4>
+          <ul>
+            <li><a href="https://www.facebook.com/tuyendungttvh" target="_blank" rel="noopener">Fanpage tuyển dụng</a></li>
+            <li><a href="https://thinhthevinhhoa.com" target="_blank" rel="noopener">Hệ thống thương hiệu</a></li>
+            <li><a href="viec-lam.html">Cơ hội nghề nghiệp</a></li>
+          </ul>
+        </div>
+
       </div>
-      <p>© 2026 Thịnh Thế Vinh Hoa F&amp;B Group · 35 Huỳnh Tịnh Của, P. Xuân Hòa, TP.HCM</p>
-      <p>MayCha · Hồng Trà Sữa Tam Hảo · Gà Giòn Sốt Ba Cô Gái · Trà Hú</p>
-      <p class="tagline">Vững thời · Sáng vận · Đẹp danh</p>
+      <div class="ft-bottom">© 2026 Thịnh Thế Vinh Hoa F&amp;B Group · Tất cả các quyền được bảo lưu.</div>
     </div>
   </footer>
 
