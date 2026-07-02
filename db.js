@@ -22,7 +22,7 @@ const memGallery = [];               // Khoảnh khắc Vinh Hoa: [{id,url,sort_
 const memJobs = [];                  // Việc làm (tuyển dụng): [{id,...,sort_order}] (fallback RAM)
 // dùng chung cho cả 2 chế độ:
 const typing = new Map();    // convId -> ts
-const sessions = new Map();  // token -> {username, displayName, ts}
+const sessions = new Map();  // token -> {username, displayName, ts}  (fallback RAM khi không có PG)
 
 function genSalt() { return crypto.randomBytes(8).toString('hex'); }
 function hashPw(pw, salt) { return crypto.createHash('sha256').update(salt + ':' + pw).digest('hex'); }
@@ -58,6 +58,8 @@ async function init() {
     await pool.query(`CREATE TABLE IF NOT EXISTS jobs(
       id bigserial PRIMARY KEY, title text, salary text, location text, deadline text,
       jobtype text, dept text, description text, sort_order int)`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS sessions(
+      token text PRIMARY KEY, username text, display_name text, ts bigint)`);
     console.log(' [db] Đã kết nối PostgreSQL — lưu chat bền vững.');
   } else {
     console.log(' [db] Không có DATABASE_URL/pg — lưu chat tạm trong RAM.');
@@ -105,15 +107,28 @@ async function verifyAgent(username, password) {
   return { username: a.username, displayName: a.display_name };
 }
 
-// ----- sessions (RAM) -----
-function createSession(username, displayName) {
+// ----- sessions (lưu PostgreSQL để không mất khi server restart/redeploy; fallback RAM) -----
+const SESSION_TTL = 7 * 24 * 3600 * 1000;
+async function createSession(username, displayName) {
   const token = crypto.randomBytes(24).toString('hex');
-  sessions.set(token, { username, displayName, ts: Date.now() });
+  const ts = Date.now();
+  if (HAS_PG) {
+    await pool.query('INSERT INTO sessions(token,username,display_name,ts) VALUES($1,$2,$3,$4)', [token, username, displayName, ts]);
+  } else {
+    sessions.set(token, { username, displayName, ts });
+  }
   return token;
 }
-function getSession(token) {
+async function getSession(token) {
+  if (!token) return null;
+  if (HAS_PG) {
+    const r = await pool.query('SELECT username, display_name AS "displayName", ts FROM sessions WHERE token=$1', [token]);
+    const s = r.rows[0]; if (!s) return null;
+    if (Date.now() - Number(s.ts) > SESSION_TTL) { await pool.query('DELETE FROM sessions WHERE token=$1', [token]); return null; }
+    return s;
+  }
   const s = sessions.get(token); if (!s) return null;
-  if (Date.now() - s.ts > 7 * 24 * 3600 * 1000) { sessions.delete(token); return null; }
+  if (Date.now() - s.ts > SESSION_TTL) { sessions.delete(token); return null; }
   return s;
 }
 

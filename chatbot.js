@@ -175,7 +175,7 @@ async function callGemini(cfg, messages) {
   });
 }
 
-function agentSession(url, req) {
+async function agentSession(url, req) {
   const token = url.searchParams.get('token') || req.headers['x-agent-token'];
   return token ? db.getSession(token) : null;
 }
@@ -234,11 +234,11 @@ async function handleChat(req, res, url, loadConfig) {
       const b = await readBody(req) || {};
       const a = await db.verifyAgent(b.username, b.password);
       if (!a) return sendJson(res, 401, { error: 'Sai tài khoản hoặc mật khẩu' });
-      const token = db.createSession(a.username, a.displayName);
+      const token = await db.createSession(a.username, a.displayName);
       return sendJson(res, 200, { ok: true, token, displayName: a.displayName, username: a.username });
     }
     if (p.startsWith('/api/agent/')) {
-      const sess = agentSession(url, req);
+      const sess = await agentSession(url, req);
       if (!sess) return sendJson(res, 401, { error: 'Chưa đăng nhập' });
 
       if (p === '/api/agent/me' && req.method === 'GET') return sendJson(res, 200, { username: sess.username, displayName: sess.displayName });

@@ -446,7 +446,7 @@ const server = http.createServer(async (req, res) => {
   // Danh sách đăng ký đào tạo cho nhân viên (cần token đăng nhập agent)
   if (url.pathname === '/api/training' && req.method === 'GET') {
     const token = (req.headers['authorization'] || '').replace(/^Bearer\s+/i, '') || url.searchParams.get('token');
-    if (!db.getSession(token)) return sendJson(res, 401, { error: 'Cần đăng nhập nhân viên.' });
+    if (!(await db.getSession(token))) return sendJson(res, 401, { error: 'Cần đăng nhập nhân viên.' });
     try {
       return sendJson(res, 200, { ok: true, rows: await db.listTraining() });
     } catch (e) {
@@ -456,7 +456,7 @@ const server = http.createServer(async (req, res) => {
   // Sửa / xóa đăng ký đào tạo (cần token đăng nhập agent)
   if (url.pathname.startsWith('/api/training/') && (req.method === 'PUT' || req.method === 'DELETE')) {
     const token = (req.headers['authorization'] || '').replace(/^Bearer\s+/i, '') || url.searchParams.get('token');
-    if (!db.getSession(token)) return sendJson(res, 401, { error: 'Cần đăng nhập nhân viên.' });
+    if (!(await db.getSession(token))) return sendJson(res, 401, { error: 'Cần đăng nhập nhân viên.' });
     const id = decodeURIComponent(url.pathname.slice('/api/training/'.length));
     if (req.method === 'DELETE') {
       try {
