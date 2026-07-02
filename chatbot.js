@@ -12,6 +12,7 @@ const path = require('path');
 const db = require('./db');
 const sheet = require('./sheet');
 const notify = require('./notify');
+const mailer = require('./mailer');
 
 function sendJson(res, status, obj) {
   const b = JSON.stringify(obj);
@@ -286,6 +287,42 @@ async function handleChat(req, res, url, loadConfig) {
         };
         await db.setSetting('trainingform', JSON.stringify(cfg));
         return sendJson(res, 200, { ok: true });
+      }
+
+      // Cấu hình EMAIL tự động (bật/tắt, chế độ test, danh sách test, tiêu đề, nội dung)
+      if (p === '/api/agent/emailcfg' && req.method === 'GET') {
+        const c = await mailer.getEmailCfg();
+        const e = cfg.email || {};
+        const smtpUser = process.env.SMTP_USER || e.user || 'thinhthevinhhoa@gmail.com';
+        const smtpReady = !!(process.env.SMTP_PASS || e.pass); // chỉ báo đã có mật khẩu hay chưa, KHÔNG lộ mật khẩu
+        return sendJson(res, 200, Object.assign({}, c, { _smtpUser: smtpUser, _smtpReady: smtpReady }));
+      }
+      if (p === '/api/agent/emailcfg' && req.method === 'POST') {
+        const b = await readBody(req) || {};
+        const testList = String(b.testList || '').split(/[\n,;]+/).map((s) => s.trim()).filter(Boolean);
+        const c = {
+          enabled: !!b.enabled,
+          testMode: b.testMode !== false,
+          testList: testList.length ? testList : ['thenam2703@gmail.com'],
+          fromName: (b.fromName || 'Thịnh Thế Vinh Hoa').toString().trim(),
+          subject: (b.subject || '').toString(),
+          body: (b.body || '').toString()
+        };
+        await db.setSetting('emailcfg', JSON.stringify(c));
+        return sendJson(res, 200, { ok: true });
+      }
+      // Gửi email THỬ ngay tới 1 địa chỉ (bắt buộc nằm trong danh sách test để an toàn)
+      if (p === '/api/agent/email/test' && req.method === 'POST') {
+        const b = await readBody(req) || {};
+        const to = (b.to || '').toString().trim();
+        if (!to) return sendJson(res, 400, { error: 'Vui lòng nhập email nhận thử.' });
+        const c = await mailer.getEmailCfg();
+        const allow = (c.testList || []).map((x) => String(x).trim().toLowerCase());
+        if (allow.indexOf(to.toLowerCase()) === -1) {
+          return sendJson(res, 400, { error: 'Email này chưa nằm trong danh sách test. Hãy thêm vào "Danh sách email test" và lưu trước khi gửi thử.' });
+        }
+        const r = await mailer.sendMail(cfg, { to, subject: c.subject, bodyText: c.body, fromName: c.fromName });
+        return sendJson(res, 200, r);
       }
 
       // Khoảnh khắc Vinh Hoa (gallery)

@@ -1,0 +1,175 @@
+/**
+ * Gửi email tự động cho ứng viên đăng ký đào tạo — SMTP qua TLS (module built-in 'tls').
+ * KHÔNG cần thư viện ngoài.
+ *
+ * Cấu hình tài khoản gửi (ưu tiên biến môi trường khi deploy):
+ *   - user: SMTP_USER  hoặc  config.email.user  (mặc định thinhthevinhhoa@gmail.com)
+ *   - pass: SMTP_PASS  hoặc  config.email.pass  (App Password 16 ký tự của Gmail — KHÔNG phải mật khẩu thường)
+ *
+ * Bật/tắt + nội dung + chế độ test: lưu ở settings key 'emailcfg' (chỉnh trong dashboard).
+ * Fire-and-forget: mọi lỗi được nuốt, KHÔNG làm hỏng luồng đăng ký.
+ */
+const tls = require('tls');
+const db = require('./db');
+
+const EMAIL_DEFAULTS = {
+  enabled: false,          // gửi email tự động khi có đăng ký mới
+  testMode: true,          // CHỈ gửi tới các email trong testList (an toàn khi thử nghiệm)
+  testList: ['thenam2703@gmail.com'],
+  fromName: 'Thịnh Thế Vinh Hoa',
+  subject: 'Thư mời tham gia Khóa Đào Tạo Đầu Vào — Thịnh Thế Vinh Hoa',
+  body: [
+    'Dear các bạn Nhân Viên Mới,',
+    '',
+    'Chúc mừng các bạn đã phỏng vấn thành công và chuẩn bị gia nhập đại gia đình Thịnh Thế Vinh Hoa với các thương hiệu như: MayCha, Tam Hảo, Trà Hú, Gà Giòn Sốt Ba Cô Gái, …',
+    '',
+    'Như đã trao đổi với các bạn, trước khi bắt đầu công việc tại cửa hàng, các bạn cần tham gia khóa đào tạo đầu vào để có thể nắm bắt những nội dung cần thiết và đảm bảo chất lượng dịch vụ khi làm việc tại cửa hàng.',
+    'Khóa đào tạo dự kiến kéo dài khoảng 02 ngày, cố định là Thứ 2 + Thứ 3 VÀ Thứ 5 + Thứ 6 hàng tuần (Các bạn chỉ cần tham gia một trong hai khóa này, không cần tham gia cả hai). Ngày Thứ 2 và Thứ 5 là học về Lý Thuyết, ngày Thứ 3 và Thứ 6 sẽ học về Thực Hành.',
+    '',
+    'Chi tiết về Lịch học Khóa đào tạo tiếp theo như sau:',
+    '',
+    '1. Đối với các bạn học Trực tiếp tại Phòng Đào Tạo (Các bạn ở TP. HCM):',
+    '* Địa điểm: Cửa Hàng MayCha tại số 21 Rạch Bùng Binh, Phường Nhiêu Lộc (Quận 3), TP. HCM (Tầng trệt là cửa hàng, tầng 2 và tầng 3 là phòng học)',
+    '* Ngày bắt đầu học: Thứ 5 – 02/07/2026',
+    '* Thời gian học: Dự kiến từ 9h sáng đến 17h chiều (Nghỉ trưa 1h và buổi chiều có thể kết thúc sớm hơn)',
+    '* Địa điểm gửi xe: Bạn có thể gửi xe tại Tòa Nhà Viettel Tower (Số 285 Cách Mạng Tháng Tám) hoặc Bãi giữ xe của Ga Xe Lửa (Số 1 Nguyễn Thông) rồi đi bộ đến Cửa hàng (Cách bãi xe khoảng 200m)',
+    '* Hướng dẫn: Khi đến cửa hàng bạn cứ đi thẳng vào trong rồi đi theo cầu theo lên lầu 2 để vào phòng học.',
+    '* Người hỗ trợ: Khi cần hỗ trợ, các bạn có thể liên hệ anh / chị nhân sự đang trao đổi công việc hoặc liên hệ Chị Thảo – 0846.013.017 / Anh Nhơn – 0933.871.658',
+    '',
+    '2. Đối với các bạn học Online (Các bạn ở khu vực Tỉnh hoặc ở các Quận/Huyện xa):',
+    '* Link tham gia: https://teams.microsoft.com/meet/41339908778497?p=oO3OTbVhaIdMelI7FZ',
+    '* Ngày bắt đầu học: Thứ 5 – 02/07/2026',
+    '* Thời gian học: Dự kiến từ 9h sáng đến 17h chiều (Nghỉ trưa 1h và buổi chiều có thể kết thúc sớm hơn)',
+    '',
+    '3. Các thông tin cần lưu ý:',
+    '* Trong thời gian học, các bạn vẫn được tính lương, mong các bạn tham gia đầy đủ và cố gắng tập trung.',
+    '* Sau khi hoàn thành chương trình học, các bạn hãy chủ động liên hệ với anh chị Quản lý (Người phỏng vấn các bạn tại cửa hàng) để hẹn lịch nhận việc ở cửa hàng.',
+    '* Khi đến cửa hàng nhận việc ngày đầu tiên, các bạn hãy chủ động nhờ anh chị Quản lý chấm bù hai ngày công mà các bạn đã tham gia đào tạo (Thao tác chấm bù công trên App 1Office).',
+    '* Sau khi nhờ Quản lý chấm bù công, các bạn nhớ chủ động chấm công khi làm việc tại cửa hàng để được ghi nhận đầy đủ bảng công và tránh ảnh hưởng tiền lương của mình.',
+    '* Thao tác chấm công trên App 1Office sẽ được hướng dẫn trong buổi đào tạo, nhưng nếu chưa rõ bạn có thể nhờ Quản lý hướng dẫn lại. Hãy chủ động để đảm bảo “Đủ công = Đủ lương”',
+    '',
+    'Chúc các bạn học tập hiệu quả và nhiều niềm vui!'
+  ].join('\n')
+};
+
+async function getEmailCfg() {
+  let saved = {};
+  try { const v = await db.getSetting('emailcfg'); if (v) saved = JSON.parse(v); } catch (e) {}
+  const c = Object.assign({}, EMAIL_DEFAULTS, saved);
+  if (!Array.isArray(c.testList)) c.testList = EMAIL_DEFAULTS.testList.slice();
+  return c;
+}
+
+function smtpCreds(cfg) {
+  const e = (cfg && cfg.email) || {};
+  const user = process.env.SMTP_USER || e.user || 'thinhthevinhhoa@gmail.com';
+  const pass = process.env.SMTP_PASS || e.pass || '';
+  return { user, pass, host: process.env.SMTP_HOST || e.host || 'smtp.gmail.com', port: +(process.env.SMTP_PORT || e.port || 465) };
+}
+
+function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+// text -> HTML: escape, biến URL http(s) thành link, xuống dòng thành <br>
+function textToHtml(text) {
+  const body = esc(text)
+    .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" style="color:#c69320">$1</a>')
+    .replace(/\r?\n/g, '<br>');
+  return '<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#2a1810;max-width:680px">'
+    + body
+    + '<hr style="border:none;border-top:1px solid #eadfce;margin:24px 0">'
+    + '<div style="font-size:13px;color:#8b7060">Email tự động từ hệ thống tuyển dụng Thịnh Thế Vinh Hoa F&amp;B Group.</div></div>';
+}
+
+function b64(s) { return Buffer.from(s, 'utf8').toString('base64'); }
+function wrap76(s) { return s.replace(/(.{76})/g, '$1\r\n'); }
+function encHeader(s) { return '=?UTF-8?B?' + b64(s) + '?='; }
+
+// Client SMTP tối giản: đọc reply theo mã 3 số.
+function smtpConnect(host, port) {
+  return new Promise((resolve, reject) => {
+    const sock = tls.connect({ host, port, servername: host });
+    sock.setEncoding('utf8');
+    sock.setTimeout(20000);
+    let buf = '';
+    let waiter = null;
+    function flush() {
+      const m = buf.match(/^(?:\d{3}-[^\n]*\n)*(\d{3}) [^\n]*\n/);
+      if (m && waiter) {
+        const code = parseInt(m[1], 10);
+        buf = buf.slice(m[0].length);
+        const w = waiter; waiter = null; w(code);
+      }
+    }
+    sock.on('data', (d) => { buf += d; flush(); });
+    sock.on('timeout', () => { sock.destroy(new Error('SMTP timeout')); });
+    sock.on('error', reject);
+    const api = {
+      sock,
+      read() { return new Promise((res) => { waiter = res; flush(); }); },
+      cmd(line) { sock.write(line + '\r\n'); return api.read(); },
+      write(raw) { sock.write(raw); },
+      close() { try { sock.end(); } catch (e) {} }
+    };
+    sock.once('secureConnect', () => resolve(api));
+  });
+}
+
+// Gửi 1 email (HTML). Trả { ok, error }. KHÔNG throw.
+async function sendMail(cfg, { to, subject, bodyText, fromName }) {
+  const { user, pass, host, port } = smtpCreds(cfg);
+  if (!pass) return { ok: false, error: 'Chưa cấu hình mật khẩu SMTP (SMTP_PASS).' };
+  if (!to) return { ok: false, error: 'Thiếu email người nhận.' };
+  const html = textToHtml(bodyText || '');
+  const headers = [
+    'From: ' + encHeader(fromName || 'Thịnh Thế Vinh Hoa') + ' <' + user + '>',
+    'To: <' + to + '>',
+    'Subject: ' + encHeader(subject || '(không tiêu đề)'),
+    'MIME-Version: 1.0',
+    'Content-Type: text/html; charset=UTF-8',
+    'Content-Transfer-Encoding: base64',
+    'Date: ' + new Date().toUTCString()
+  ].join('\r\n');
+  const message = headers + '\r\n\r\n' + wrap76(b64(html));
+  // dot-stuffing (dòng bắt đầu bằng '.')
+  const safe = message.replace(/\r\n\./g, '\r\n..');
+
+  let c;
+  try {
+    c = await smtpConnect(host, port);
+    if ((await c.read()) !== 220) throw new Error('greeting');
+    if ((await c.cmd('EHLO ttvh')) !== 250) throw new Error('EHLO');
+    if ((await c.cmd('AUTH LOGIN')) !== 334) throw new Error('AUTH');
+    if ((await c.cmd(b64(user))) !== 334) throw new Error('user');
+    if ((await c.cmd(b64(pass))) !== 235) throw new Error('Sai tài khoản/App Password');
+    if ((await c.cmd('MAIL FROM:<' + user + '>')) !== 250) throw new Error('MAIL FROM');
+    const rcpt = await c.cmd('RCPT TO:<' + to + '>');
+    if (rcpt !== 250 && rcpt !== 251) throw new Error('RCPT TO');
+    if ((await c.cmd('DATA')) !== 354) throw new Error('DATA');
+    c.write(safe + '\r\n.\r\n');
+    if ((await c.read()) !== 250) throw new Error('gửi nội dung thất bại');
+    c.close();
+    return { ok: true };
+  } catch (e) {
+    if (c) c.close();
+    return { ok: false, error: e.message };
+  }
+}
+
+// Gửi email chào mừng khi có đăng ký đào tạo mới (tôn trọng bật/tắt + chế độ test).
+async function maybeSendTrainingEmail(cfg, form) {
+  try {
+    const s = await getEmailCfg();
+    if (!s.enabled) return { ok: false, skipped: 'disabled' };
+    const to = (form.email || '').trim();
+    if (!to || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) return { ok: false, skipped: 'no-email' };
+    if (s.testMode) {
+      const allow = (s.testList || []).map((x) => String(x).trim().toLowerCase());
+      if (allow.indexOf(to.toLowerCase()) === -1) return { ok: false, skipped: 'not-in-testlist' };
+    }
+    const r = await sendMail(cfg, { to, subject: s.subject, bodyText: s.body, fromName: s.fromName });
+    if (r.ok) console.log(' [mail] Đã gửi email đào tạo tới ' + to);
+    else console.warn(' [mail] Gửi thất bại tới ' + to + ': ' + r.error);
+    return r;
+  } catch (e) { return { ok: false, error: e.message }; }
+}
+
+module.exports = { EMAIL_DEFAULTS, getEmailCfg, sendMail, maybeSendTrainingEmail };

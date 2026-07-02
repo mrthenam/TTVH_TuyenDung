@@ -82,6 +82,12 @@
     "googleClientId": ""
   },
 
+  "_note_email": "Gửi email tự động cho ứng viên đăng ký đào tạo. user = Gmail gửi đi; pass = App Password 16 ký tự của Gmail (KHÔNG phải mật khẩu thường). Khi deploy nên đặt qua env SMTP_USER / SMTP_PASS. Bật/tắt + nội dung chỉnh trong dashboard tab 'Email tự động'.",
+  "email": {
+    "user": "thinhthevinhhoa@gmail.com",
+    "pass": ""
+  },
+
   "_note_zalo": "Báo Zalo khi đổi lịch đào tạo. Cách A: notifyUrl (webhook trung gian). Cách B (Zalo OA trực tiếp, tự refresh token): appId + appSecret + recipientId + refreshToken (khởi tạo lần đầu). Env: ZALO_NOTIFY_URL / ZALO_APP_ID / ZALO_APP_SECRET / ZALO_REFRESH_TOKEN / ZALO_RECIPIENT_ID.",
   "zalo": {
     "notifyUrl": "",

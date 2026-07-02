@@ -19,6 +19,7 @@ const db = require('./db');
 const sheet = require('./sheet');
 const notify = require('./notify');
 const stores = require('./stores');
+const mailer = require('./mailer');
 
 const ROOT = __dirname;
 const CONFIG_PATH = path.join(ROOT, 'config.json');
@@ -438,6 +439,8 @@ const server = http.createServer(async (req, res) => {
           + (dDmy ? '\n• Ngày đào tạo: ' + dDmy : '')
           + (form.store ? '\n• Cửa hàng: ' + form.store : '')
       }).catch(() => {});
+      // Gửi email chào mừng cho ứng viên (tôn trọng bật/tắt + chế độ test trong dashboard)
+      mailer.maybeSendTrainingEmail(cfg, form).catch(() => {});
       return sendJson(res, 200, { ok: true, id });
     } catch (e) {
       return sendJson(res, 500, { error: 'Không lưu được đăng ký: ' + e.message });
@@ -661,6 +664,7 @@ chatbot.init()
     'images/anh vinh danh/5.jpg'
   ]))
   .then(async () => { if (!(await db.getSetting('trainingform'))) await db.setSetting('trainingform', JSON.stringify(TRAININGFORM_DEFAULTS)); })
+  .then(async () => { if (!(await db.getSetting('emailcfg'))) await db.setSetting('emailcfg', JSON.stringify(mailer.EMAIL_DEFAULTS)); })
   .then(() => { try { return db.seedJobs(JSON.parse(fs.readFileSync(path.join(__dirname, 'jobs-seed.json'), 'utf8'))); } catch (e) { console.warn(' [jobs] seed lỗi:', e.message); } })
   .catch((e) => console.error(' [db] init lỗi:', e.message));
 server.listen(PORT, () => {

@@ -119,6 +119,8 @@
   .addbox h3{font-size:16px;font-weight:900}
   .staffgrid .tablecard{flex:1;min-width:280px}
   .hintnote{color:var(--muted);font-size:12px;margin-top:4px}
+  .emailtoggle{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;margin-bottom:12px;line-height:1.5}
+  .emailtoggle input{margin-top:3px;flex:none;width:16px;height:16px}
   .boxmsg{display:none;font-size:13px;font-weight:600;padding:9px 12px;border-radius:9px}
   .boxmsg.err.show{display:block;color:var(--red);background:rgba(224,52,43,.08);border:1px solid rgba(224,52,43,.3)}
   .boxmsg.ok.show{display:block;color:#1f9a52;background:rgba(47,170,94,.1);border:1px solid rgba(47,170,94,.35)}
@@ -284,6 +286,7 @@
       <button class="navbtn" id="tabRecruit"><span class="ic">📢</span><span class="t">Thông tin tuyển dụng</span></button>
       <button class="navbtn" id="tabGallery"><span class="ic">📸</span><span class="t">Khoảnh khắc Vinh Hoa</span></button>
       <button class="navbtn" id="tabForm"><span class="ic">📝</span><span class="t">Form đào tạo</span></button>
+      <button class="navbtn" id="tabEmail"><span class="ic">✉️</span><span class="t">Email tự động</span></button>
       <button class="navbtn" id="tabJobs"><span class="ic">💼</span><span class="t">Việc làm (tuyển dụng)</span></button>
       <button class="navbtn" id="tabLog"><span class="ic">📝</span><span class="t">Lịch sử chỉnh sửa</span></button>
       <div class="foot">© 2026 TTVH F&B</div>
@@ -414,6 +417,36 @@
           <div class="fld"><label>Hình Thức Tham Gia Đào Tạo (mỗi dòng 1 hình thức)</label><textarea id="tf_modes" spellcheck="false" style="min-height:100px"></textarea></div>
           <button class="btn primary" id="tfSave" style="justify-content:center;margin-top:6px">Lưu</button>
           <p class="hintnote">Ô “Khác” ở mục Vị trí được giữ tự động. Thay đổi áp dụng ngay cho trang đăng ký.</p>
+        </div>
+      </div>
+
+      <!-- EMAIL TỰ ĐỘNG -->
+      <div class="trainview" id="viewEmail" style="display:none">
+        <div class="pagehd">
+          <div><h1>✉️ Email tự động</h1><div class="sub">Tự động gửi email chào mừng cho ứng viên khi đăng ký đào tạo thành công.</div></div>
+        </div>
+        <div class="addbox" style="width:auto;max-width:860px">
+          <div id="emOk" class="boxmsg ok"></div>
+          <div id="emErr" class="boxmsg err"></div>
+          <div id="emSmtp" class="hintnote" style="margin-bottom:14px"></div>
+
+          <label class="emailtoggle"><input type="checkbox" id="em_enabled" /> <b>Bật gửi email tự động</b> — khi tắt, hệ thống sẽ không gửi email nào.</label>
+          <label class="emailtoggle"><input type="checkbox" id="em_test" /> <b>Chế độ test (an toàn)</b> — chỉ gửi tới các email trong danh sách bên dưới. <span style="color:#c0392b">Nên bật khi đang thử nghiệm.</span></label>
+
+          <div class="fld"><label>Danh sách email test (mỗi dòng 1 email)</label><textarea id="em_testList" spellcheck="false" style="min-height:70px" placeholder="thenam2703@gmail.com"></textarea></div>
+          <div class="fld"><label>Tên người gửi hiển thị</label><input id="em_fromName" type="text" placeholder="Thịnh Thế Vinh Hoa" /></div>
+          <div class="fld"><label>Tiêu đề email</label><input id="em_subject" type="text" /></div>
+          <div class="fld"><label>Nội dung email (văn bản thường — link http tự thành liên kết, xuống dòng giữ nguyên)</label><textarea id="em_body" spellcheck="false" style="min-height:320px;font-size:13.5px"></textarea></div>
+          <button class="btn primary" id="emSave" style="justify-content:center;margin-top:6px">Lưu cấu hình</button>
+
+          <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--line, #eadfce)">
+            <label style="font-weight:700;display:block;margin-bottom:8px">Gửi thử ngay</label>
+            <div class="galbar" style="margin:0">
+              <input id="em_testTo" type="text" placeholder="Email nhận thử (phải nằm trong danh sách test)" />
+              <button class="btn primary" id="emTestBtn">📧 Gửi thử</button>
+            </div>
+            <p class="hintnote">Email thử sẽ dùng đúng tiêu đề &amp; nội dung ở trên. Nhớ bấm “Lưu cấu hình” trước khi gửi thử.</p>
+          </div>
         </div>
       </div>
 
@@ -626,6 +659,7 @@ function switchView(v) {
   $('#viewRecruit').style.display = v === 'recruit' ? 'flex' : 'none';
   $('#viewGallery').style.display = v === 'gallery' ? 'flex' : 'none';
   $('#viewForm').style.display = v === 'form' ? 'flex' : 'none';
+  $('#viewEmail').style.display = v === 'email' ? 'flex' : 'none';
   $('#viewJobs').style.display = v === 'jobs' ? 'flex' : 'none';
   $('#viewLog').style.display = v === 'log' ? 'flex' : 'none';
   $('#tabChat').classList.toggle('act', v === 'chat');
@@ -635,6 +669,7 @@ function switchView(v) {
   $('#tabRecruit').classList.toggle('act', v === 'recruit');
   $('#tabGallery').classList.toggle('act', v === 'gallery');
   $('#tabForm').classList.toggle('act', v === 'form');
+  $('#tabEmail').classList.toggle('act', v === 'email');
   $('#tabJobs').classList.toggle('act', v === 'jobs');
   $('#tabLog').classList.toggle('act', v === 'log');
   if (v === 'train') { loadTraining(null, true); startTrainSync(); } else { stopTrainSync(); }
@@ -643,6 +678,7 @@ function switchView(v) {
   if (v === 'recruit') loadRecruit();
   if (v === 'gallery') loadGallery();
   if (v === 'form') loadTrainingForm();
+  if (v === 'email') loadEmailCfg();
   if (v === 'jobs') loadJobs();
   if (v === 'log') loadLog();
 }
@@ -658,6 +694,7 @@ $('#tabLog').addEventListener('click', function () { switchView('log'); });
 $('#tabRecruit').addEventListener('click', function () { switchView('recruit'); });
 $('#tabGallery').addEventListener('click', function () { switchView('gallery'); });
 $('#tabForm').addEventListener('click', function () { switchView('form'); });
+$('#tabEmail').addEventListener('click', function () { switchView('email'); });
 $('#tabJobs').addEventListener('click', function () { switchView('jobs'); });
 
 /* ===== VIỆC LÀM (TUYỂN DỤNG) ===== */
@@ -751,6 +788,53 @@ $('#tfSave').addEventListener('click', function () {
   api('/api/agent/trainingform', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
     .then(function (res) { btn.disabled = false; btn.textContent = old; if (res && res.ok) { $('#tfOk').textContent = 'Đã lưu. Mở lại form để xem thay đổi.'; $('#tfOk').classList.add('show'); toast('Đã lưu form đào tạo.'); } else toast('Lưu thất bại.'); })
     .catch(function (e) { btn.disabled = false; btn.textContent = old; if (e.message === '401') return logout(); toast('Lỗi kết nối.'); });
+});
+
+/* ===== EMAIL TỰ ĐỘNG ===== */
+function emMsg(id, t) { var el = $(id); el.textContent = t || ''; el.classList.toggle('show', !!t); }
+function loadEmailCfg() {
+  emMsg('#emOk', ''); emMsg('#emErr', '');
+  api('/api/agent/emailcfg').then(function (d) {
+    d = d || {};
+    $('#em_enabled').checked = !!d.enabled;
+    $('#em_test').checked = d.testMode !== false;
+    $('#em_testList').value = (d.testList || []).join('\n');
+    $('#em_fromName').value = d.fromName || 'Thịnh Thế Vinh Hoa';
+    $('#em_subject').value = d.subject || '';
+    $('#em_body').value = d.body || '';
+    var ready = d._smtpReady;
+    $('#emSmtp').innerHTML = 'Tài khoản gửi: <b>' + esc(d._smtpUser || '') + '</b> — '
+      + (ready ? '<span style="color:#1f9a52">đã cấu hình mật khẩu ✓</span>'
+        : '<span style="color:#c0392b">CHƯA có App Password. Thêm biến môi trường <b>SMTP_PASS</b> trên Railway (App Password 16 ký tự của Gmail) thì mới gửi được.</span>');
+  }).catch(function (e) { if (e.message === '401') logout(); });
+}
+$('#emSave').addEventListener('click', function () {
+  emMsg('#emOk', ''); emMsg('#emErr', '');
+  var data = {
+    enabled: $('#em_enabled').checked,
+    testMode: $('#em_test').checked,
+    testList: $('#em_testList').value,
+    fromName: $('#em_fromName').value.trim(),
+    subject: $('#em_subject').value.trim(),
+    body: $('#em_body').value
+  };
+  var btn = $('#emSave'); btn.disabled = true; var old = btn.textContent; btn.textContent = 'Đang lưu…';
+  api('/api/agent/emailcfg', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+    .then(function (res) { btn.disabled = false; btn.textContent = old; if (res && res.ok) { emMsg('#emOk', 'Đã lưu cấu hình email.'); toast('Đã lưu cấu hình email.'); loadEmailCfg(); } else emMsg('#emErr', (res && res.error) || 'Lưu thất bại.'); })
+    .catch(function (e) { btn.disabled = false; btn.textContent = old; if (e.message === '401') return logout(); emMsg('#emErr', 'Lỗi kết nối.'); });
+});
+$('#emTestBtn').addEventListener('click', function () {
+  emMsg('#emOk', ''); emMsg('#emErr', '');
+  var to = $('#em_testTo').value.trim();
+  if (!to) { emMsg('#emErr', 'Vui lòng nhập email nhận thử.'); return; }
+  var btn = $('#emTestBtn'); btn.disabled = true; var old = btn.textContent; btn.textContent = 'Đang gửi…';
+  api('/api/agent/email/test', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ to: to }) })
+    .then(function (res) {
+      btn.disabled = false; btn.textContent = old;
+      if (res && res.ok) { emMsg('#emOk', 'Đã gửi email thử tới ' + to + '. Kiểm tra hộp thư (kể cả Spam).'); toast('Đã gửi email thử.'); }
+      else emMsg('#emErr', 'Gửi thất bại: ' + ((res && res.error) || 'lỗi không xác định'));
+    })
+    .catch(function (e) { btn.disabled = false; btn.textContent = old; if (e.message === '401') return logout(); emMsg('#emErr', 'Lỗi kết nối.'); });
 });
 
 /* ===== KHOẢNH KHẮC VINH HOA ===== */
