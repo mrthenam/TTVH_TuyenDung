@@ -60,11 +60,13 @@
         "source": "49",
         "campaign_current_id": "CTV01881706266787"
       },
-      "_note_brandCampaigns": "Định tuyến chiến dịch theo thương hiệu ứng tuyển (chỉ dùng để SEED lần đầu vào DB; sau đó quản trị sửa trong dashboard tab Chiến dịch). value = { code, name }.",
+      "_note_brandCampaigns": "Định tuyến chiến dịch theo thương hiệu ứng tuyển (Cửa hàng) hoặc khối công việc (Văn phòng / Sản xuất). Chỉ dùng để SEED các key CÒN THIẾU vào DB; sau đó quản trị sửa trong dashboard tab Chiến dịch. value = { code, name }.",
       "brandCampaigns": {
         "MayCha": { "code": "CTV01881806266801", "name": "[MAYCHA - Hiring Web] Tuyển dụng nhân viên mới" },
         "Hồng Trà Sữa Tam Hảo": { "code": "CTV01881806266805", "name": "[TAMHAO - Hiring Web] Tuyển dụng nhân viên mới" },
-        "Gà Giòn Sốt Ba Cô Gái": { "code": "CTV01881806266803", "name": "[GARAN - Hiring Web] Tuyển dụng nhân viên mới" }
+        "Gà Giòn Sốt Ba Cô Gái": { "code": "CTV01881806266803", "name": "[GARAN - Hiring Web] Tuyển dụng nhân viên mới" },
+        "Khối Văn Phòng": { "code": "", "name": "[VANPHONG - Hiring Web] Tuyển dụng khối văn phòng" },
+        "Khối Kho & Xưởng Sản Xuất": { "code": "", "name": "[SANXUAT - Hiring Web] Tuyển dụng khối kho & xưởng sản xuất" }
       },
       "_note_codePrefix": "Tiền tố cho mã ứng viên tự sinh (code bắt buộc & duy nhất).",
       "codePrefix": "HSUV_WEB"

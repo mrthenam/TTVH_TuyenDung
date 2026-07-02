@@ -274,12 +274,13 @@ async function getBrandCampaignMap() {
   rows.forEach((r) => { m[r.brand] = { code: r.code, name: r.name }; });
   return m;
 }
-// Seed lần đầu từ config (chỉ khi bảng trống) — obj: { brand: {code, name} }
+// Seed từ config: chỉ thêm các key CÒN THIẾU, không đụng vào các key đã có sẵn — obj: { brand: {code, name} }
 async function seedBrandCampaigns(obj) {
   if (!obj) return;
   const existing = await listBrandCampaigns();
-  if (existing.length) return;
+  const cur = new Set(existing.map((r) => r.brand));
   for (const b in obj) {
+    if (cur.has(b)) continue;
     const v = obj[b];
     await setBrandCampaign(b, typeof v === 'string' ? v : v.code, typeof v === 'string' ? '' : v.name);
   }

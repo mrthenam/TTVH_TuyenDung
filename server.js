@@ -359,10 +359,12 @@ async function createCandidate(form, cfg, res) {
     const target = map[k];
     if (target) payload[target] = form[k];
   }
-  // Định tuyến CHIẾN DỊCH theo thương hiệu ứng tuyển (ưu tiên cấu hình trong DB, fallback config)
+  // Định tuyến CHIẾN DỊCH: ưu tiên theo thương hiệu ứng tuyển (Cửa hàng); nếu không có (Văn phòng/Sản xuất)
+  // thì định tuyến theo Khối công việc. Ưu tiên cấu hình trong DB, fallback config.
   let dbMap = null;
   try { dbMap = await db.getBrandCampaignMap(); } catch (e) { dbMap = null; }
-  const brandCode = pickBrandCampaign(dbMap || {}, form.brand) || pickBrandCampaign(c.brandCampaigns, form.brand);
+  const brandCode = pickBrandCampaign(dbMap || {}, form.brand) || pickBrandCampaign(c.brandCampaigns, form.brand)
+    || pickBrandCampaign(dbMap || {}, form.jobgroup) || pickBrandCampaign(c.brandCampaigns, form.jobgroup);
   if (brandCode) payload.campaign_current_id = brandCode;
 
   // Ngày sinh: input HTML là yyyy-mm-dd -> 1Office cần dd/mm/YYYY

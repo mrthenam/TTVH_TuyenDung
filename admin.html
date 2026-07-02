@@ -353,20 +353,20 @@
       <!-- CHIẾN DỊCH -->
       <div class="trainview" id="viewCampaign" style="display:none">
         <div class="pagehd">
-          <div><h1>🎯 Chiến dịch theo thương hiệu</h1><div class="sub">Khi ứng viên chọn thương hiệu, hồ sơ tự vào đúng chiến dịch 1Office bên dưới.</div></div>
+          <div><h1>🎯 Chiến dịch tuyển dụng</h1><div class="sub">Khi ứng viên chọn Thương hiệu (khối Cửa hàng) hoặc Khối công việc (Văn phòng / Kho &amp; Xưởng Sản Xuất), hồ sơ tự vào đúng chiến dịch 1Office bên dưới.</div></div>
         </div>
         <div id="campList" class="camplist"></div>
         <div class="addbox" style="width:auto;max-width:640px">
-          <h3>＋ Thêm thương hiệu → chiến dịch</h3>
+          <h3>＋ Thêm Thương hiệu/Khối công việc → chiến dịch</h3>
           <div id="cErr" class="boxmsg err"></div>
           <div id="cOk" class="boxmsg ok"></div>
           <div class="grid2">
-            <div class="fld"><label>Thương hiệu <span class="req">*</span></label><input id="c_brand" type="text" placeholder="vd: Trà Hú" /></div>
+            <div class="fld"><label>Thương hiệu / Khối công việc <span class="req">*</span></label><input id="c_brand" type="text" placeholder="vd: Trà Hú, hoặc Khối Văn Phòng" /></div>
             <div class="fld"><label>Mã chiến dịch</label><input id="c_code" type="text" placeholder="vd: CTV01881806266805" /></div>
             <div class="fld full"><label>Tên chiến dịch</label><input id="c_name" type="text" placeholder="vd: [TRAHU - Hiring Web] Tuyển dụng nhân viên mới" /></div>
           </div>
           <button class="btn primary" id="cAdd" style="justify-content:center;margin-top:6px">Thêm chiến dịch</button>
-          <p class="hintnote">Tên thương hiệu phải trùng đúng giá trị trong ô “Thương hiệu ứng tuyển” trên form ứng tuyển.</p>
+          <p class="hintnote">Giá trị nhập phải trùng đúng với "Thương hiệu ứng tuyển" (khi chọn Cửa hàng) hoặc "Khối công việc" — <b>Khối Văn Phòng</b>, <b>Khối Kho &amp; Xưởng Sản Xuất</b> (khi chọn Văn phòng/Sản xuất) trên form ứng tuyển.</p>
         </div>
       </div>
 
@@ -914,8 +914,9 @@ function loadCampaigns() {
     var rows = d.rows || []; $('#navCampCnt').textContent = rows.length;
     var html = '';
     rows.forEach(function (r) {
+      var isJobgroup = /^Khối /.test(r.brand || '');
       html += '<div class="camprow" data-brand="' + esc(r.brand) + '">'
-        + '<div class="cb">' + esc(r.brand) + '<small>Thương hiệu ứng tuyển</small></div>'
+        + '<div class="cb">' + esc(r.brand) + '<small>' + (isJobgroup ? 'Khối công việc' : 'Thương hiệu ứng tuyển') + '</small></div>'
         + '<div class="fld"><label>Mã chiến dịch</label><input class="ci_code" value="' + esc(r.code || '') + '" /></div>'
         + '<div class="fld"><label>Tên chiến dịch</label><input class="ci_name" value="' + esc(r.name || '') + '" /></div>'
         + '<div class="acts"><button class="btn primary cSave">Lưu</button><button class="iconbtn del cDel">🗑</button></div>'
