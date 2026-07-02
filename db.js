@@ -113,7 +113,13 @@ async function createSession(username, displayName) {
   const token = crypto.randomBytes(24).toString('hex');
   const ts = Date.now();
   if (HAS_PG) {
-    await pool.query('INSERT INTO sessions(token,username,display_name,ts) VALUES($1,$2,$3,$4)', [token, username, displayName, ts]);
+    try {
+      await pool.query('INSERT INTO sessions(token,username,display_name,ts) VALUES($1,$2,$3,$4)', [token, username, displayName, ts]);
+      console.log(' [session] tạo mới OK cho user=' + username);
+    } catch (e) {
+      console.error(' [session] LỖI khi tạo (INSERT):', e.message);
+      sessions.set(token, { username, displayName, ts }); // fallback RAM để không chặn đăng nhập
+    }
   } else {
     sessions.set(token, { username, displayName, ts });
   }
@@ -122,10 +128,23 @@ async function createSession(username, displayName) {
 async function getSession(token) {
   if (!token) return null;
   if (HAS_PG) {
-    const r = await pool.query('SELECT username, display_name AS "displayName", ts FROM sessions WHERE token=$1', [token]);
-    const s = r.rows[0]; if (!s) return null;
-    if (Date.now() - Number(s.ts) > SESSION_TTL) { await pool.query('DELETE FROM sessions WHERE token=$1', [token]); return null; }
-    return s;
+    try {
+      const r = await pool.query('SELECT username, display_name AS "displayName", ts FROM sessions WHERE token=$1', [token]);
+      const s = r.rows[0];
+      if (!s) {
+        const fb = sessions.get(token); // có thể vừa tạo qua nhánh fallback RAM ở trên
+        if (fb) return fb;
+        console.log(' [session] không tìm thấy token trong DB (rowCount=' + r.rowCount + ')');
+        return null;
+      }
+      if (Date.now() - Number(s.ts) > SESSION_TTL) { await pool.query('DELETE FROM sessions WHERE token=$1', [token]); return null; }
+      return s;
+    } catch (e) {
+      console.error(' [session] LỖI khi đọc (SELECT):', e.message);
+      const s = sessions.get(token); if (!s) return null;
+      if (Date.now() - s.ts > SESSION_TTL) { sessions.delete(token); return null; }
+      return s;
+    }
   }
   const s = sessions.get(token); if (!s) return null;
   if (Date.now() - s.ts > SESSION_TTL) { sessions.delete(token); return null; }
