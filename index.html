@@ -2005,18 +2005,20 @@
               </select>
             </div>
             <div class="field">
+              <label for="jobgroup">Khối công việc <span class="req">*</span></label>
+              <select id="jobgroup" name="jobgroup">
+                <option value="" disabled selected>Chọn khối công việc</option>
+                <option>Cửa hàng</option>
+                <option>Khối Văn Phòng</option>
+                <option>Khối Kho &amp; Xưởng Sản Xuất</option>
+              </select>
+            </div>
+            <div class="field">
               <label for="position">Vị trí ứng tuyển <span class="req">*</span></label>
               <select id="position" name="position">
-                <option value="" disabled selected>Chọn vị trí ứng tuyển</option>
-                <option>Quản lý cửa hàng</option>
-                <option>Trưởng ca</option>
-                <option>Nhân viên Full-time (có &gt; 6 tháng kinh nghiệm)</option>
-                <option>Nhân viên Part-time (có &gt; 6 tháng kinh nghiệm)</option>
-                <option>Nhân viên Part-time (chưa có kinh nghiệm)</option>
-                <option>Nhân viên Full-time (chưa có kinh nghiệm nhưng làm được 8 tiếng)</option>
-                <option>Nhân viên thời vụ Tết</option>
-                <option>Nhân viên Part-time (ca đêm)</option>
+                <option value="" disabled selected>Chọn khối công việc trước</option>
               </select>
+              <input type="text" id="position_other" placeholder="Nhập tên vị trí ứng tuyển" style="display:none;margin-top:8px" />
             </div>
             <div class="field">
               <label for="brand">Thương hiệu ứng tuyển <span class="req">*</span></label>
@@ -2327,10 +2329,52 @@
       });
     })();
 
+    /* Khối công việc -> Vị trí ứng tuyển (cascading) + tùy chọn "Khác" */
+    (function() {
+      var POSITIONS = {
+        'Cửa hàng': [
+          'Quản lý cửa hàng', 'Trưởng ca',
+          'Nhân viên Full-time (có > 6 tháng kinh nghiệm)',
+          'Nhân viên Part-time (có > 6 tháng kinh nghiệm)',
+          'Nhân viên Part-time (chưa có kinh nghiệm)',
+          'Nhân viên Full-time (chưa có kinh nghiệm nhưng làm được 8 tiếng)',
+          'Nhân viên thời vụ Tết', 'Nhân viên Part-time (ca đêm)'
+        ],
+        'Khối Văn Phòng': ['Marketing / Truyền thông', 'Nhân sự (HR)', 'IT', 'Tài chính - Kế toán'],
+        'Khối Kho & Xưởng Sản Xuất': ['Sản xuất / Vận hành', 'QA / QC', 'Kho vận', 'Kỹ thuật / Bảo trì']
+      };
+      var jobgroupSel = document.getElementById('jobgroup');
+      var positionSel = document.getElementById('position');
+      var positionOther = document.getElementById('position_other');
+
+      function fillPositions(group) {
+        var list = POSITIONS[group] || [];
+        positionSel.innerHTML = '<option value="" disabled selected>Chọn vị trí ứng tuyển</option>'
+          + list.map(function(p) { return '<option>' + p + '</option>'; }).join('')
+          + '<option value="__other__">Khác</option>';
+        positionOther.style.display = 'none';
+        positionOther.value = '';
+      }
+      jobgroupSel.addEventListener('change', function() {
+        fillPositions(jobgroupSel.value);
+        jobgroupSel.classList.remove('err');
+      });
+      positionSel.addEventListener('change', function() {
+        var isOther = positionSel.value === '__other__';
+        positionOther.style.display = isOther ? 'block' : 'none';
+        if (isOther) positionOther.focus();
+        else positionOther.value = '';
+        positionSel.classList.remove('err');
+      });
+      positionOther.addEventListener('input', function() {
+        positionOther.classList.remove('err');
+      });
+    })();
+
     /* Form validation + submit (demo) */
     (function() {
       var form = document.getElementById('regForm');
-      var required = ['name', 'gender', 'birthday', 'phone', 'email', 'idcard', 'address', 'region', 'workarea', 'position', 'brand'];
+      var required = ['name', 'gender', 'birthday', 'phone', 'email', 'idcard', 'address', 'region', 'workarea', 'jobgroup', 'position', 'brand'];
       var optional = ['referrer'];
       form.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -2348,6 +2392,16 @@
             if (!firstBad) firstBad = el;
           }
         });
+        // Vị trí "Khác" -> validate ô nhập tay
+        var positionOther = document.getElementById('position_other');
+        if (document.getElementById('position').value === '__other__') {
+          var pov = positionOther.value.trim();
+          positionOther.classList.toggle('err', !pov);
+          if (!pov) {
+            ok = false;
+            if (!firstBad) firstBad = positionOther;
+          }
+        }
         var fe = document.getElementById('formErr');
         if (!ok) {
           fe.textContent = 'Vui lòng điền đầy đủ các mục bắt buộc có dấu (*).';
@@ -2368,6 +2422,7 @@
           var el = document.getElementById(id);
           if (el) data[id] = el.value.trim();
         });
+        if (data.position === '__other__') data.position = positionOther.value.trim();
 
         // Lấy chiến dịch & nguồn từ URL (vd mở form qua link/QR: ?campaign=123&source_id=49)
         var qs = new URLSearchParams(location.search);
