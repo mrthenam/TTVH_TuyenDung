@@ -570,6 +570,8 @@ function showApp(name) {
   $('#gate').style.display = 'none'; $('#app').style.display = 'flex'; $('#app').style.flexDirection = 'column'; $('#me').textContent = name || 'Nhân viên';
   refreshList(); if (!listTimer) listTimer = setInterval(refreshList, 3000);
   loadNotif(); if (!notifTimer) notifTimer = setInterval(loadNotif, 15000);
+  // Tải sẵn số lượng cho các badge sidebar (đăng ký đào tạo / nhân viên / chiến dịch) ngay khi vào app
+  loadTraining(); loadStaff(); loadCampaigns();
   api('/api/agent/sheetinfo').then(function (d) { SHEET_VIEW_URL = (d && d.viewUrl) || ''; GOOGLE_CLIENT_ID = (d && d.googleClientId) || ''; }).catch(function () {});
 }
 function logout() { TOKEN = ''; localStorage.removeItem('ttvh_agent_token'); clearInterval(listTimer); clearInterval(msgTimer); location.reload(); }
