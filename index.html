@@ -1639,16 +1639,18 @@
 
     .ft-desc {
       font-size: 14px;
-      color: rgba(245,237,224,.78);
+      color: rgba(245, 237, 224, .78);
       line-height: 1.65;
       margin-bottom: 14px;
     }
 
-    .ft-desc em { font-style: italic; }
+    .ft-desc em {
+      font-style: italic;
+    }
 
     .ft-info {
       font-size: 13.5px;
-      color: rgba(245,237,224,.78);
+      color: rgba(245, 237, 224, .78);
       margin-bottom: 7px;
       line-height: 1.55;
     }
@@ -1659,27 +1661,33 @@
       text-underline-offset: 3px;
     }
 
-    .ft-info a:hover { color: var(--gold); }
+    .ft-info a:hover {
+      color: var(--gold);
+    }
 
     .ft-map {
       margin-top: 16px;
       border-radius: 10px;
       overflow: hidden;
-      border: 1px solid rgba(245,237,224,.18);
+      border: 1px solid rgba(245, 237, 224, .18);
     }
 
-    .ft-map iframe { display: block; }
+    .ft-map iframe {
+      display: block;
+    }
 
     .ft-map-link {
       display: inline-block;
       margin-top: 9px;
       font-size: 13px;
-      color: rgba(245,237,224,.65);
+      color: rgba(245, 237, 224, .65);
       text-decoration: underline;
       text-underline-offset: 2px;
     }
 
-    .ft-map-link:hover { color: var(--gold); }
+    .ft-map-link:hover {
+      color: var(--gold);
+    }
 
     .ft-col h4 {
       font-family: var(--head);
@@ -1695,15 +1703,19 @@
       padding: 0;
     }
 
-    .ft-col ul li { margin-bottom: 11px; }
+    .ft-col ul li {
+      margin-bottom: 11px;
+    }
 
     .ft-col ul li a {
       font-size: 14px;
-      color: rgba(245,237,224,.78);
+      color: rgba(245, 237, 224, .78);
       transition: color .15s;
     }
 
-    .ft-col ul li a:hover { color: var(--gold); }
+    .ft-col ul li a:hover {
+      color: var(--gold);
+    }
 
     .ft-col ul li a.ft-bold {
       font-weight: 700;
@@ -1713,18 +1725,24 @@
     .ft-bottom {
       margin-top: 38px;
       padding-top: 18px;
-      border-top: 1px solid rgba(245,237,224,.15);
+      border-top: 1px solid rgba(245, 237, 224, .15);
       text-align: center;
       font-size: 12.5px;
-      color: rgba(245,237,224,.45);
+      color: rgba(245, 237, 224, .45);
     }
 
     @media(max-width:860px) {
-      .ft-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+      .ft-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+      }
     }
 
     @media(max-width:540px) {
-      .ft-grid { grid-template-columns: 1fr; gap: 28px; }
+      .ft-grid {
+        grid-template-columns: 1fr;
+        gap: 28px;
+      }
     }
 
     .sticky-cta {
@@ -2079,7 +2097,7 @@
             </div>
             <div class="field">
               <label for="referrer">Người giới thiệu</label>
-              <input type="text" id="referrer" name="referrer" placeholder="Tên người giới thiệu (nếu có)" />
+              <input type="text" id="referrer" name="referrer" placeholder="Tên người giới thiệu + Phòng ban (Nếu có)" />
             </div>
           </div>
           <button type="submit" class="btn btn-primary btn-block" style="margin-top:6px">GỬI HỒ SƠ ỨNG TUYỂN →</button>
@@ -2172,7 +2190,7 @@
             <img src="images/logo-ttvh.jpg" alt="Thịnh Thế Vinh Hoa" />
             <span class="ft-brand-name">Thịnh Thế Vinh Hoa</span>
           </div>
-          <p class="ft-desc">Hệ sinh thái F&amp;B đa thương hiệu. <em>Vũng thời · Sáng vận · Đẹp danh.</em></p>
+          <p class="ft-desc">Hệ sinh thái F&amp;B đa thương hiệu. <em>Vững thời · Sáng vận · Đẹp danh.</em></p>
           <p class="ft-info"><strong>Địa chỉ:</strong> Số 35, đường Huỳnh Tịnh Của, phường Xuân Hòa, TP. Hồ Chí Minh, Việt Nam</p>
           <p class="ft-info">Hotline: <a href="tel:02871080719">028 7108 0719</a></p>
           <p class="ft-info">Email tuyển dụng: <a href="mailto:hr@maycha.com.vn">hr@maycha.com.vn</a></p>
@@ -2398,9 +2416,11 @@
 
       function fillPositions(group) {
         var list = POSITIONS[group] || [];
-        positionSel.innerHTML = '<option value="" disabled selected>Chọn vị trí ứng tuyển</option>'
-          + list.map(function(p) { return '<option>' + p + '</option>'; }).join('')
-          + '<option value="__other__">Khác</option>';
+        positionSel.innerHTML = '<option value="" disabled selected>Chọn vị trí ứng tuyển</option>' +
+          list.map(function(p) {
+            return '<option>' + p + '</option>';
+          }).join('') +
+          '<option value="__other__">Khác</option>';
         positionSel.disabled = false;
         positionHint.style.display = 'none';
         positionOther.style.display = 'none';
