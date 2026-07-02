@@ -253,11 +253,11 @@ function serveStatic(req, res) {
   });
 }
 
-// Đọc body (JSON) của request POST.
+// Đọc body (JSON) của request POST. Giới hạn nới rộng để chấp nhận CV đính kèm (base64).
 function readBody(req) {
   return new Promise((resolve) => {
     let raw = '';
-    req.on('data', (c) => { raw += c; if (raw.length > 1e6) req.destroy(); });
+    req.on('data', (c) => { raw += c; if (raw.length > 8e6) req.destroy(); });
     req.on('end', () => { try { resolve(JSON.parse(raw || '{}')); } catch (e) { resolve(null); } });
   });
 }
@@ -368,6 +368,11 @@ async function createCandidate(form, cfg, res) {
   // Ngày sinh: input HTML là yyyy-mm-dd -> 1Office cần dd/mm/YYYY
   if (payload.birthday && /^\d{4}-\d{2}-\d{2}$/.test(payload.birthday)) {
     const p = payload.birthday.split('-'); payload.birthday = p[2] + '/' + p[1] + '/' + p[0];
+  }
+
+  // CV đính kèm (nếu có) -> field "files" của 1Office: JSON [{name, file: base64}] (chỉ nhận 1 file duy nhất)
+  if (form.cv_base64 && form.cv_name) {
+    payload.files = JSON.stringify([{ name: form.cv_name, file: form.cv_base64 }]);
   }
 
   // 3) Đã có hồ sơ (không blacklist) -> CẬP NHẬT hồ sơ cũ theo code (đăng ký lại, tránh lỗi trùng SĐT).

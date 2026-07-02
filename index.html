@@ -2092,6 +2092,11 @@
                       <option>Gà Giòn Sốt Ba Cô Gái</option>
                     </select>
                   </div>
+                  <div class="field full" id="cvField" style="display:none">
+                    <label for="cvFile">Tải lên CV <span style="color:var(--muted);font-weight:500">(PDF/DOC/DOCX, tối đa 5MB)</span></label>
+                    <input type="file" id="cvFile" name="cvFile" accept=".pdf,.doc,.docx" disabled />
+                    <p class="jgb-hint" id="cvHint"></p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -2429,6 +2434,9 @@
       var positionHint = document.getElementById('positionHint');
       var brandField = document.getElementById('brandField');
       var brandSel = document.getElementById('brand');
+      var cvField = document.getElementById('cvField');
+      var cvFile = document.getElementById('cvFile');
+      var cvHint = document.getElementById('cvHint');
 
       function fillPositions(group) {
         var list = POSITIONS[group] || [];
@@ -2450,9 +2458,33 @@
           brandSel.classList.remove('err');
         }
       }
+      function toggleCv(show) {
+        cvField.style.display = show ? '' : 'none';
+        cvFile.disabled = !show;
+        if (!show) {
+          cvFile.value = '';
+          cvFile.classList.remove('err');
+          cvHint.textContent = '';
+        }
+      }
+      cvFile.addEventListener('change', function() {
+        cvFile.classList.remove('err');
+        var f = cvFile.files && cvFile.files[0];
+        if (f && f.size > 5 * 1024 * 1024) {
+          cvHint.style.color = 'var(--red)';
+          cvHint.textContent = 'File quá lớn (tối đa 5MB). Vui lòng chọn file khác.';
+          cvFile.value = '';
+        } else if (f) {
+          cvHint.style.color = 'var(--muted)';
+          cvHint.textContent = 'Đã chọn: ' + f.name;
+        } else {
+          cvHint.textContent = '';
+        }
+      });
       jobgroupSel.addEventListener('change', function() {
         fillPositions(jobgroupSel.value);
         toggleBrand(jobgroupSel.value === 'Cửa hàng');
+        toggleCv(jobgroupSel.value === 'Khối Văn Phòng' || jobgroupSel.value === 'Khối Kho & Xưởng Sản Xuất');
         jobgroupSel.classList.remove('err');
       });
       positionSel.addEventListener('change', function() {
@@ -2472,7 +2504,7 @@
       var form = document.getElementById('regForm');
       var required = ['name', 'gender', 'birthday', 'phone', 'email', 'idcard', 'address', 'region', 'workarea', 'jobgroup', 'position'];
       var optional = ['referrer'];
-      form.addEventListener('submit', function(e) {
+      form.addEventListener('submit', async function(e) {
         e.preventDefault();
         var ok = true,
           firstBad = null;
@@ -2545,6 +2577,27 @@
         var oldTxt = btn.textContent;
         btn.disabled = true;
         btn.textContent = 'Đang gửi hồ sơ…';
+
+        // Đính kèm CV (base64) nếu Khối Văn Phòng / Khối Kho & Xưởng Sản Xuất có chọn file
+        var cvFile = document.getElementById('cvFile');
+        var cvF = cvFile && !cvFile.disabled && cvFile.files && cvFile.files[0];
+        if (cvF) {
+          try {
+            var dataUrl = await new Promise(function(resolve, reject) {
+              var reader = new FileReader();
+              reader.onload = function() {
+                resolve(reader.result);
+              };
+              reader.onerror = reject;
+              reader.readAsDataURL(cvF);
+            });
+            data.cv_name = cvF.name;
+            data.cv_base64 = String(dataUrl).split(',')[1] || '';
+          } catch (err) {
+            /* đọc file lỗi -> bỏ qua, vẫn cho nộp hồ sơ không kèm CV */
+          }
+        }
+
         fetch('/api/apply', {
             method: 'POST',
             headers: {
