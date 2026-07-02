@@ -776,9 +776,15 @@
       var validators = {
         name: {
           test: function(v) {
-            return v.trim().length >= 2;
+            var t = v.trim();
+            if (t.length < 2) return false;
+            // chữ cái đầu MỖI từ phải viết hoa (vd: Bùi Thế Nam)
+            return t.split(/\s+/).every(function(w) {
+              var c = w.charAt(0);
+              return c === c.toLocaleUpperCase('vi');
+            });
           },
-          bad: 'Vui lòng nhập họ tên.'
+          bad: 'Vui lòng viết hoa chữ cái đầu mỗi từ (ví dụ: Bùi Thế Nam).'
         },
         phone: {
           test: function(v) {
@@ -825,6 +831,23 @@
           evalField(id, false);
         });
       });
+
+      // Tự viết hoa chữ cái đầu mỗi từ cho ô Họ Tên (khi rời ô)
+      function titleCaseVi(s) {
+        return s.replace(/\s+/g, ' ').trim().split(' ').map(function(w) {
+          if (!w) return w;
+          return w.charAt(0).toLocaleUpperCase('vi') + w.slice(1).toLocaleLowerCase('vi');
+        }).join(' ');
+      }
+      (function() {
+        var nameEl = document.getElementById('name');
+        if (!nameEl) return;
+        nameEl.addEventListener('blur', function() {
+          var t = titleCaseVi(nameEl.value);
+          if (t !== nameEl.value) nameEl.value = t;
+          evalField('name', false);
+        });
+      })();
 
       function setMsg(id, text, good) {
         var m = document.getElementById('msg-' + id);
