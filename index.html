@@ -1332,6 +1332,46 @@
       }
     }
 
+    .jobgroup-box {
+      border: 1px dashed var(--line-2);
+      border-radius: 14px;
+      padding: 18px 20px 6px;
+      background: var(--card-2, #fff6ec)
+    }
+
+    .jgb-title {
+      font-size: 12.5px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 14px
+    }
+
+    .jgb-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px
+    }
+
+    @media(max-width:680px) {
+      .jgb-grid {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .field select:disabled {
+      background: #f2ece2;
+      color: var(--muted);
+      cursor: not-allowed
+    }
+
+    .jgb-hint {
+      font-size: 12.5px;
+      color: var(--muted);
+      margin-top: 6px
+    }
+
     .field label .req {
       color: var(--red);
       margin-left: 2px
@@ -2004,21 +2044,29 @@
                 <option>Khác</option>
               </select>
             </div>
-            <div class="field">
-              <label for="jobgroup">Khối công việc <span class="req">*</span></label>
-              <select id="jobgroup" name="jobgroup">
-                <option value="" disabled selected>Chọn khối công việc</option>
-                <option>Cửa hàng</option>
-                <option>Khối Văn Phòng</option>
-                <option>Khối Kho &amp; Xưởng Sản Xuất</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="position">Vị trí ứng tuyển <span class="req">*</span></label>
-              <select id="position" name="position">
-                <option value="" disabled selected>Chọn khối công việc trước</option>
-              </select>
-              <input type="text" id="position_other" placeholder="Nhập tên vị trí ứng tuyển" style="display:none;margin-top:8px" />
+            <div class="field full">
+              <div class="jobgroup-box">
+                <div class="jgb-title">Thông tin ứng tuyển</div>
+                <div class="jgb-grid">
+                  <div class="field">
+                    <label for="jobgroup">Khối công việc <span class="req">*</span></label>
+                    <select id="jobgroup" name="jobgroup">
+                      <option value="" disabled selected>Chọn khối công việc</option>
+                      <option>Cửa hàng</option>
+                      <option>Khối Văn Phòng</option>
+                      <option>Khối Kho &amp; Xưởng Sản Xuất</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="position">Vị trí ứng tuyển <span class="req">*</span></label>
+                    <select id="position" name="position" disabled>
+                      <option value="" disabled selected>Chọn vị trí ứng tuyển</option>
+                    </select>
+                    <input type="text" id="position_other" placeholder="Nhập tên vị trí ứng tuyển" style="display:none;margin-top:8px" />
+                    <p class="jgb-hint" id="positionHint">(Vui lòng chọn Khối công việc trước)</p>
+                  </div>
+                </div>
+              </div>
             </div>
             <div class="field">
               <label for="brand">Thương hiệu ứng tuyển <span class="req">*</span></label>
@@ -2346,12 +2394,15 @@
       var jobgroupSel = document.getElementById('jobgroup');
       var positionSel = document.getElementById('position');
       var positionOther = document.getElementById('position_other');
+      var positionHint = document.getElementById('positionHint');
 
       function fillPositions(group) {
         var list = POSITIONS[group] || [];
         positionSel.innerHTML = '<option value="" disabled selected>Chọn vị trí ứng tuyển</option>'
           + list.map(function(p) { return '<option>' + p + '</option>'; }).join('')
           + '<option value="__other__">Khác</option>';
+        positionSel.disabled = false;
+        positionHint.style.display = 'none';
         positionOther.style.display = 'none';
         positionOther.value = '';
       }
