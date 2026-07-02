@@ -1333,25 +1333,36 @@
     }
 
     .jobgroup-box {
-      border: 1px dashed var(--line-2);
+      border: 1px solid rgba(198, 147, 32, .28);
       border-radius: 14px;
-      padding: 18px 20px 6px;
+      padding: 20px 22px 22px;
       background: var(--card-2, #fff6ec)
     }
 
     .jgb-title {
+      display: flex;
+      align-items: center;
+      gap: 7px;
       font-size: 12.5px;
       font-weight: 800;
       letter-spacing: .08em;
       text-transform: uppercase;
       color: var(--red);
-      margin-bottom: 14px
+      margin-bottom: 16px
     }
 
     .jgb-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 16px
+    }
+
+    .jgb-grid .full {
+      grid-column: 1 / -1
+    }
+
+    .jgb-grid .field {
+      margin-bottom: 0
     }
 
     @media(max-width:680px) {
@@ -1369,7 +1380,7 @@
     .jgb-hint {
       font-size: 12.5px;
       color: var(--muted);
-      margin-top: 6px
+      margin-top: 8px
     }
 
     .field label .req {
@@ -2064,7 +2075,7 @@
             </div>
             <div class="field full">
               <div class="jobgroup-box">
-                <div class="jgb-title">Thông tin ứng tuyển</div>
+                <div class="jgb-title"><span aria-hidden="true">📋</span> Thông tin ứng tuyển</div>
                 <div class="jgb-grid">
                   <div class="field">
                     <label for="jobgroup">Khối công việc <span class="req">*</span></label>
@@ -2083,19 +2094,19 @@
                     <input type="text" id="position_other" placeholder="Nhập tên vị trí ứng tuyển" style="display:none;margin-top:8px" />
                     <p class="jgb-hint" id="positionHint">(Vui lòng chọn Khối công việc trước)</p>
                   </div>
+                  <div class="field full" id="brandField" style="display:none">
+                    <label for="brand">Thương hiệu ứng tuyển <span class="req">*</span></label>
+                    <select id="brand" name="brand" disabled>
+                      <option value="" disabled selected>Chọn thương hiệu</option>
+                      <option>MayCha</option>
+                      <option>Hồng Trà Sữa Tam Hảo</option>
+                      <option>Gà Giòn Sốt Ba Cô Gái</option>
+                    </select>
+                  </div>
                 </div>
               </div>
             </div>
-            <div class="field">
-              <label for="brand">Thương hiệu ứng tuyển <span class="req">*</span></label>
-              <select id="brand" name="brand">
-                <option value="" disabled selected>Chọn thương hiệu</option>
-                <option>MayCha</option>
-                <option>Hồng Trà Sữa Tam Hảo</option>
-                <option>Gà Giòn Sốt Ba Cô Gái</option>
-              </select>
-            </div>
-            <div class="field">
+            <div class="field full">
               <label for="referrer">Người giới thiệu</label>
               <input type="text" id="referrer" name="referrer" placeholder="Tên người giới thiệu + Phòng ban (Nếu có)" />
             </div>
@@ -2413,6 +2424,8 @@
       var positionSel = document.getElementById('position');
       var positionOther = document.getElementById('position_other');
       var positionHint = document.getElementById('positionHint');
+      var brandField = document.getElementById('brandField');
+      var brandSel = document.getElementById('brand');
 
       function fillPositions(group) {
         var list = POSITIONS[group] || [];
@@ -2426,8 +2439,17 @@
         positionOther.style.display = 'none';
         positionOther.value = '';
       }
+      function toggleBrand(show) {
+        brandField.style.display = show ? '' : 'none';
+        brandSel.disabled = !show;
+        if (!show) {
+          brandSel.value = '';
+          brandSel.classList.remove('err');
+        }
+      }
       jobgroupSel.addEventListener('change', function() {
         fillPositions(jobgroupSel.value);
+        toggleBrand(jobgroupSel.value === 'Cửa hàng');
         jobgroupSel.classList.remove('err');
       });
       positionSel.addEventListener('change', function() {
@@ -2445,7 +2467,7 @@
     /* Form validation + submit (demo) */
     (function() {
       var form = document.getElementById('regForm');
-      var required = ['name', 'gender', 'birthday', 'phone', 'email', 'idcard', 'address', 'region', 'workarea', 'jobgroup', 'position', 'brand'];
+      var required = ['name', 'gender', 'birthday', 'phone', 'email', 'idcard', 'address', 'region', 'workarea', 'jobgroup', 'position'];
       var optional = ['referrer'];
       form.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -2473,6 +2495,17 @@
             if (!firstBad) firstBad = positionOther;
           }
         }
+        // Thương hiệu ứng tuyển -> chỉ bắt buộc khi Khối công việc là "Cửa hàng"
+        var jobgroupVal = document.getElementById('jobgroup').value;
+        var brandSel = document.getElementById('brand');
+        if (jobgroupVal === 'Cửa hàng') {
+          var bv = brandSel.value.trim();
+          brandSel.classList.toggle('err', !bv);
+          if (!bv) {
+            ok = false;
+            if (!firstBad) firstBad = brandSel;
+          }
+        }
         var fe = document.getElementById('formErr');
         if (!ok) {
           fe.textContent = 'Vui lòng điền đầy đủ các mục bắt buộc có dấu (*).';
@@ -2494,6 +2527,7 @@
           if (el) data[id] = el.value.trim();
         });
         if (data.position === '__other__') data.position = positionOther.value.trim();
+        data.brand = jobgroupVal === 'Cửa hàng' ? brandSel.value.trim() : '';
 
         // Lấy chiến dịch & nguồn từ URL (vd mở form qua link/QR: ?campaign=123&source_id=49)
         var qs = new URLSearchParams(location.search);
