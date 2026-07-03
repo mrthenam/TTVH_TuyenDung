@@ -219,12 +219,14 @@ async function sendMail(cfg, { to, subject, bodyText, fromName }) {
 async function maybeSendTrainingEmail(cfg, form) {
   try {
     const s = await getEmailCfg();
-    if (!s.enabled) return { ok: false, skipped: 'disabled' };
-    const to = (form.email || '').trim();
-    if (!to || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) return { ok: false, skipped: 'no-email' };
+    const to0 = (form.email || '').trim();
+    console.log(' [mail] Kích hoạt sau đăng ký — enabled=' + s.enabled + ', testMode=' + s.testMode + ', testList=' + JSON.stringify(s.testList) + ', email form=' + JSON.stringify(to0));
+    if (!s.enabled) { console.log(' [mail] Bỏ qua: chưa bật gửi tự động (enabled=false).'); return { ok: false, skipped: 'disabled' }; }
+    const to = to0;
+    if (!to || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) { console.log(' [mail] Bỏ qua: email không hợp lệ hoặc trống.'); return { ok: false, skipped: 'no-email' }; }
     if (s.testMode) {
       const allow = (s.testList || []).map((x) => String(x).trim().toLowerCase());
-      if (allow.indexOf(to.toLowerCase()) === -1) return { ok: false, skipped: 'not-in-testlist' };
+      if (allow.indexOf(to.toLowerCase()) === -1) { console.log(' [mail] Bỏ qua: "' + to + '" không nằm trong danh sách test ' + JSON.stringify(allow) + '.'); return { ok: false, skipped: 'not-in-testlist' }; }
     }
     const p = mailProvider(cfg);
     console.log(' [mail] Chuẩn bị gửi qua ' + p.name + ' (ready=' + p.ready + ', from=' + p.fromEmail + ') tới ' + to);
