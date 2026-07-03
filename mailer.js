@@ -161,22 +161,30 @@ async function smtpSend(cfg, { to, subject, html, fromName }) {
 // ---- Resend (API HTTPS — dùng được trên Railway) ----
 function resendSend({ apiKey, from, to, subject, html }) {
   return new Promise((resolve) => {
-    const body = JSON.stringify({ from, to: [to], subject: subject || '(không tiêu đề)', html });
-    const req = https.request('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) },
-      timeout: 20000
-    }, (res) => {
-      let d = ''; res.setEncoding('utf8'); res.on('data', (c) => (d += c));
-      res.on('end', () => {
-        let j = null; try { j = JSON.parse(d); } catch (e) {}
-        if (res.statusCode >= 200 && res.statusCode < 300 && j && j.id) return resolve({ ok: true, id: j.id });
-        const msg = (j && (j.message || (j.error && (j.error.message || j.error)) || j.name)) || ('HTTP ' + res.statusCode + ' ' + d.slice(0, 250));
-        resolve({ ok: false, error: 'Resend: ' + msg });
+    if (!apiKey) return resolve({ ok: false, error: 'Resend: thiếu API key.' });
+    let body;
+    try { body = JSON.stringify({ from, to: [to], subject: subject || '(không tiêu đề)', html }); }
+    catch (e) { return resolve({ ok: false, error: 'Resend: lỗi tạo nội dung — ' + e.message }); }
+    let req;
+    try {
+      req = https.request('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + String(apiKey).trim(), 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) },
+        timeout: 20000
+      }, (res) => {
+        let d = ''; res.setEncoding('utf8'); res.on('data', (c) => (d += c));
+        res.on('end', () => {
+          let j = null; try { j = JSON.parse(d); } catch (e) {}
+          if (res.statusCode >= 200 && res.statusCode < 300 && j && j.id) return resolve({ ok: true, id: j.id });
+          const msg = (j && (j.message || (j.error && (j.error.message || j.error)) || j.name)) || ('HTTP ' + res.statusCode + ' ' + (d ? d.slice(0, 250) : '(rỗng)'));
+          resolve({ ok: false, error: 'Resend: ' + msg });
+        });
       });
-    });
+    } catch (e) {
+      return resolve({ ok: false, error: 'Resend: lỗi tạo request — ' + (e && (e.message || e.code) || 'không rõ') });
+    }
     req.on('timeout', () => { req.destroy(); resolve({ ok: false, error: 'Resend: timeout' }); });
-    req.on('error', (e) => resolve({ ok: false, error: 'Resend: ' + e.message }));
+    req.on('error', (e) => resolve({ ok: false, error: 'Resend: ' + (e && (e.message || e.code) || 'lỗi kết nối không rõ') }));
     req.write(body); req.end();
   });
 }
@@ -218,11 +226,13 @@ async function maybeSendTrainingEmail(cfg, form) {
       const allow = (s.testList || []).map((x) => String(x).trim().toLowerCase());
       if (allow.indexOf(to.toLowerCase()) === -1) return { ok: false, skipped: 'not-in-testlist' };
     }
+    const p = mailProvider(cfg);
+    console.log(' [mail] Chuẩn bị gửi qua ' + p.name + ' (ready=' + p.ready + ', from=' + p.fromEmail + ') tới ' + to);
     const r = await sendMail(cfg, { to, subject: s.subject, bodyText: s.body, fromName: s.fromName });
-    if (r.ok) console.log(' [mail] Đã gửi email đào tạo tới ' + to);
-    else console.warn(' [mail] Gửi thất bại tới ' + to + ': ' + r.error);
+    if (r.ok) console.log(' [mail] Đã gửi email đào tạo tới ' + to + ' — kết quả: ' + JSON.stringify(r));
+    else console.warn(' [mail] Gửi thất bại tới ' + to + ' — kết quả đầy đủ: ' + JSON.stringify(r));
     return r;
-  } catch (e) { return { ok: false, error: e.message }; }
+  } catch (e) { console.error(' [mail] Exception ngoài dự kiến:', e && e.stack); return { ok: false, error: (e && e.message) || 'lỗi không xác định' }; }
 }
 
 module.exports = { EMAIL_DEFAULTS, getEmailCfg, sendMail, maybeSendTrainingEmail, mailStatus };
