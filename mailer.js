@@ -83,33 +83,41 @@ function b64(s) { return Buffer.from(s, 'utf8').toString('base64'); }
 function wrap76(s) { return s.replace(/(.{76})/g, '$1\r\n'); }
 function encHeader(s) { return '=?UTF-8?B?' + b64(s) + '?='; }
 
-// Client SMTP tối giản: đọc reply theo mã 3 số.
+// Client SMTP tối giản: đọc reply {code, text}; reject rõ ràng khi lỗi/đóng kết nối.
 function smtpConnect(host, port) {
   return new Promise((resolve, reject) => {
+    let settled = false;
     const sock = tls.connect({ host, port, servername: host });
     sock.setEncoding('utf8');
-    sock.setTimeout(20000);
+    sock.setTimeout(25000);
     let buf = '';
-    let waiter = null;
+    let waiter = null; // { res, rej }
     function flush() {
+      if (!waiter) return;
       const m = buf.match(/^(?:\d{3}-[^\n]*\n)*(\d{3}) [^\n]*\n/);
-      if (m && waiter) {
+      if (m) {
         const code = parseInt(m[1], 10);
+        const text = buf.slice(0, m[0].length).replace(/\s+/g, ' ').trim();
         buf = buf.slice(m[0].length);
-        const w = waiter; waiter = null; w(code);
+        const w = waiter; waiter = null; w.res({ code, text });
       }
     }
+    function fail(err) {
+      if (waiter) { const w = waiter; waiter = null; w.rej(err); }
+      if (!settled) { settled = true; reject(err); }
+    }
     sock.on('data', (d) => { buf += d; flush(); });
-    sock.on('timeout', () => { sock.destroy(new Error('SMTP timeout')); });
-    sock.on('error', reject);
+    sock.on('timeout', () => { sock.destroy(); fail(new Error('timeout (' + host + ':' + port + ') — có thể nhà cung cấp chặn cổng SMTP ra ngoài')); });
+    sock.on('error', (e) => fail(new Error('kết nối lỗi: ' + (e.code || e.message))));
+    sock.on('close', () => { if (waiter) { const w = waiter; waiter = null; w.rej(new Error('kết nối bị đóng đột ngột')); } });
     const api = {
       sock,
-      read() { return new Promise((res) => { waiter = res; flush(); }); },
+      read() { return new Promise((res, rej) => { waiter = { res, rej }; flush(); }); },
       cmd(line) { sock.write(line + '\r\n'); return api.read(); },
       write(raw) { sock.write(raw); },
       close() { try { sock.end(); } catch (e) {} }
     };
-    sock.once('secureConnect', () => resolve(api));
+    sock.once('secureConnect', () => { settled = true; resolve(api); });
   });
 }
 
@@ -132,25 +140,24 @@ async function sendMail(cfg, { to, subject, bodyText, fromName }) {
   // dot-stuffing (dòng bắt đầu bằng '.')
   const safe = message.replace(/\r\n\./g, '\r\n..');
 
-  let c;
+  let c, stage = 'connect';
   try {
     c = await smtpConnect(host, port);
-    if ((await c.read()) !== 220) throw new Error('greeting');
-    if ((await c.cmd('EHLO ttvh')) !== 250) throw new Error('EHLO');
-    if ((await c.cmd('AUTH LOGIN')) !== 334) throw new Error('AUTH');
-    if ((await c.cmd(b64(user))) !== 334) throw new Error('user');
-    if ((await c.cmd(b64(pass))) !== 235) throw new Error('Sai tài khoản/App Password');
-    if ((await c.cmd('MAIL FROM:<' + user + '>')) !== 250) throw new Error('MAIL FROM');
-    const rcpt = await c.cmd('RCPT TO:<' + to + '>');
-    if (rcpt !== 250 && rcpt !== 251) throw new Error('RCPT TO');
-    if ((await c.cmd('DATA')) !== 354) throw new Error('DATA');
-    c.write(safe + '\r\n.\r\n');
-    if ((await c.read()) !== 250) throw new Error('gửi nội dung thất bại');
+    let r;
+    stage = 'greeting'; r = await c.read(); if (r.code !== 220) throw new Error(r.text);
+    stage = 'EHLO'; r = await c.cmd('EHLO ttvh.local'); if (r.code !== 250) throw new Error(r.text);
+    stage = 'AUTH'; r = await c.cmd('AUTH LOGIN'); if (r.code !== 334) throw new Error(r.text);
+    stage = 'user'; r = await c.cmd(b64(user)); if (r.code !== 334) throw new Error(r.text);
+    stage = 'pass'; r = await c.cmd(b64(pass)); if (r.code !== 235) throw new Error('sai App Password? ' + r.text);
+    stage = 'MAIL FROM'; r = await c.cmd('MAIL FROM:<' + user + '>'); if (r.code !== 250) throw new Error(r.text);
+    stage = 'RCPT TO'; r = await c.cmd('RCPT TO:<' + to + '>'); if (r.code !== 250 && r.code !== 251) throw new Error(r.text);
+    stage = 'DATA'; r = await c.cmd('DATA'); if (r.code !== 354) throw new Error(r.text);
+    stage = 'send'; c.write(safe + '\r\n.\r\n'); r = await c.read(); if (r.code !== 250) throw new Error(r.text);
     c.close();
     return { ok: true };
   } catch (e) {
     if (c) c.close();
-    return { ok: false, error: e.message };
+    return { ok: false, error: '[' + stage + '] ' + (e && (e.message || e.code) ? (e.message || e.code) : 'lỗi không xác định') };
   }
 }
 
