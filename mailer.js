@@ -20,7 +20,7 @@ const EMAIL_DEFAULTS = {
   fromName: 'Thịnh Thế Vinh Hoa',
   subject: 'Thư mời tham gia Khóa Đào Tạo Đầu Vào — Thịnh Thế Vinh Hoa',
   body: [
-    'Dear các bạn Nhân Viên Mới,',
+    'Dear {{ten}},',
     '',
     'Chúc mừng các bạn đã phỏng vấn thành công và chuẩn bị gia nhập đại gia đình Thịnh Thế Vinh Hoa với các thương hiệu như: MayCha, Tam Hảo, Trà Hú, Gà Giòn Sốt Ba Cô Gái, …',
     '',
@@ -252,6 +252,11 @@ async function sendMail(cfg, { to, subject, bodyText, fromName }) {
   return smtpSend(cfg, { to, subject, html, fromName: dispName });
 }
 
+// Thay placeholder {{ten}}... trong tiêu đề/nội dung bằng dữ liệu thật của người đăng ký.
+function applyTemplate(text, vars) {
+  return String(text || '').replace(/\{\{\s*(\w+)\s*\}\}/g, (m, key) => (Object.prototype.hasOwnProperty.call(vars, key) ? vars[key] : m));
+}
+
 // Gửi email chào mừng khi có đăng ký đào tạo mới (tôn trọng bật/tắt + chế độ test).
 async function maybeSendTrainingEmail(cfg, form) {
   try {
@@ -267,11 +272,14 @@ async function maybeSendTrainingEmail(cfg, form) {
     }
     const p = mailProvider(cfg);
     console.log(' [mail] Chuẩn bị gửi qua ' + p.name + ' (ready=' + p.ready + ', from=' + p.fromEmail + ') tới ' + to);
-    const r = await sendMail(cfg, { to, subject: s.subject, bodyText: s.body, fromName: s.fromName });
+    const vars = { ten: (form.name || '').trim() || 'các bạn Nhân Viên Mới' };
+    const subject = applyTemplate(s.subject, vars);
+    const bodyText = applyTemplate(s.body, vars);
+    const r = await sendMail(cfg, { to, subject, bodyText, fromName: s.fromName });
     if (r.ok) console.log(' [mail] Đã gửi email đào tạo tới ' + to + ' — kết quả: ' + JSON.stringify(r));
     else console.warn(' [mail] Gửi thất bại tới ' + to + ' — kết quả đầy đủ: ' + JSON.stringify(r));
     return r;
   } catch (e) { console.error(' [mail] Exception ngoài dự kiến:', e && e.stack); return { ok: false, error: (e && e.message) || 'lỗi không xác định' }; }
 }
 
-module.exports = { EMAIL_DEFAULTS, getEmailCfg, sendMail, maybeSendTrainingEmail, mailStatus };
+module.exports = { EMAIL_DEFAULTS, getEmailCfg, sendMail, maybeSendTrainingEmail, mailStatus, applyTemplate };

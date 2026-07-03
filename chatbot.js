@@ -319,7 +319,13 @@ async function handleChat(req, res, url, loadConfig) {
         if (allow.indexOf(to.toLowerCase()) === -1) {
           return sendJson(res, 400, { error: 'Email này chưa nằm trong danh sách test. Hãy thêm vào "Danh sách email test" và lưu trước khi gửi thử.' });
         }
-        const r = await mailer.sendMail(cfg, { to, subject: c.subject, bodyText: c.body, fromName: c.fromName });
+        const vars = { ten: (b.demoName || '').toString().trim() || 'Nguyễn Văn A (tên mẫu)' };
+        const r = await mailer.sendMail(cfg, {
+          to,
+          subject: mailer.applyTemplate(c.subject, vars),
+          bodyText: mailer.applyTemplate(c.body, vars),
+          fromName: c.fromName
+        });
         return sendJson(res, 200, r);
       }
 
