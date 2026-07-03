@@ -802,10 +802,10 @@ function loadEmailCfg() {
     $('#em_fromName').value = d.fromName || 'Thịnh Thế Vinh Hoa';
     $('#em_subject').value = d.subject || '';
     $('#em_body').value = d.body || '';
-    var ready = d._smtpReady;
-    $('#emSmtp').innerHTML = 'Tài khoản gửi: <b>' + esc(d._smtpUser || '') + '</b> — '
-      + (ready ? '<span style="color:#1f9a52">đã cấu hình mật khẩu ✓</span>'
-        : '<span style="color:#c0392b">CHƯA có App Password. Thêm biến môi trường <b>SMTP_PASS</b> trên Railway (App Password 16 ký tự của Gmail) thì mới gửi được.</span>');
+    var ready = d._ready;
+    $('#emSmtp').innerHTML = 'Gửi qua: <b>' + esc(d._provider || '') + '</b> · Địa chỉ gửi: <b>' + esc(d._fromEmail || '') + '</b> — '
+      + (ready ? '<span style="color:#1f9a52">đã sẵn sàng ✓</span>'
+        : '<span style="color:#c0392b">CHƯA sẵn sàng. Thêm biến môi trường <b>RESEND_API_KEY</b> (và <b>EMAIL_FROM</b>) trên Railway thì mới gửi được.</span>');
   }).catch(function (e) { if (e.message === '401') logout(); });
 }
 $('#emSave').addEventListener('click', function () {

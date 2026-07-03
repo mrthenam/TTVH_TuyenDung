@@ -10,6 +10,7 @@
  * Fire-and-forget: mọi lỗi được nuốt, KHÔNG làm hỏng luồng đăng ký.
  */
 const tls = require('tls');
+const https = require('https');
 const db = require('./db');
 
 const EMAIL_DEFAULTS = {
@@ -121,12 +122,10 @@ function smtpConnect(host, port) {
   });
 }
 
-// Gửi 1 email (HTML). Trả { ok, error }. KHÔNG throw.
-async function sendMail(cfg, { to, subject, bodyText, fromName }) {
+// ---- SMTP (fallback; KHÔNG dùng được trên Railway vì bị chặn cổng SMTP) ----
+async function smtpSend(cfg, { to, subject, html, fromName }) {
   const { user, pass, host, port } = smtpCreds(cfg);
-  if (!pass) return { ok: false, error: 'Chưa cấu hình mật khẩu SMTP (SMTP_PASS).' };
-  if (!to) return { ok: false, error: 'Thiếu email người nhận.' };
-  const html = textToHtml(bodyText || '');
+  if (!pass) return { ok: false, error: 'Chưa cấu hình mật khẩu SMTP.' };
   const headers = [
     'From: ' + encHeader(fromName || 'Thịnh Thế Vinh Hoa') + ' <' + user + '>',
     'To: <' + to + '>',
@@ -137,9 +136,7 @@ async function sendMail(cfg, { to, subject, bodyText, fromName }) {
     'Date: ' + new Date().toUTCString()
   ].join('\r\n');
   const message = headers + '\r\n\r\n' + wrap76(b64(html));
-  // dot-stuffing (dòng bắt đầu bằng '.')
-  const safe = message.replace(/\r\n\./g, '\r\n..');
-
+  const safe = message.replace(/\r\n\./g, '\r\n..'); // dot-stuffing
   let c, stage = 'connect';
   try {
     c = await smtpConnect(host, port);
@@ -148,7 +145,7 @@ async function sendMail(cfg, { to, subject, bodyText, fromName }) {
     stage = 'EHLO'; r = await c.cmd('EHLO ttvh.local'); if (r.code !== 250) throw new Error(r.text);
     stage = 'AUTH'; r = await c.cmd('AUTH LOGIN'); if (r.code !== 334) throw new Error(r.text);
     stage = 'user'; r = await c.cmd(b64(user)); if (r.code !== 334) throw new Error(r.text);
-    stage = 'pass'; r = await c.cmd(b64(pass)); if (r.code !== 235) throw new Error('sai App Password? ' + r.text);
+    stage = 'pass'; r = await c.cmd(b64(pass)); if (r.code !== 235) throw new Error('sai mật khẩu? ' + r.text);
     stage = 'MAIL FROM'; r = await c.cmd('MAIL FROM:<' + user + '>'); if (r.code !== 250) throw new Error(r.text);
     stage = 'RCPT TO'; r = await c.cmd('RCPT TO:<' + to + '>'); if (r.code !== 250 && r.code !== 251) throw new Error(r.text);
     stage = 'DATA'; r = await c.cmd('DATA'); if (r.code !== 354) throw new Error(r.text);
@@ -159,6 +156,55 @@ async function sendMail(cfg, { to, subject, bodyText, fromName }) {
     if (c) c.close();
     return { ok: false, error: '[' + stage + '] ' + (e && (e.message || e.code) ? (e.message || e.code) : 'lỗi không xác định') };
   }
+}
+
+// ---- Resend (API HTTPS — dùng được trên Railway) ----
+function resendSend({ apiKey, from, to, subject, html }) {
+  return new Promise((resolve) => {
+    const body = JSON.stringify({ from, to: [to], subject: subject || '(không tiêu đề)', html });
+    const req = https.request('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) },
+      timeout: 20000
+    }, (res) => {
+      let d = ''; res.setEncoding('utf8'); res.on('data', (c) => (d += c));
+      res.on('end', () => {
+        let j = null; try { j = JSON.parse(d); } catch (e) {}
+        if (res.statusCode >= 200 && res.statusCode < 300 && j && j.id) return resolve({ ok: true, id: j.id });
+        const msg = (j && (j.message || (j.error && (j.error.message || j.error)) || j.name)) || ('HTTP ' + res.statusCode + ' ' + d.slice(0, 250));
+        resolve({ ok: false, error: 'Resend: ' + msg });
+      });
+    });
+    req.on('timeout', () => { req.destroy(); resolve({ ok: false, error: 'Resend: timeout' }); });
+    req.on('error', (e) => resolve({ ok: false, error: 'Resend: ' + e.message }));
+    req.write(body); req.end();
+  });
+}
+
+// Chọn nhà cung cấp: có RESEND_API_KEY -> Resend (HTTPS); ngược lại -> SMTP.
+function mailProvider(cfg) {
+  const e = (cfg && cfg.email) || {};
+  const resendKey = process.env.RESEND_API_KEY || e.resendKey || '';
+  const fromEmail = process.env.EMAIL_FROM || e.fromEmail || 'admin@vieclamthinhthevinhhoa.com.vn';
+  if (resendKey) return { name: 'Resend', fromEmail, ready: true, resendKey };
+  const cr = smtpCreds(cfg);
+  return { name: 'SMTP', fromEmail: cr.user, ready: !!cr.pass };
+}
+function mailStatus(cfg) {
+  const p = mailProvider(cfg);
+  return { provider: p.name, fromEmail: p.fromEmail, ready: p.ready };
+}
+
+// Gửi 1 email (HTML). Trả { ok, error }. KHÔNG throw.
+async function sendMail(cfg, { to, subject, bodyText, fromName }) {
+  if (!to) return { ok: false, error: 'Thiếu email người nhận.' };
+  const html = textToHtml(bodyText || '');
+  const dispName = fromName || 'Thịnh Thế Vinh Hoa';
+  const p = mailProvider(cfg);
+  if (p.name === 'Resend') {
+    return resendSend({ apiKey: p.resendKey, from: dispName + ' <' + p.fromEmail + '>', to, subject, html });
+  }
+  return smtpSend(cfg, { to, subject, html, fromName: dispName });
 }
 
 // Gửi email chào mừng khi có đăng ký đào tạo mới (tôn trọng bật/tắt + chế độ test).
@@ -179,4 +225,4 @@ async function maybeSendTrainingEmail(cfg, form) {
   } catch (e) { return { ok: false, error: e.message }; }
 }
 
-module.exports = { EMAIL_DEFAULTS, getEmailCfg, sendMail, maybeSendTrainingEmail };
+module.exports = { EMAIL_DEFAULTS, getEmailCfg, sendMail, maybeSendTrainingEmail, mailStatus };

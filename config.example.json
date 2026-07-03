@@ -82,8 +82,10 @@
     "googleClientId": ""
   },
 
-  "_note_email": "Gửi email tự động cho ứng viên đăng ký đào tạo. user = Gmail gửi đi; pass = App Password 16 ký tự của Gmail (KHÔNG phải mật khẩu thường). Khi deploy nên đặt qua env SMTP_USER / SMTP_PASS. Bật/tắt + nội dung chỉnh trong dashboard tab 'Email tự động'.",
+  "_note_email": "Gửi email tự động cho ứng viên đăng ký đào tạo. Railway CHẶN cổng SMTP nên dùng Resend (API HTTPS): resendKey = API key Resend (env RESEND_API_KEY), fromEmail = địa chỉ gửi trên tên miền đã xác minh với Resend (env EMAIL_FROM). Bật/tắt + nội dung chỉnh trong dashboard tab 'Email tự động'. (user/pass chỉ dùng cho SMTP fallback khi chạy nơi không chặn cổng.)",
   "email": {
+    "resendKey": "",
+    "fromEmail": "admin@vieclamthinhthevinhhoa.com.vn",
     "user": "thinhthevinhhoa@gmail.com",
     "pass": ""
   },

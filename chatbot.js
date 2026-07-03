@@ -292,10 +292,8 @@ async function handleChat(req, res, url, loadConfig) {
       // Cấu hình EMAIL tự động (bật/tắt, chế độ test, danh sách test, tiêu đề, nội dung)
       if (p === '/api/agent/emailcfg' && req.method === 'GET') {
         const c = await mailer.getEmailCfg();
-        const e = cfg.email || {};
-        const smtpUser = process.env.SMTP_USER || e.user || 'thinhthevinhhoa@gmail.com';
-        const smtpReady = !!(process.env.SMTP_PASS || e.pass); // chỉ báo đã có mật khẩu hay chưa, KHÔNG lộ mật khẩu
-        return sendJson(res, 200, Object.assign({}, c, { _smtpUser: smtpUser, _smtpReady: smtpReady }));
+        const st = mailer.mailStatus(cfg); // { provider, fromEmail, ready } — KHÔNG lộ khóa
+        return sendJson(res, 200, Object.assign({}, c, { _provider: st.provider, _fromEmail: st.fromEmail, _ready: st.ready }));
       }
       if (p === '/api/agent/emailcfg' && req.method === 'POST') {
         const b = await readBody(req) || {};
