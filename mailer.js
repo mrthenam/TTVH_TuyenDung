@@ -69,15 +69,52 @@ function smtpCreds(cfg) {
 }
 
 function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
-// text -> HTML: escape, biến URL http(s) thành link, xuống dòng thành <br>
+function linkify(escapedText) {
+  return escapedText.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" style="color:#c69320;text-decoration:underline">$1</a>');
+}
+const GOLD = '#c69320';
+// Chuyển văn bản thường (viết trong dashboard) -> HTML có định dạng:
+//  - dòng bắt đầu "* " -> gạch đầu dòng
+//  - dòng dạng "1. ..." / "A. ..." (không có "* ") -> tiêu đề mục, in đậm màu vàng đồng
+//  - dòng trống -> khoảng cách đoạn
+//  - còn lại -> đoạn văn thường
+function bodyToHtml(text) {
+  const lines = String(text || '').split(/\r?\n/);
+  let html = '', ulOpen = false;
+  function closeUl() { if (ulOpen) { html += '</ul>'; ulOpen = false; } }
+  lines.forEach((raw) => {
+    const line = raw.trim();
+    if (!line) { closeUl(); html += '<div style="height:12px"></div>'; return; }
+    if (/^\*\s+/.test(line)) {
+      if (!ulOpen) { html += '<ul style="margin:4px 0 14px;padding-left:22px">'; ulOpen = true; }
+      html += '<li style="margin-bottom:6px">' + linkify(esc(line.replace(/^\*\s+/, ''))) + '</li>';
+      return;
+    }
+    closeUl();
+    if (/^(\d+|[A-ZĐ])\.\s+\S/.test(line)) {
+      html += '<div style="font-weight:700;color:' + GOLD + ';margin:18px 0 8px;font-size:16px">' + linkify(esc(line)) + '</div>';
+      return;
+    }
+    html += '<p style="margin:0 0 8px">' + linkify(esc(line)) + '</p>';
+  });
+  closeUl();
+  return html;
+}
+// Bọc nội dung trong khung email có thương hiệu (banner logo + footer).
 function textToHtml(text) {
-  const body = esc(text)
-    .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" style="color:#c69320">$1</a>')
-    .replace(/\r?\n/g, '<br>');
-  return '<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#2a1810;max-width:680px">'
-    + body
-    + '<hr style="border:none;border-top:1px solid #eadfce;margin:24px 0">'
-    + '<div style="font-size:13px;color:#8b7060">Email tự động từ hệ thống tuyển dụng Thịnh Thế Vinh Hoa F&amp;B Group.</div></div>';
+  const logoUrl = 'https://vieclamthinhthevinhhoa.com.vn/images/logo-ttvh.jpg';
+  return '<div style="background:#fbf7ef;padding:28px 12px;font-family:Arial,Helvetica,sans-serif">'
+    + '<div style="max-width:640px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 10px 30px rgba(198,147,32,.15)">'
+    + '<div style="background:linear-gradient(135deg,#e6c34d 0%,#c69320 100%);padding:26px 32px;text-align:center">'
+    + '<img src="' + logoUrl + '" width="52" height="52" style="border-radius:12px;display:block;margin:0 auto 10px;border:2px solid rgba(255,255,255,.6)" alt="Thịnh Thế Vinh Hoa" />'
+    + '<div style="color:#ffffff;font-weight:800;font-size:19px;letter-spacing:.02em">THỊNH THẾ VINH HOA</div>'
+    + '<div style="color:rgba(255,255,255,.85);font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;margin-top:2px">F&amp;B Group</div>'
+    + '</div>'
+    + '<div style="padding:30px 32px;color:#2a1810;font-size:15px;line-height:1.7">' + bodyToHtml(text) + '</div>'
+    + '<div style="padding:18px 32px;border-top:1px solid #eadfce;background:#fff8f0;color:#8b7060;font-size:12px;text-align:center">'
+    + 'Email tự động từ hệ thống tuyển dụng Thịnh Thế Vinh Hoa F&amp;B Group.<br>'
+    + '<a href="https://vieclamthinhthevinhhoa.com.vn" style="color:' + GOLD + ';text-decoration:none">vieclamthinhthevinhhoa.com.vn</a>'
+    + '</div></div></div>';
 }
 
 function b64(s) { return Buffer.from(s, 'utf8').toString('base64'); }
