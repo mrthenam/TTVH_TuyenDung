@@ -897,6 +897,61 @@
       }
     }
 
+    /* LIÊN HỆ (hotline theo khu vực) */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px
+    }
+
+    .contact-card {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 20px;
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s
+    }
+
+    .contact-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow);
+      border-color: rgba(198, 147, 32, .3)
+    }
+
+    .contact-card .ic {
+      flex: none;
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--grad-soft);
+      display: grid;
+      place-items: center;
+      font-size: 21px
+    }
+
+    .contact-card b {
+      display: block;
+      margin-bottom: 3px;
+      font-size: 14.5px
+    }
+
+    .contact-card .phone {
+      font-family: var(--head);
+      font-weight: 800;
+      font-size: 19px;
+      color: var(--red);
+      letter-spacing: .01em
+    }
+
+    @media(max-width:680px) {
+      .contact-grid {
+        grid-template-columns: 1fr
+      }
+    }
+
     /* APPLY-BY-BRAND (replaces pricing) */
     .tiers {
       display: grid;
@@ -2181,6 +2236,35 @@
         <a href="mailto:hr@maycha.com.vn" class="btn btn-ghost">Liên hệ HR</a>
       </div>
       <p class="proof" style="margin:0">📍 Văn phòng chính: 35 Huỳnh Tịnh Của, P. Xuân Hòa, TP.HCM · ✉ Email phòng nhân sự: hr@maycha.com.vn</p>
+    </div>
+  </section>
+
+  <!-- LIÊN HỆ -->
+  <section class="sec" id="lienhe">
+    <div class="wrap">
+      <div class="sec-head center fade">
+        <span class="eyebrow">Liên hệ</span>
+        <h2 class="title">Hotline <span class="grad-text">theo khu vực</span></h2>
+        <p class="lead">Gọi ngay số hotline đúng thương hiệu/khối bạn quan tâm để được tư vấn nhanh nhất.</p>
+      </div>
+      <div class="contact-grid fade">
+        <a class="contact-card" href="tel:0983008254">
+          <div class="ic">📞</div>
+          <div><b>Trà Sữa MayCha</b><span class="phone">0983 008 254</span></div>
+        </a>
+        <a class="contact-card" href="tel:0983008931">
+          <div class="ic">📞</div>
+          <div><b>Hồng Trà Sữa Tam Hảo</b><span class="phone">0983 008 931</span></div>
+        </a>
+        <a class="contact-card" href="tel:0983008361">
+          <div class="ic">📞</div>
+          <div><b>Hồng Trà Sữa Tam Hảo (Hà Nội)</b><span class="phone">0983 008 361</span></div>
+        </a>
+        <a class="contact-card" href="tel:0983435553">
+          <div class="ic">📞</div>
+          <div><b>Khối Kho &amp; Xưởng Sản Xuất</b><span class="phone">0983 435 553</span></div>
+        </a>
+      </div>
     </div>
   </section>
 
