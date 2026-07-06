@@ -1235,6 +1235,46 @@
       border-color: var(--red)
     }
 
+    .date-field {
+      position: relative
+    }
+
+    .date-field input#birthday {
+      padding-right: 46px
+    }
+
+    .date-pick-btn {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: transparent;
+      font-size: 18px;
+      cursor: pointer;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      color: var(--muted)
+    }
+
+    .date-pick-btn:hover {
+      background: var(--card-2);
+      color: var(--red)
+    }
+
+    .date-field input.date-native-hidden {
+      position: absolute;
+      opacity: 0;
+      width: 1px;
+      height: 1px;
+      pointer-events: none;
+      left: 0;
+      top: 0
+    }
+
     .errmsg {
       color: var(--red);
       font-size: 12px;
@@ -2030,7 +2070,11 @@
             </div>
             <div class="field">
               <label for="birthday">Ngày sinh <span class="req">*</span></label>
-              <input type="date" id="birthday" name="birthday" />
+              <div class="date-field">
+                <input type="text" id="birthday" name="birthday" placeholder="01/01/2000" inputmode="numeric" maxlength="10" autocomplete="bday" />
+                <button type="button" class="date-pick-btn" id="birthdayPickBtn" aria-label="Chọn ngày sinh từ lịch">📅</button>
+                <input type="date" id="birthday_native" class="date-native-hidden" tabindex="-1" aria-hidden="true" />
+              </div>
             </div>
             <div class="field">
               <label for="phone">Điện thoại <span class="req">*</span></label>
@@ -2420,6 +2464,48 @@
       });
     })();
 
+    /* Ngày sinh dd/mm/yyyy: format khi gõ, parse để validate/gửi, đồng bộ với lịch native */
+    function formatBirthdayInput(raw) {
+      var digits = (raw || '').replace(/\D/g, '').slice(0, 8);
+      var parts = [];
+      if (digits.length > 0) parts.push(digits.slice(0, 2));
+      if (digits.length > 2) parts.push(digits.slice(2, 4));
+      if (digits.length > 4) parts.push(digits.slice(4, 8));
+      return parts.join('/');
+    }
+    function parseDmy(v) {
+      var m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec((v || '').trim());
+      if (!m) return null;
+      var d = +m[1], mo = +m[2], y = +m[3];
+      if (mo < 1 || mo > 12 || y < 1900 || y > new Date().getFullYear()) return null;
+      var dt = new Date(y, mo - 1, d);
+      if (dt.getFullYear() !== y || dt.getMonth() !== mo - 1 || dt.getDate() !== d) return null;
+      var p2 = function(n) { return (n < 10 ? '0' : '') + n; };
+      return { iso: y + '-' + p2(mo) + '-' + p2(d) };
+    }
+    (function() {
+      var bday = document.getElementById('birthday');
+      var native = document.getElementById('birthday_native');
+      var pickBtn = document.getElementById('birthdayPickBtn');
+      bday.addEventListener('input', function() {
+        bday.value = formatBirthdayInput(bday.value);
+        bday.classList.remove('err');
+      });
+      pickBtn.addEventListener('click', function() {
+        var parsed = parseDmy(bday.value);
+        native.value = parsed ? parsed.iso : '';
+        if (native.showPicker) {
+          try { native.showPicker(); } catch (e) { native.focus(); native.click(); }
+        } else { native.focus(); native.click(); }
+      });
+      native.addEventListener('change', function() {
+        if (!native.value) return;
+        var p = native.value.split('-');
+        bday.value = p[2] + '/' + p[1] + '/' + p[0];
+        bday.classList.remove('err');
+      });
+    })();
+
     /* Khối công việc -> Vị trí ứng tuyển (cascading) + tùy chọn "Khác" */
     (function() {
       var POSITIONS = {
@@ -2536,6 +2622,7 @@
           var bad = !v;
           if (id === 'phone') bad = !/^[0-9\s().+-]{8,}$/.test(v);
           if (id === 'email') bad = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+          if (id === 'birthday') bad = !parseDmy(v);
           el.classList.toggle('err', bad);
           if (bad) {
             ok = false;
@@ -2585,6 +2672,8 @@
         });
         if (data.position === '__other__') data.position = positionOther.value.trim();
         data.brand = jobgroupVal === 'Cửa hàng' ? brandSel.value.trim() : '';
+        var bdayParsed = parseDmy(data.birthday);
+        if (bdayParsed) data.birthday = bdayParsed.iso;
 
         // Lấy chiến dịch & nguồn từ URL (vd mở form qua link/QR: ?campaign=123&source_id=49)
         var qs = new URLSearchParams(location.search);
