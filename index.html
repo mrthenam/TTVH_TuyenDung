@@ -897,61 +897,6 @@
       }
     }
 
-    /* LIÊN HỆ (hotline theo khu vực) */
-    .contact-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 18px
-    }
-
-    .contact-card {
-      display: flex;
-      gap: 14px;
-      align-items: center;
-      background: #fff;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 20px;
-      transition: transform .18s ease, box-shadow .18s ease, border-color .18s
-    }
-
-    .contact-card:hover {
-      transform: translateY(-3px);
-      box-shadow: var(--shadow);
-      border-color: rgba(198, 147, 32, .3)
-    }
-
-    .contact-card .ic {
-      flex: none;
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      background: var(--grad-soft);
-      display: grid;
-      place-items: center;
-      font-size: 21px
-    }
-
-    .contact-card b {
-      display: block;
-      margin-bottom: 3px;
-      font-size: 14.5px
-    }
-
-    .contact-card .phone {
-      font-family: var(--head);
-      font-weight: 800;
-      font-size: 19px;
-      color: var(--red);
-      letter-spacing: .01em
-    }
-
-    @media(max-width:680px) {
-      .contact-grid {
-        grid-template-columns: 1fr
-      }
-    }
-
     /* APPLY-BY-BRAND (replaces pricing) */
     .tiers {
       display: grid;
@@ -1777,6 +1722,28 @@
       color: #f5ede0;
     }
 
+    .ft-contact li {
+      margin-bottom: 13px;
+    }
+
+    .ft-contact-name {
+      display: block;
+      font-size: 12px;
+      color: rgba(245, 237, 224, .55);
+      margin-bottom: 2px;
+    }
+
+    .ft-contact li a {
+      font-family: var(--head);
+      font-weight: 700;
+      font-size: 15px;
+      color: #f5ede0;
+    }
+
+    .ft-contact li a:hover {
+      color: var(--gold);
+    }
+
     .ft-bottom {
       margin-top: 38px;
       padding-top: 18px;
@@ -2239,35 +2206,6 @@
     </div>
   </section>
 
-  <!-- LIÊN HỆ -->
-  <section class="sec" id="lienhe">
-    <div class="wrap">
-      <div class="sec-head center fade">
-        <span class="eyebrow">Liên hệ</span>
-        <h2 class="title">Hotline <span class="grad-text">theo khu vực</span></h2>
-        <p class="lead">Gọi ngay số hotline đúng thương hiệu/khối bạn quan tâm để được tư vấn nhanh nhất.</p>
-      </div>
-      <div class="contact-grid fade">
-        <a class="contact-card" href="tel:0983008254">
-          <div class="ic">📞</div>
-          <div><b>Trà Sữa MayCha</b><span class="phone">0983 008 254</span></div>
-        </a>
-        <a class="contact-card" href="tel:0983008931">
-          <div class="ic">📞</div>
-          <div><b>Hồng Trà Sữa Tam Hảo</b><span class="phone">0983 008 931</span></div>
-        </a>
-        <a class="contact-card" href="tel:0983008361">
-          <div class="ic">📞</div>
-          <div><b>Hồng Trà Sữa Tam Hảo (Hà Nội)</b><span class="phone">0983 008 361</span></div>
-        </a>
-        <a class="contact-card" href="tel:0983435553">
-          <div class="ic">📞</div>
-          <div><b>Khối Kho &amp; Xưởng Sản Xuất</b><span class="phone">0983 435 553</span></div>
-        </a>
-      </div>
-    </div>
-  </section>
-
   <!-- FOOTER -->
   <footer>
     <div class="wrap">
@@ -2297,16 +2235,18 @@
             <li><a href="#" class="ft-bold">Hồng Trà Sữa Tam Hảo</a></li>
             <li><a href="#">Gà Giòn Sốt Ba Cô Gái</a></li>
             <li><a href="#">Trà Hú – Đậm Hú Hồn</a></li>
+            <li><a href="viec-lam.html">Cơ hội nghề nghiệp</a></li>
           </ul>
         </div>
 
-        <!-- Cột phải: kết nối -->
+        <!-- Cột phải: liên hệ -->
         <div class="ft-col">
-          <h4>Kết nối</h4>
-          <ul>
-            <li><a href="https://www.facebook.com/tuyendungttvh" target="_blank" rel="noopener">Fanpage tuyển dụng</a></li>
-            <li><a href="https://thinhthevinhhoa.com" target="_blank" rel="noopener">Hệ thống thương hiệu</a></li>
-            <li><a href="viec-lam.html">Cơ hội nghề nghiệp</a></li>
+          <h4>Liên hệ</h4>
+          <ul class="ft-contact">
+            <li><span class="ft-contact-name">Trà Sữa MayCha</span><a href="tel:0983008254">0983 008 254</a></li>
+            <li><span class="ft-contact-name">Hồng Trà Sữa Tam Hảo</span><a href="tel:0983008931">0983 008 931</a></li>
+            <li><span class="ft-contact-name">Hồng Trà Sữa Tam Hảo (Hà Nội)</span><a href="tel:0983008361">0983 008 361</a></li>
+            <li><span class="ft-contact-name">Khối Kho &amp; Xưởng Sản Xuất</span><a href="tel:0983435553">0983 435 553</a></li>
           </ul>
         </div>
 
