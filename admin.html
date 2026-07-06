@@ -1168,7 +1168,7 @@ var TR_HEAD = ['Id', 'Thời gian bắt đầu', 'Thời gian hoàn thành', 'H�
 var TR_WIDTHS = [6, 18, 18, 26, 16, 28, 22, 20, 24, 38, 30, 34];
 function trainingMatrix() {
   return trainRows.slice().sort(function (a, b) { return a.ts - b.ts; }).map(function (r, i) {
-    return [(r.id != null ? r.id : (i + 1)), fmtTsUS(r.ts), fmtTsUS(r.updated_at || r.ts), r.name || '', r.phone || '', r.email || '', r.province || '', r.district || '', normPos(r.position) || '', r.mode || '', fmtDateUS(r.sess_date) || '', r.store || ''];
+    return [(r.id != null ? r.id : (i + 1)), fmtTsUS(r.ts), fmtTsUS(r.updated_at || r.ts), r.name || '', r.phone || '', r.email || '', r.province || '', r.district || '', normPos(r.position) || '', r.mode || '', fmtDate(r.sess_date) || '', r.store || ''];
   });
 }
 $('#tcsv').addEventListener('click', function () {
