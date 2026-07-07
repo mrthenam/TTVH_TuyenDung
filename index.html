@@ -331,6 +331,19 @@
       color: var(--red)
     }
 
+    .pill-link {
+      font-family: inherit;
+      color: var(--txt);
+      cursor: pointer;
+      transition: background .15s, border-color .15s, transform .15s
+    }
+
+    .pill-link:hover {
+      background: #fdf6e8;
+      border-color: rgba(198, 147, 32, .35);
+      transform: translateY(-1px)
+    }
+
     .hero h1 {
       font-family: var(--head);
       font-size: clamp(34px, 6.4vw, 66px);
@@ -1758,9 +1771,9 @@
       <img src="images/logo-ttvh.jpg" alt="Thịnh Thế Vinh Hoa F&amp;B Group" class="hero-logo" />
       <div class="badge-row">
         <span class="pill hot">● ĐANG TUYỂN GẤP</span>
-        <span class="pill">Toàn thời gian &amp; Bán thời gian</span>
-        <span class="pill">Khối Văn Phòng</span>
-        <span class="pill">Khối Kho & Xưởng Sản Xuất</span>
+        <button type="button" class="pill pill-link" data-goto="store">Toàn thời gian &amp; Bán thời gian</button>
+        <button type="button" class="pill pill-link" data-goto="office">Khối Văn Phòng</button>
+        <button type="button" class="pill pill-link" data-goto="prod">Khối Kho & Xưởng Sản Xuất</button>
       </div>
       <h1>Gia nhập đại gia đình <span class="grad-text"> Thịnh Thế Vinh Hoa</span></h1>
       <p class="sub">Bạn không cần là người giỏi nhất, chỉ cần bạn là người muốn phát triển nhất. Hãy để Thịnh Thế Vinh Hoa làm bước đệm đưa bạn đi xa!</p>
@@ -2210,6 +2223,15 @@
             var p = document.getElementById('panel-' + k);
             if (p) p.style.display = (k === t) ? '' : 'none';
           });
+        });
+      });
+      /* Pill "Toàn thời gian & Bán thời gian / Khối Văn Phòng / Khối Kho & Xưởng Sản Xuất" -> mở đúng tab tương ứng */
+      [].forEach.call(document.querySelectorAll('.pill-link'), function(b) {
+        b.addEventListener('click', function() {
+          var t = b.getAttribute('data-goto');
+          var tab = document.querySelector('.ctab[data-tab="' + t + '"]');
+          if (tab) tab.click();
+          document.getElementById('career').scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
       });
     })();
