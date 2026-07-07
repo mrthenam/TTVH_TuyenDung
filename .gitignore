@@ -14,3 +14,6 @@ Thumbs.db
 *.log
 .vscode/
 .idea/
+
+# Tài liệu nội bộ (hướng dẫn, giải thích, ảnh chụp màn hình) — không push lên git
+tai-lieu-noi-bo/

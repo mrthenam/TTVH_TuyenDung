@@ -523,7 +523,7 @@
     <div class="panel">
 
       <form id="trainForm" novalidate>
-        <h1 class="form-title">TTVH - Thông Tin Đăng Ký Tham Gia Lớp Đào Tạo Đầu Vào</h1>
+        <h1 class="form-title">Maycha - Thông Tin Đăng Ký Tham Gia Lớp Đào Tạo Đầu Vào</h1>
         <p class="form-desc">Khi bạn gửi biểu mẫu này, nó sẽ không tự động thu thập các chi tiết của bạn như tên và địa chỉ email trừ khi bạn tự cung cấp nó.</p>
         <p class="req-note">* Bắt buộc</p>
         <hr class="rule" />
@@ -654,31 +654,59 @@
 
       // ô "Khác" cho vị trí: khi gõ thì tự chọn radio Khác
       var posOther = document.getElementById('position_other');
-      function otherFocus() { var r = form.querySelector('input[name="position"][value="__other__"]'); if (r) r.checked = true; }
-      function otherInput() { otherFocus(); document.getElementById('opts-position').classList.remove('err'); }
-      function attachPosOther() { posOther = document.getElementById('position_other'); if (posOther) { posOther.addEventListener('focus', otherFocus); posOther.addEventListener('input', otherInput); } }
+
+      function otherFocus() {
+        var r = form.querySelector('input[name="position"][value="__other__"]');
+        if (r) r.checked = true;
+      }
+
+      function otherInput() {
+        otherFocus();
+        document.getElementById('opts-position').classList.remove('err');
+      }
+
+      function attachPosOther() {
+        posOther = document.getElementById('position_other');
+        if (posOther) {
+          posOther.addEventListener('focus', otherFocus);
+          posOther.addEventListener('input', otherInput);
+        }
+      }
       attachPosOther();
 
       // Áp cấu hình form (tiêu đề/mô tả/lưu ý/vị trí/hình thức) — chỉnh trong dashboard
-      function escA(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+      function escA(s) {
+        return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+
       function buildPositions(arr) {
         document.getElementById('opts-position').innerHTML =
-          arr.map(function (p) { return '<label class="opt"><input type="radio" name="position" value="' + escA(p) + '" />' + escA(p) + '</label>'; }).join('')
-          + '<label class="opt"><input type="radio" name="position" value="__other__" /><input type="text" id="position_other" class="otherbox" placeholder="Khác" /></label>';
+          arr.map(function(p) {
+            return '<label class="opt"><input type="radio" name="position" value="' + escA(p) + '" />' + escA(p) + '</label>';
+          }).join('') +
+          '<label class="opt"><input type="radio" name="position" value="__other__" /><input type="text" id="position_other" class="otherbox" placeholder="Khác" /></label>';
         attachPosOther();
       }
+
       function buildModes(arr) {
         document.getElementById('opts-mode').innerHTML =
-          arr.map(function (m) { return '<label class="opt"><input type="radio" name="mode" value="' + escA(m) + '" />' + escA(m) + '</label>'; }).join('');
+          arr.map(function(m) {
+            return '<label class="opt"><input type="radio" name="mode" value="' + escA(m) + '" />' + escA(m) + '</label>';
+          }).join('');
       }
-      fetch('/api/trainingform').then(function (r) { return r.json(); }).then(function (cfg) {
+      fetch('/api/trainingform').then(function(r) {
+        return r.json();
+      }).then(function(cfg) {
         if (!cfg || typeof cfg !== 'object') return;
         if (cfg.title) document.querySelector('.form-title').textContent = cfg.title;
         if (cfg.desc) document.querySelector('.form-desc').textContent = cfg.desc;
-        if (cfg.dateNote) { var dn = document.getElementById('dateNoteHint'); if (dn) dn.textContent = cfg.dateNote; }
+        if (cfg.dateNote) {
+          var dn = document.getElementById('dateNoteHint');
+          if (dn) dn.textContent = cfg.dateNote;
+        }
         if (Array.isArray(cfg.positions) && cfg.positions.length) buildPositions(cfg.positions);
         if (Array.isArray(cfg.modes) && cfg.modes.length) buildModes(cfg.modes);
-      }).catch(function () {});
+      }).catch(function() {});
 
       document.querySelectorAll('.opts').forEach(function(g) {
         g.addEventListener('change', function() {
@@ -751,15 +779,26 @@
       // Làm mới danh sách cửa hàng ngay (không chờ cache 10 phút)
       document.getElementById('storeRefresh').addEventListener('click', function() {
         var msg = document.getElementById('storeRefreshMsg');
-        msg.textContent = 'Đang làm mới…'; msg.style.color = '#555';
-        fetch('/api/stores?refresh=1').then(function(r) { return r.json(); }).then(function(d) {
+        msg.textContent = 'Đang làm mới…';
+        msg.style.color = '#555';
+        fetch('/api/stores?refresh=1').then(function(r) {
+          return r.json();
+        }).then(function(d) {
           if (d && typeof d === 'object') {
-            Object.keys(d).forEach(function(k) { if (STORES[k]) STORES[k] = d[k] || []; });
+            Object.keys(d).forEach(function(k) {
+              if (STORES[k]) STORES[k] = d[k] || [];
+            });
             if (brandSel.value) fillStores(brandSel.value);
           }
-          msg.textContent = '✓ Đã cập nhật danh sách mới nhất.'; msg.style.color = '#1f9a52';
-          setTimeout(function() { msg.textContent = ''; }, 4000);
-        }).catch(function() { msg.textContent = 'Lỗi, vui lòng thử lại.'; msg.style.color = '#d6342a'; });
+          msg.textContent = '✓ Đã cập nhật danh sách mới nhất.';
+          msg.style.color = '#1f9a52';
+          setTimeout(function() {
+            msg.textContent = '';
+          }, 4000);
+        }).catch(function() {
+          msg.textContent = 'Lỗi, vui lòng thử lại.';
+          msg.style.color = '#d6342a';
+        });
       });
 
       function val(id) {
