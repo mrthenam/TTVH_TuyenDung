@@ -12,7 +12,21 @@ let pool = null;
 // ----- fallback RAM -----
 const memConv = new Map();   // id -> {id,name,human_mode,created_at,updated_at}
 const memMsg = new Map();    // id -> [{role,text,from_src,ts}]
-const memAgents = new Map(); // username -> {username,pass_hash,salt,display_name}
+const memAgents = new Map(); // username -> {username,pass_hash,salt,display_name,perms,is_admin}
+
+// Các khối công việc dùng cho phân quyền đăng/sửa tin tuyển dụng
+function normDept(s) { return String(s == null ? '' : s).normalize('NFC').trim(); }
+const JOB_DEPTS = ['Cửa hàng', 'Văn phòng', 'Khối sản xuất'].map(normDept);
+// Chuẩn hóa danh sách khối về đúng tên chuẩn (bỏ trùng, bỏ giá trị lạ, không phụ thuộc dạng Unicode NFC/NFD của client)
+function parsePerms(v) {
+  try {
+    const a = Array.isArray(v) ? v : JSON.parse(v || '[]');
+    if (!Array.isArray(a)) return [];
+    const out = [];
+    a.forEach(x => { const n = normDept(x); const hit = JOB_DEPTS.find(d => d === n); if (hit && out.indexOf(hit) < 0) out.push(hit); });
+    return out;
+  } catch (e) { return []; }
+}
 const memTraining = [];      // [{...registration, id, ts}]  (fallback RAM)
 const memBrandCampaigns = new Map(); // brand -> {brand, code, name}
 const memSettings = new Map();       // k -> v (fallback RAM)
@@ -39,6 +53,8 @@ async function init() {
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_msg_conv ON messages(conv_id, ts)`);
     await pool.query(`CREATE TABLE IF NOT EXISTS agents(
       username text PRIMARY KEY, pass_hash text, salt text, display_name text, created_at bigint)`);
+    await pool.query(`ALTER TABLE agents ADD COLUMN IF NOT EXISTS perms text`);
+    await pool.query(`ALTER TABLE agents ADD COLUMN IF NOT EXISTS is_admin boolean DEFAULT false`);
     await pool.query(`CREATE TABLE IF NOT EXISTS training(
       id bigserial PRIMARY KEY, name text, phone text, email text, brand text,
       position text, store text, course text, sess_date text, sess_time text,
@@ -72,23 +88,34 @@ async function countAgents() {
   return memAgents.size;
 }
 async function seedAdmin() {
-  if ((await countAgents()) > 0) return;
-  const user = process.env.ADMIN_USER || 'admin';
-  const pass = process.env.ADMIN_PASS || 'ttvh@2026';
-  await createAgent(user, pass, 'Quản trị');
-  console.log(' [db] Đã tạo tài khoản nhân viên mặc định: ' + user);
+  const user = (process.env.ADMIN_USER || 'admin').trim().toLowerCase();
+  if ((await countAgents()) === 0) {
+    const pass = process.env.ADMIN_PASS || 'ttvh@2026';
+    await createAgent(user, pass, 'Quản trị', { isAdmin: true });
+    console.log(' [db] Đã tạo tài khoản nhân viên mặc định: ' + user);
+    return;
+  }
+  // Đảm bảo tài khoản quản trị luôn có cờ is_admin (kể cả khi đã tồn tại từ trước khi thêm cột)
+  if (HAS_PG) {
+    try { await pool.query('UPDATE agents SET is_admin=true WHERE username=$1', [user]); } catch (e) {}
+  } else {
+    const a = memAgents.get(user); if (a) a.is_admin = true;
+  }
 }
 
-async function createAgent(username, password, displayName) {
+async function createAgent(username, password, displayName, opts) {
   username = (username || '').trim().toLowerCase(); if (!username || !password) return false;
+  opts = opts || {};
+  const isAdmin = !!opts.isAdmin;
+  const permsStr = JSON.stringify(parsePerms(opts.perms));
   const salt = genSalt(); const ph = hashPw(password, salt);
   if (HAS_PG) {
     await pool.query(
-      `INSERT INTO agents(username,pass_hash,salt,display_name,created_at) VALUES($1,$2,$3,$4,$5)
-       ON CONFLICT (username) DO UPDATE SET pass_hash=$2, salt=$3, display_name=$4`,
-      [username, ph, salt, displayName || username, Date.now()]);
+      `INSERT INTO agents(username,pass_hash,salt,display_name,created_at,perms,is_admin) VALUES($1,$2,$3,$4,$5,$6,$7)
+       ON CONFLICT (username) DO UPDATE SET pass_hash=$2, salt=$3, display_name=$4, perms=$6, is_admin=$7`,
+      [username, ph, salt, displayName || username, Date.now(), permsStr, isAdmin]);
   } else {
-    memAgents.set(username, { username, pass_hash: ph, salt, display_name: displayName || username });
+    memAgents.set(username, { username, pass_hash: ph, salt, display_name: displayName || username, perms: permsStr, is_admin: isAdmin });
   }
   return true;
 }
@@ -97,9 +124,25 @@ async function getAgent(username) {
   if (HAS_PG) { const r = await pool.query('SELECT * FROM agents WHERE username=$1', [username]); return r.rows[0] || null; }
   return memAgents.get(username) || null;
 }
+// Quyền hiệu lực của 1 nhân viên: admin = toàn quyền tất cả khối
+async function getAgentPerms(username) {
+  const a = await getAgent(username);
+  if (!a) return { isAdmin: false, depts: [] };
+  const isAdmin = !!a.is_admin;
+  return { isAdmin, depts: isAdmin ? JOB_DEPTS.slice() : parsePerms(a.perms) };
+}
+async function updateAgentPerms(username, perms) {
+  username = (username || '').trim().toLowerCase();
+  const permsStr = JSON.stringify(parsePerms(perms));
+  if (HAS_PG) { const r = await pool.query('UPDATE agents SET perms=$2 WHERE username=$1', [username, permsStr]); return r.rowCount; }
+  const a = memAgents.get(username); if (!a) return 0; a.perms = permsStr; return 1;
+}
 async function listAgents() {
-  if (HAS_PG) { const r = await pool.query('SELECT username, display_name FROM agents ORDER BY username'); return r.rows; }
-  return [...memAgents.values()].map(a => ({ username: a.username, display_name: a.display_name }));
+  if (HAS_PG) {
+    const r = await pool.query('SELECT username, display_name, perms, is_admin FROM agents ORDER BY username');
+    return r.rows.map(a => ({ username: a.username, display_name: a.display_name, perms: parsePerms(a.perms), is_admin: !!a.is_admin }));
+  }
+  return [...memAgents.values()].map(a => ({ username: a.username, display_name: a.display_name, perms: parsePerms(a.perms), is_admin: !!a.is_admin }));
 }
 async function verifyAgent(username, password) {
   const a = await getAgent(username); if (!a) return null;
@@ -445,7 +488,7 @@ async function setSetting(k, v) {
 
 module.exports = {
   init, HAS_PG,
-  verifyAgent, createAgent, listAgents,
+  verifyAgent, createAgent, listAgents, getAgentPerms, updateAgentPerms, JOB_DEPTS, normDept,
   createSession, getSession,
   ensureConv, addMessage, getMessages, setHumanMode, getConv, listConversations,
   setTyping, isTyping,

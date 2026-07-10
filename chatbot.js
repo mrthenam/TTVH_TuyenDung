@@ -241,8 +241,13 @@ async function handleChat(req, res, url, loadConfig) {
     if (p.startsWith('/api/agent/')) {
       const sess = await agentSession(url, req);
       if (!sess) return sendJson(res, 401, { error: 'Chưa đăng nhập' });
+      // Quyền hiệu lực của người đang đăng nhập (admin = toàn quyền mọi khối)
+      const mePerm = await db.getAgentPerms(sess.username);
+      const canManageDept = (dept) => mePerm.isAdmin || mePerm.depts.indexOf(db.normDept(dept)) >= 0;
 
-      if (p === '/api/agent/me' && req.method === 'GET') return sendJson(res, 200, { username: sess.username, displayName: sess.displayName });
+      if (p === '/api/agent/me' && req.method === 'GET') {
+        return sendJson(res, 200, { username: sess.username, displayName: sess.displayName, isAdmin: mePerm.isAdmin, perms: mePerm.depts, allDepts: db.JOB_DEPTS });
+      }
       if (p === '/api/agent/sheetinfo' && req.method === 'GET') return sendJson(res, 200, { viewUrl: (cfg.sheet && cfg.sheet.viewUrl) || '', googleClientId: (cfg.sheet && cfg.sheet.googleClientId) || '' });
       // Lịch sử chỉnh sửa / thông báo
       if (p === '/api/agent/log' && req.method === 'GET') return sendJson(res, 200, { rows: await db.listTrainingLog(+url.searchParams.get('limit') || 100) });
@@ -257,15 +262,32 @@ async function handleChat(req, res, url, loadConfig) {
           location: (b.location || '').toString().trim(),
           deadline: (b.deadline || '').toString().trim(),
           jobtype: (b.jobtype || '').toString().trim(),
-          dept: (b.dept || '').toString().trim(),
+          dept: db.normDept(b.dept),
           description: (b.description || '').toString()
         };
         if (!j.title) return sendJson(res, 400, { error: 'Thiếu tên công việc' });
-        if (b.id) { await db.updateJob(b.id, j); return sendJson(res, 200, { ok: true, id: Number(b.id) }); }
+        // Phân quyền: nhân viên chỉ được đăng/sửa tin thuộc khối được cấp
+        if (!mePerm.isAdmin) {
+          if (!j.dept || db.JOB_DEPTS.indexOf(j.dept) === -1) return sendJson(res, 400, { error: 'Vui lòng chọn Khối hợp lệ cho tin tuyển dụng.' });
+          if (!canManageDept(j.dept)) return sendJson(res, 403, { error: 'Bạn không có quyền đăng/sửa tin thuộc khối "' + j.dept + '".' });
+        }
+        if (b.id) {
+          // Khi sửa: kiểm tra cả khối hiện tại của tin (tránh sửa tin ngoài quyền hoặc dời tin sang khối không được cấp)
+          if (!mePerm.isAdmin) {
+            const cur = await db.getJob(b.id);
+            if (cur && cur.dept && !canManageDept(cur.dept)) return sendJson(res, 403, { error: 'Bạn không có quyền sửa tin thuộc khối "' + cur.dept + '".' });
+          }
+          await db.updateJob(b.id, j); return sendJson(res, 200, { ok: true, id: Number(b.id) });
+        }
         const id = await db.addJob(j); return sendJson(res, 200, { ok: true, id });
       }
       if (p === '/api/agent/jobs/delete' && req.method === 'POST') {
-        const b = await readBody(req) || {}; await db.deleteJob(b.id); return sendJson(res, 200, { ok: true });
+        const b = await readBody(req) || {};
+        if (!mePerm.isAdmin) {
+          const cur = await db.getJob(b.id);
+          if (cur && cur.dept && !canManageDept(cur.dept)) return sendJson(res, 403, { error: 'Bạn không có quyền xóa tin thuộc khối "' + cur.dept + '".' });
+        }
+        await db.deleteJob(b.id); return sendJson(res, 200, { ok: true });
       }
       if (p === '/api/agent/jobs/reorder' && req.method === 'POST') {
         const b = await readBody(req) || {}; await db.reorderJobs(b.ids || []); return sendJson(res, 200, { ok: true });
@@ -368,17 +390,31 @@ async function handleChat(req, res, url, loadConfig) {
       }
 
       // Quản lý nhân viên
-      if (p === '/api/agent/staff' && req.method === 'GET') return sendJson(res, 200, { agents: await db.listAgents(), me: sess.username });
+      if (p === '/api/agent/staff' && req.method === 'GET') return sendJson(res, 200, { agents: await db.listAgents(), me: sess.username, myIsAdmin: mePerm.isAdmin, allDepts: db.JOB_DEPTS });
       if (p === '/api/agent/create' && req.method === 'POST') {
+        if (!mePerm.isAdmin) return sendJson(res, 403, { error: 'Chỉ tài khoản quản trị mới được thêm nhân viên.' });
         const b = await readBody(req) || {};
         const username = (b.username || '').toString().trim().toLowerCase();
         const password = (b.password || '').toString();
         const displayName = (b.displayName || '').toString().trim() || username;
+        const perms = Array.isArray(b.perms) ? b.perms : []; // db.createAgent tự chuẩn hóa về đúng tên khối
         if (!/^[a-z0-9._-]{3,}$/.test(username)) return sendJson(res, 400, { error: 'Tên đăng nhập tối thiểu 3 ký tự, chỉ gồm chữ thường/số/._-' });
         if (password.length < 4) return sendJson(res, 400, { error: 'Mật khẩu tối thiểu 4 ký tự' });
         const list = await db.listAgents();
         if (list.some((a) => a.username === username)) return sendJson(res, 409, { error: 'Tên đăng nhập "' + username + '" đã tồn tại' });
-        await db.createAgent(username, password, displayName);
+        await db.createAgent(username, password, displayName, { perms: perms });
+        return sendJson(res, 200, { ok: true });
+      }
+      // Cập nhật quyền đăng/sửa tin theo khối cho 1 nhân viên (chỉ admin)
+      if (p === '/api/agent/staff/perms' && req.method === 'POST') {
+        if (!mePerm.isAdmin) return sendJson(res, 403, { error: 'Chỉ tài khoản quản trị mới được phân quyền.' });
+        const b = await readBody(req) || {};
+        const username = (b.username || '').toString().trim().toLowerCase();
+        const perms = Array.isArray(b.perms) ? b.perms : []; // db.updateAgentPerms tự chuẩn hóa
+        const target = await db.getAgentPerms(username);
+        if (target.isAdmin) return sendJson(res, 400, { error: 'Tài khoản quản trị luôn có toàn quyền, không cần phân quyền.' });
+        const n = await db.updateAgentPerms(username, perms);
+        if (!n) return sendJson(res, 404, { error: 'Không tìm thấy nhân viên.' });
         return sendJson(res, 200, { ok: true });
       }
 
