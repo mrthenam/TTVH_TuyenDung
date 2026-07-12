@@ -328,7 +328,6 @@ async function handleChat(req, res, url, loadConfig) {
           title: (b.title || '').toString(),
           desc: (b.desc || '').toString(),
           genders: arr(b.genders),
-          workareas: arr(b.workareas),
           brands: arr(b.brands),
           positions
         };

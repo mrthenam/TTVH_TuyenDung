@@ -456,7 +456,6 @@
           <div class="fld"><label>Tiêu đề section</label><input id="af_title" type="text" /></div>
           <div class="fld"><label>Mô tả (dòng giới thiệu dưới tiêu đề)</label><textarea id="af_desc" style="min-height:70px"></textarea></div>
           <div class="fld"><label>Giới tính (mỗi dòng 1 lựa chọn)</label><textarea id="af_genders" spellcheck="false" style="min-height:80px"></textarea></div>
-          <div class="fld"><label>Khu vực mong muốn làm việc (mỗi dòng 1 khu vực)</label><textarea id="af_workareas" spellcheck="false" style="min-height:150px"></textarea></div>
           <div class="fld"><label>Thương hiệu ứng tuyển (mỗi dòng 1 thương hiệu)</label><textarea id="af_brands" spellcheck="false" style="min-height:90px"></textarea></div>
           <div class="fld"><label>Vị trí — Khối <b>Cửa hàng</b> (mỗi dòng 1 vị trí)</label><textarea id="af_pos_store" spellcheck="false" style="min-height:150px"></textarea></div>
           <div class="fld"><label>Vị trí — <b>Khối Văn Phòng</b> (mỗi dòng 1 vị trí)</label><textarea id="af_pos_office" spellcheck="false" style="min-height:200px"></textarea></div>
@@ -902,7 +901,6 @@ function loadApplyForm() {
     $('#af_title').value = d.title || '';
     $('#af_desc').value = d.desc || '';
     $('#af_genders').value = (d.genders || []).join('\n');
-    $('#af_workareas').value = (d.workareas || []).join('\n');
     $('#af_brands').value = (d.brands || []).join('\n');
     $('#af_pos_store').value = (pos['Cửa hàng'] || []).join('\n');
     $('#af_pos_office').value = (pos['Khối Văn Phòng'] || []).join('\n');
@@ -916,7 +914,6 @@ $('#afSave').addEventListener('click', function () {
     title: $('#af_title').value.trim(),
     desc: $('#af_desc').value.trim(),
     genders: lines('#af_genders'),
-    workareas: lines('#af_workareas'),
     brands: lines('#af_brands'),
     positions: {
       'Cửa hàng': lines('#af_pos_store'),

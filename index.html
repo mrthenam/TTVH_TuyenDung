@@ -1488,6 +1488,57 @@
       margin-left: 2px
     }
 
+    /* Multi-select tìm kiếm: Khu vực mong muốn làm việc (Tỉnh/Thành + Quận/Huyện) */
+    .ms { position: relative }
+    .ms-control {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+      min-height: 50px; padding: 8px 12px; border-radius: 12px;
+      border: 1px solid var(--line-2); background: var(--bg); cursor: text;
+      transition: border-color .2s
+    }
+    .ms.open .ms-control, .ms-control.focus { border-color: var(--red) }
+    .ms.err .ms-control { border-color: var(--red) }
+    .ms-tag {
+      display: inline-flex; align-items: center; gap: 6px; max-width: 100%;
+      background: var(--card-2); border: 1px solid rgba(198, 147, 32, .4);
+      color: var(--txt); border-radius: 999px; padding: 4px 8px 4px 12px;
+      font-size: 13px; font-weight: 600
+    }
+    .ms-tag span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+    .ms-tag button {
+      border: none; background: rgba(198, 147, 32, .18); color: var(--red);
+      width: 18px; height: 18px; border-radius: 50%; cursor: pointer; flex: none;
+      font-size: 13px; line-height: 1; display: flex; align-items: center; justify-content: center
+    }
+    .ms-tag button:hover { background: var(--red); color: #fff }
+    .ms-input {
+      flex: 1; min-width: 90px; border: none; background: transparent;
+      padding: 6px 2px; font-family: inherit; font-size: 15px; color: var(--txt); outline: none
+    }
+    .ms-menu {
+      position: absolute; z-index: 40; left: 0; right: 0; top: calc(100% + 6px);
+      max-height: 264px; overflow-y: auto; background: var(--bg);
+      border: 1px solid var(--line-2); border-radius: 12px; padding: 6px;
+      box-shadow: 0 20px 50px -24px rgba(54, 28, 18, .5)
+    }
+    .ms-menu[hidden] { display: none }
+    .ms-opt {
+      padding: 10px 12px; border-radius: 9px; cursor: pointer; font-size: 14.5px;
+      display: flex; align-items: center; gap: 9px
+    }
+    .ms-opt:hover, .ms-opt.active { background: var(--card-2) }
+    .ms-opt.sel { color: var(--red); font-weight: 700 }
+    .ms-opt.sel::after { content: '✓'; margin-left: auto }
+    .ms-empty { padding: 12px; color: var(--muted); font-size: 14px; text-align: center }
+    .dist-blocks { display: flex; flex-direction: column; gap: 14px; margin-top: 14px }
+    .dist-block {
+      border: 1px solid rgba(198, 147, 32, .28); border-radius: 12px;
+      padding: 14px 16px; background: var(--card-2)
+    }
+    .dist-block-label { font-size: 13px; font-weight: 700; color: var(--muted); margin-bottom: 9px }
+    .dist-block-label b { color: var(--txt) }
+    .dist-block .ms-control { background: var(--bg) }
+
     #formErr {
       display: none;
       background: rgba(198, 147, 32, .08);
@@ -2060,33 +2111,17 @@
               <label for="region">Xã phường, Quận huyện, Tỉnh thành <span class="req">*</span></label>
               <input type="text" id="region" name="region" placeholder="VD: P. Xuân Hòa, TP.HCM" />
             </div>
-            <div class="field">
-              <label for="workarea">Nơi ở &amp; khu vực mong muốn làm việc <span class="req">*</span></label>
-              <select id="workarea" name="workarea">
-                <option value="" disabled selected>Chọn khu vực</option>
-                <option>Quận 1</option>
-                <option>Quận 3</option>
-                <option>Quận 4</option>
-                <option>Quận 5</option>
-                <option>Quận 6</option>
-                <option>Quận 7</option>
-                <option>Quận 8</option>
-                <option>Quận 10</option>
-                <option>Quận 11</option>
-                <option>Quận 12</option>
-                <option>Quận Bình Thạnh</option>
-                <option>Quận Gò Vấp</option>
-                <option>Quận Phú Nhuận</option>
-                <option>Quận Tân Bình</option>
-                <option>Quận Tân Phú</option>
-                <option>Quận Bình Tân</option>
-                <option>TP. Thủ Đức</option>
-                <option>Huyện Hóc Môn</option>
-                <option>Huyện Bình Chánh</option>
-                <option>Huyện Củ Chi</option>
-                <option>Huyện Nhà Bè</option>
-                <option>Khác</option>
-              </select>
+            <div class="field full">
+              <label>Khu vực mong muốn làm việc <span class="req">*</span></label>
+              <div class="ms" id="provinceMs">
+                <div class="ms-control">
+                  <input type="text" class="ms-input" id="provinceInput" placeholder="Tìm &amp; chọn Tỉnh/Thành (có thể chọn nhiều)…" autocomplete="off" />
+                </div>
+                <div class="ms-menu" hidden></div>
+              </div>
+              <p class="jgb-hint" style="margin-top:7px">Chọn một hoặc nhiều Tỉnh/Thành, sau đó chọn Quận/Huyện tương ứng bên dưới.</p>
+              <div id="districtBlocks" class="dist-blocks"></div>
+              <input type="hidden" id="workarea" name="workarea" />
             </div>
             <div class="field">
               <label for="referrer">Người giới thiệu</label>
@@ -2437,7 +2472,6 @@
       title: 'Ứng tuyển ngay',
       desc: 'Ứng tuyển nhanh không cần CV. Phòng nhân sự sẽ kết nối và hẹn lịch phỏng vấn với bạn trong 24-48 giờ làm việc.',
       genders: ['Nam', 'Nữ', 'Khác'],
-      workareas: ['Quận 1', 'Quận 3', 'Quận 4', 'Quận 5', 'Quận 6', 'Quận 7', 'Quận 8', 'Quận 10', 'Quận 11', 'Quận 12', 'Quận Bình Thạnh', 'Quận Gò Vấp', 'Quận Phú Nhuận', 'Quận Tân Bình', 'Quận Tân Phú', 'Quận Bình Tân', 'TP. Thủ Đức', 'Huyện Hóc Môn', 'Huyện Bình Chánh', 'Huyện Củ Chi', 'Huyện Nhà Bè', 'Khác'],
       brands: ['MayCha', 'Hồng Trà Sữa Tam Hảo', 'Gà Giòn Sốt Ba Cô Gái'],
       positions: {
         'Cửa hàng': [
@@ -2486,7 +2520,6 @@
       }
       var p = document.getElementById('applyDesc'); if (p) p.textContent = APPLY_CFG.desc || '';
       fillSelectOptions(document.getElementById('gender'), APPLY_CFG.genders, 'Chọn giới tính');
-      fillSelectOptions(document.getElementById('workarea'), APPLY_CFG.workareas, 'Chọn khu vực');
       fillSelectOptions(document.getElementById('brand'), APPLY_CFG.brands, 'Chọn thương hiệu');
     }
     renderApplyStatics();
@@ -2496,7 +2529,6 @@
         title: d.title || APPLY_DEFAULTS.title,
         desc: d.desc || APPLY_DEFAULTS.desc,
         genders: (d.genders && d.genders.length) ? d.genders : APPLY_DEFAULTS.genders,
-        workareas: (d.workareas && d.workareas.length) ? d.workareas : APPLY_DEFAULTS.workareas,
         brands: (d.brands && d.brands.length) ? d.brands : APPLY_DEFAULTS.brands,
         positions: (d.positions && typeof d.positions === 'object') ? d.positions : APPLY_DEFAULTS.positions
       };
@@ -2578,10 +2610,132 @@
       });
     })();
 
+    /* Khu vực mong muốn làm việc: Tỉnh/Thành (chọn nhiều, tìm kiếm) -> Quận/Huyện (cascade) */
+    (function() {
+      function msEsc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+      // Bỏ dấu tiếng Việt để tìm kiếm không dấu
+      function msNorm(s) {
+        return String(s || '').toLowerCase()
+          .normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd');
+      }
+
+      // Factory: multi-select có tìm kiếm. config = { options:[], placeholder, onChange(values) }
+      function makeMultiSelect(msEl, config) {
+        var control = msEl.querySelector('.ms-control');
+        var input = msEl.querySelector('.ms-input');
+        var menu = msEl.querySelector('.ms-menu');
+        var options = config.options || [];
+        var selected = [];
+        if (config.placeholder) input.setAttribute('placeholder', config.placeholder);
+
+        function emit() { if (config.onChange) config.onChange(selected.slice()); }
+        function filtered() {
+          var q = msNorm(input.value.trim());
+          return options.filter(function(o) { return !q || msNorm(o).indexOf(q) >= 0; });
+        }
+        function renderTags() {
+          Array.prototype.slice.call(control.querySelectorAll('.ms-tag')).forEach(function(t) { t.remove(); });
+          selected.forEach(function(v) {
+            var tag = document.createElement('span'); tag.className = 'ms-tag';
+            tag.innerHTML = '<span>' + msEsc(v) + '</span>';
+            var b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-label', 'Bỏ ' + v); b.textContent = '×';
+            b.addEventListener('mousedown', function(e) { e.preventDefault(); e.stopPropagation(); toggle(v); });
+            tag.appendChild(b);
+            control.insertBefore(tag, input);
+          });
+        }
+        function renderMenu() {
+          var list = filtered();
+          if (!list.length) { menu.innerHTML = '<div class="ms-empty">Không tìm thấy</div>'; return; }
+          menu.innerHTML = list.map(function(o) {
+            return '<div class="ms-opt' + (selected.indexOf(o) >= 0 ? ' sel' : '') + '" data-val="' + msEsc(o) + '">' + msEsc(o) + '</div>';
+          }).join('');
+        }
+        function open() { msEl.classList.add('open'); menu.hidden = false; renderMenu(); }
+        function close() { msEl.classList.remove('open'); menu.hidden = true; input.value = ''; }
+        function toggle(v) {
+          var i = selected.indexOf(v);
+          if (i >= 0) selected.splice(i, 1); else selected.push(v);
+          renderTags(); renderMenu(); emit();
+        }
+
+        control.addEventListener('click', function() { input.focus(); if (menu.hidden) open(); });
+        input.addEventListener('focus', function() { control.classList.add('focus'); });
+        input.addEventListener('blur', function() { control.classList.remove('focus'); });
+        input.addEventListener('input', function() { if (menu.hidden) open(); else renderMenu(); });
+        menu.addEventListener('mousedown', function(e) {
+          var opt = e.target.closest ? e.target.closest('.ms-opt') : null;
+          if (!opt) return;
+          e.preventDefault();
+          toggle(opt.getAttribute('data-val'));
+          input.value = ''; renderMenu(); input.focus();
+        });
+        input.addEventListener('keydown', function(e) {
+          if (e.key === 'Backspace' && !input.value && selected.length) { toggle(selected[selected.length - 1]); }
+          else if (e.key === 'Enter') { e.preventDefault(); var l = filtered(); if (l.length) { toggle(l[0]); input.value = ''; renderMenu(); } }
+          else if (e.key === 'Escape') { close(); input.blur(); }
+        });
+        document.addEventListener('click', function(e) { if (!msEl.contains(e.target)) close(); });
+
+        return {
+          getValues: function() { return selected.slice(); },
+          setOptions: function(o) { options = o || []; renderMenu(); }
+        };
+      }
+
+      var LOCATIONS = {};
+      var provMs = document.getElementById('provinceMs');
+      var districtWrap = document.getElementById('districtBlocks');
+      var hidden = document.getElementById('workarea');
+      var provPicker = null;
+      var distPickers = {}; // tỉnh -> { picker, blockEl }
+
+      function composeValue() {
+        var provs = provPicker ? provPicker.getValues() : [];
+        var parts = provs.map(function(p) {
+          var ds = distPickers[p] ? distPickers[p].picker.getValues() : [];
+          return ds.length ? (p + ' (' + ds.join(', ') + ')') : p;
+        });
+        hidden.value = parts.join('; ');
+        if (hidden.value) provMs.classList.remove('err');
+      }
+
+      function makeDistrictBlock(prov) {
+        var block = document.createElement('div'); block.className = 'dist-block'; block.setAttribute('data-prov', prov);
+        var label = document.createElement('div'); label.className = 'dist-block-label';
+        label.innerHTML = 'Quận/Huyện tại <b>' + msEsc(prov) + '</b>';
+        var ms = document.createElement('div'); ms.className = 'ms';
+        ms.innerHTML = '<div class="ms-control"><input type="text" class="ms-input" autocomplete="off" /></div><div class="ms-menu" hidden></div>';
+        block.appendChild(label); block.appendChild(ms);
+        districtWrap.appendChild(block);
+        var picker = makeMultiSelect(ms, { options: LOCATIONS[prov] || [], placeholder: 'Tìm & chọn Quận/Huyện…', onChange: composeValue });
+        distPickers[prov] = { picker: picker, blockEl: block };
+      }
+
+      function onProvinceChange(provs) {
+        provs.forEach(function(p) { if (!distPickers[p]) makeDistrictBlock(p); });
+        Object.keys(distPickers).forEach(function(p) {
+          if (provs.indexOf(p) < 0) { distPickers[p].blockEl.remove(); delete distPickers[p]; }
+        });
+        provs.forEach(function(p) { if (distPickers[p]) districtWrap.appendChild(distPickers[p].blockEl); });
+        composeValue();
+      }
+
+      fetch('/vn-locations.json').then(function(r) { return r.json(); }).then(function(d) {
+        LOCATIONS = d || {};
+        provPicker = makeMultiSelect(provMs, { options: Object.keys(LOCATIONS), onChange: onProvinceChange });
+      }).catch(function() {
+        // Fallback: cho nhập tay nếu không tải được dữ liệu địa phương
+        provMs.innerHTML = '<input type="text" id="provinceInput" placeholder="Nhập khu vực mong muốn làm việc" autocomplete="off" style="width:100%;padding:14px 16px;border-radius:12px;border:1px solid var(--line-2);background:var(--bg);font-size:15px;font-family:inherit" />';
+        var fb = provMs.querySelector('#provinceInput');
+        fb.addEventListener('input', function() { hidden.value = fb.value.trim(); if (hidden.value) provMs.classList.remove('err'); });
+      });
+    })();
+
     /* Form validation + submit (demo) */
     (function() {
       var form = document.getElementById('regForm');
-      var required = ['name', 'gender', 'birthday', 'phone', 'email', 'idcard', 'address', 'region', 'workarea', 'jobgroup', 'position'];
+      var required = ['name', 'gender', 'birthday', 'phone', 'email', 'idcard', 'address', 'region', 'jobgroup', 'position'];
       var optional = ['referrer'];
       form.addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -2621,6 +2775,14 @@
             if (!firstBad) firstBad = brandSel;
           }
         }
+        // Khu vực mong muốn làm việc (widget Tỉnh/Quận) -> bắt buộc chọn ít nhất 1 Tỉnh/Thành
+        var waEl = document.getElementById('workarea');
+        var provMsEl = document.getElementById('provinceMs');
+        if (!waEl.value.trim()) {
+          if (provMsEl) provMsEl.classList.add('err');
+          ok = false;
+          if (!firstBad) firstBad = document.getElementById('provinceInput') || provMsEl;
+        }
         var fe = document.getElementById('formErr');
         if (!ok) {
           fe.textContent = 'Vui lòng điền đầy đủ các mục bắt buộc có dấu (*).';
@@ -2642,6 +2804,7 @@
           if (el) data[id] = el.value.trim();
         });
         if (data.position === '__other__') data.position = positionOther.value.trim();
+        data.workarea = document.getElementById('workarea').value.trim();
         data.brand = jobgroupVal === 'Cửa hàng' ? brandSel.value.trim() : '';
         var bdayParsed = parseDmy(data.birthday);
         if (bdayParsed) data.birthday = bdayParsed.iso;

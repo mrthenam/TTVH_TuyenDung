@@ -1020,13 +1020,6 @@ const APPLYFORM_DEFAULTS = {
   title: "Ứng tuyển ngay",
   desc: "Ứng tuyển nhanh không cần CV. Phòng nhân sự sẽ kết nối và hẹn lịch phỏng vấn với bạn trong 24-48 giờ làm việc.",
   genders: ["Nam", "Nữ", "Khác"],
-  workareas: [
-    "Quận 1", "Quận 3", "Quận 4", "Quận 5", "Quận 6", "Quận 7", "Quận 8",
-    "Quận 10", "Quận 11", "Quận 12", "Quận Bình Thạnh", "Quận Gò Vấp",
-    "Quận Phú Nhuận", "Quận Tân Bình", "Quận Tân Phú", "Quận Bình Tân",
-    "TP. Thủ Đức", "Huyện Hóc Môn", "Huyện Bình Chánh", "Huyện Củ Chi",
-    "Huyện Nhà Bè", "Khác",
-  ],
   brands: ["MayCha", "Hồng Trà Sữa Tam Hảo", "Gà Giòn Sốt Ba Cô Gái"],
   positions: {
     "Cửa hàng": [
