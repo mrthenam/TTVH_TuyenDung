@@ -311,6 +311,31 @@ async function handleChat(req, res, url, loadConfig) {
         return sendJson(res, 200, { ok: true });
       }
 
+      // Cấu hình form ứng tuyển (index.html)
+      if (p === '/api/agent/applyform' && req.method === 'GET') {
+        const v = await db.getSetting('applyform');
+        return sendJson(res, 200, (v && JSON.parse(v)) || {});
+      }
+      if (p === '/api/agent/applyform' && req.method === 'POST') {
+        const b = await readBody(req) || {};
+        const arr = (x) => Array.isArray(x) ? x.map(String).map(s => s.trim()).filter(Boolean) : [];
+        // 3 khối là khóa CỐ ĐỊNH — điều khiển cascading + định tuyến 1Office, không nhận khóa lạ.
+        const GROUPS = ['Cửa hàng', 'Khối Văn Phòng', 'Khối Kho & Xưởng Sản Xuất'];
+        const posIn = (b.positions && typeof b.positions === 'object') ? b.positions : {};
+        const positions = {};
+        GROUPS.forEach((g) => { positions[g] = arr(posIn[g]); });
+        const cfg = {
+          title: (b.title || '').toString(),
+          desc: (b.desc || '').toString(),
+          genders: arr(b.genders),
+          workareas: arr(b.workareas),
+          brands: arr(b.brands),
+          positions
+        };
+        await db.setSetting('applyform', JSON.stringify(cfg));
+        return sendJson(res, 200, { ok: true });
+      }
+
       // Cấu hình EMAIL tự động (bật/tắt, chế độ test, danh sách test, tiêu đề, nội dung)
       if (p === '/api/agent/emailcfg' && req.method === 'GET') {
         const c = await mailer.getEmailCfg();

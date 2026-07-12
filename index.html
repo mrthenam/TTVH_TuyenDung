@@ -1999,8 +1999,8 @@
     <div class="wrap">
       <div class="sec-head center fade">
         <span class="eyebrow">Ứng tuyển liền tay</span>
-        <h2 class="title">Ứng tuyển <span class="grad-text">ngay</span></h2>
-        <p class="lead" style="margin:10px auto 0">Ứng tuyển nhanh không cần CV. Phòng nhân sự sẽ kết nối và hẹn lịch phỏng vấn với bạn trong 24-48 giờ làm việc.</p>
+        <h2 class="title" id="applyTitle">Ứng tuyển <span class="grad-text">ngay</span></h2>
+        <p class="lead" id="applyDesc" style="margin:10px auto 0">Ứng tuyển nhanh không cần CV. Phòng nhân sự sẽ kết nối và hẹn lịch phỏng vấn với bạn trong 24-48 giờ làm việc.</p>
       </div>
 
       <div class="apply-steps fade">
@@ -2432,9 +2432,14 @@
       });
     })();
 
-    /* Khối công việc -> Vị trí ứng tuyển (cascading) + tùy chọn "Khác" */
-    (function() {
-      var POSITIONS = {
+    /* ==== Cấu hình form ứng tuyển: nạp từ /api/applyform, fallback = mặc định ==== */
+    var APPLY_DEFAULTS = {
+      title: 'Ứng tuyển ngay',
+      desc: 'Ứng tuyển nhanh không cần CV. Phòng nhân sự sẽ kết nối và hẹn lịch phỏng vấn với bạn trong 24-48 giờ làm việc.',
+      genders: ['Nam', 'Nữ', 'Khác'],
+      workareas: ['Quận 1', 'Quận 3', 'Quận 4', 'Quận 5', 'Quận 6', 'Quận 7', 'Quận 8', 'Quận 10', 'Quận 11', 'Quận 12', 'Quận Bình Thạnh', 'Quận Gò Vấp', 'Quận Phú Nhuận', 'Quận Tân Bình', 'Quận Tân Phú', 'Quận Bình Tân', 'TP. Thủ Đức', 'Huyện Hóc Môn', 'Huyện Bình Chánh', 'Huyện Củ Chi', 'Huyện Nhà Bè', 'Khác'],
+      brands: ['MayCha', 'Hồng Trà Sữa Tam Hảo', 'Gà Giòn Sốt Ba Cô Gái'],
+      positions: {
         'Cửa hàng': [
           'Quản lý cửa hàng', 'Trưởng ca',
           'Nhân viên Full-time (có > 6 tháng kinh nghiệm)',
@@ -2459,7 +2464,47 @@
           'Nhân Viên Kho/Soạn Hàng Không Yêu Cầu Kinh Nghiệm',
           'Thực Tập Sinh Admin Xưởng Sản Xuất', 'Thực Tập Sinh Kiểm Soát Chất Lượng'
         ]
+      }
+    };
+    var APPLY_CFG = APPLY_DEFAULTS;
+
+    function applyEsc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+    function fillSelectOptions(sel, list, placeholder) {
+      if (!sel) return;
+      var cur = sel.value;
+      var html = '<option value="" disabled selected>' + applyEsc(placeholder) + '</option>';
+      (list || []).forEach(function(o) { html += '<option>' + applyEsc(o) + '</option>'; });
+      sel.innerHTML = html;
+      if (cur) sel.value = cur;
+    }
+    function renderApplyStatics() {
+      var h = document.getElementById('applyTitle');
+      if (h) {
+        var parts = String(APPLY_CFG.title || '').trim().split(/\s+/);
+        if (parts.length > 1) { var last = parts.pop(); h.innerHTML = applyEsc(parts.join(' ')) + ' <span class="grad-text">' + applyEsc(last) + '</span>'; }
+        else if (parts.length === 1 && parts[0]) { h.textContent = parts[0]; }
+      }
+      var p = document.getElementById('applyDesc'); if (p) p.textContent = APPLY_CFG.desc || '';
+      fillSelectOptions(document.getElementById('gender'), APPLY_CFG.genders, 'Chọn giới tính');
+      fillSelectOptions(document.getElementById('workarea'), APPLY_CFG.workareas, 'Chọn khu vực');
+      fillSelectOptions(document.getElementById('brand'), APPLY_CFG.brands, 'Chọn thương hiệu');
+    }
+    renderApplyStatics();
+    fetch('/api/applyform').then(function(r) { return r.json(); }).then(function(d) {
+      if (!d || typeof d !== 'object') return;
+      APPLY_CFG = {
+        title: d.title || APPLY_DEFAULTS.title,
+        desc: d.desc || APPLY_DEFAULTS.desc,
+        genders: (d.genders && d.genders.length) ? d.genders : APPLY_DEFAULTS.genders,
+        workareas: (d.workareas && d.workareas.length) ? d.workareas : APPLY_DEFAULTS.workareas,
+        brands: (d.brands && d.brands.length) ? d.brands : APPLY_DEFAULTS.brands,
+        positions: (d.positions && typeof d.positions === 'object') ? d.positions : APPLY_DEFAULTS.positions
       };
+      renderApplyStatics();
+    }).catch(function() {});
+
+    /* Khối công việc -> Vị trí ứng tuyển (cascading) + tùy chọn "Khác" */
+    (function() {
       var jobgroupSel = document.getElementById('jobgroup');
       var positionSel = document.getElementById('position');
       var positionOther = document.getElementById('position_other');
@@ -2471,7 +2516,7 @@
       var cvHint = document.getElementById('cvHint');
 
       function fillPositions(group) {
-        var list = POSITIONS[group] || [];
+        var list = (APPLY_CFG.positions && APPLY_CFG.positions[group]) || [];
         positionSel.innerHTML = '<option value="" disabled selected>Chọn vị trí ứng tuyển</option>' +
           list.map(function(p) {
             return '<option>' + p + '</option>';

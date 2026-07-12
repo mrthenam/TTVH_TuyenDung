@@ -779,6 +779,15 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, TRAININGFORM_DEFAULTS);
     }
   }
+  // Cấu hình form ứng tuyển (công khai cho trang index.html)
+  if (url.pathname === "/api/applyform" && req.method === "GET") {
+    try {
+      const v = await db.getSetting("applyform");
+      return sendJson(res, 200, (v && JSON.parse(v)) || APPLYFORM_DEFAULTS);
+    } catch (e) {
+      return sendJson(res, 200, APPLYFORM_DEFAULTS);
+    }
+  }
   // Khoảnh khắc Vinh Hoa (công khai cho carousel trang chủ)
   if (url.pathname === "/api/gallery" && req.method === "GET") {
     try {
@@ -1005,6 +1014,48 @@ const TRAININGFORM_DEFAULTS = {
   ],
 };
 
+// Cấu hình mặc định form ứng tuyển (trang index.html). 3 khối là KHÓA CỐ ĐỊNH
+// điều khiển cascading (brand/CV) + định tuyến chiến dịch 1Office — không đổi tên.
+const APPLYFORM_DEFAULTS = {
+  title: "Ứng tuyển ngay",
+  desc: "Ứng tuyển nhanh không cần CV. Phòng nhân sự sẽ kết nối và hẹn lịch phỏng vấn với bạn trong 24-48 giờ làm việc.",
+  genders: ["Nam", "Nữ", "Khác"],
+  workareas: [
+    "Quận 1", "Quận 3", "Quận 4", "Quận 5", "Quận 6", "Quận 7", "Quận 8",
+    "Quận 10", "Quận 11", "Quận 12", "Quận Bình Thạnh", "Quận Gò Vấp",
+    "Quận Phú Nhuận", "Quận Tân Bình", "Quận Tân Phú", "Quận Bình Tân",
+    "TP. Thủ Đức", "Huyện Hóc Môn", "Huyện Bình Chánh", "Huyện Củ Chi",
+    "Huyện Nhà Bè", "Khác",
+  ],
+  brands: ["MayCha", "Hồng Trà Sữa Tam Hảo", "Gà Giòn Sốt Ba Cô Gái"],
+  positions: {
+    "Cửa hàng": [
+      "Quản lý cửa hàng", "Trưởng ca",
+      "Nhân viên Full-time (có > 6 tháng kinh nghiệm)",
+      "Nhân viên Part-time (có > 6 tháng kinh nghiệm)",
+      "Nhân viên Part-time (chưa có kinh nghiệm)",
+      "Nhân viên Full-time (chưa có kinh nghiệm nhưng làm được 8 tiếng)",
+      "Nhân viên thời vụ Tết", "Nhân viên Part-time (ca đêm)",
+    ],
+    "Khối Văn Phòng": [
+      "Marketing / Truyền thông", "Nhân sự (HR)", "IT", "Tài chính - Kế toán",
+      "Media Production (Kênh TikTok)", "Marcom Executive", "Senior Marcom Executive",
+      "Social Media & TikTok Content Executive", "Senior Social Content (TikTok)",
+      "Senior Trade Online & Partnership", "Nhân Viên Tuyển Dụng Mass",
+      "Chuyên Viên Tuyển Dụng", "Cộng Tác Viên Tuyển Dụng", "Cộng Tác Viên Tuyển Dụng (Mass)",
+      "Chuyên Viên Đào Tạo", "Chuyên Viên Đào Tạo Nghiệp Vụ", "Chuyên Viên Đào Tạo Vận Hành",
+      "Kế Toán Chi Phí", "Kế Toán Tài Sản", "Finance Control Executive", "Finance Analyst Intern",
+      "Kiểm Soát Tuân Thủ Nội Bộ (Internal Control)", "Chuyên Viên Mua Hàng",
+      "Thực Tập Sinh IT Hỗ Trợ", "Thực Tập Sinh Hỗ Trợ Trực Tuyến",
+    ],
+    "Khối Kho & Xưởng Sản Xuất": [
+      "Sản xuất / Vận hành", "QA / QC", "Kho vận", "Kỹ thuật / Bảo trì",
+      "Nhân Viên Kho/Soạn Hàng Không Yêu Cầu Kinh Nghiệm",
+      "Thực Tập Sinh Admin Xưởng Sản Xuất", "Thực Tập Sinh Kiểm Soát Chất Lượng",
+    ],
+  },
+};
+
 chatbot
   .init()
   .then(() => {
@@ -1030,6 +1081,10 @@ chatbot
         "trainingform",
         JSON.stringify(TRAININGFORM_DEFAULTS),
       );
+  })
+  .then(async () => {
+    if (!(await db.getSetting("applyform")))
+      await db.setSetting("applyform", JSON.stringify(APPLYFORM_DEFAULTS));
   })
   .then(async () => {
     if (!(await db.getSetting("emailcfg")))

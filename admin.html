@@ -299,6 +299,7 @@
       <button class="navbtn" id="tabRecruit"><span class="ic">📢</span><span class="t">Thông tin tuyển dụng</span></button>
       <button class="navbtn" id="tabGallery"><span class="ic">📸</span><span class="t">Khoảnh khắc Vinh Hoa</span></button>
       <button class="navbtn" id="tabForm"><span class="ic">📝</span><span class="t">Form đào tạo</span></button>
+      <button class="navbtn" id="tabApply"><span class="ic">🧾</span><span class="t">Form ứng tuyển</span></button>
       <button class="navbtn" id="tabEmail"><span class="ic">✉️</span><span class="t">Email tự động</span></button>
       <button class="navbtn" id="tabJobs"><span class="ic">💼</span><span class="t">Việc làm (tuyển dụng)</span></button>
       <button class="navbtn" id="tabLog"><span class="ic">📝</span><span class="t">Lịch sử chỉnh sửa</span></button>
@@ -438,6 +439,28 @@
           <div class="fld"><label>Hình Thức Tham Gia Đào Tạo (mỗi dòng 1 hình thức)</label><textarea id="tf_modes" spellcheck="false" style="min-height:100px"></textarea></div>
           <button class="btn primary" id="tfSave" style="justify-content:center;margin-top:6px">Lưu</button>
           <p class="hintnote">Ô “Khác” ở mục Vị trí được giữ tự động. Thay đổi áp dụng ngay cho trang đăng ký.</p>
+        </div>
+      </div>
+
+      <!-- FORM ỨNG TUYỂN -->
+      <div class="trainview" id="viewApply" style="display:none">
+        <div class="pagehd">
+          <div><h1>🧾 Form ứng tuyển</h1><div class="sub">Chỉnh nội dung &amp; dữ liệu các ô chọn của form ứng tuyển (trang chủ index.html).</div></div>
+          <div class="spacer"></div>
+          <div class="tbar"><a class="btn" href="index.html#ungtuyen" target="_blank">↗ Mở form</a></div>
+        </div>
+        <div class="addbox" style="width:auto;max-width:820px">
+          <div id="afOk" class="boxmsg ok"></div>
+          <div class="fld"><label>Tiêu đề section</label><input id="af_title" type="text" /></div>
+          <div class="fld"><label>Mô tả (dòng giới thiệu dưới tiêu đề)</label><textarea id="af_desc" style="min-height:70px"></textarea></div>
+          <div class="fld"><label>Giới tính (mỗi dòng 1 lựa chọn)</label><textarea id="af_genders" spellcheck="false" style="min-height:80px"></textarea></div>
+          <div class="fld"><label>Khu vực mong muốn làm việc (mỗi dòng 1 khu vực)</label><textarea id="af_workareas" spellcheck="false" style="min-height:150px"></textarea></div>
+          <div class="fld"><label>Thương hiệu ứng tuyển (mỗi dòng 1 thương hiệu)</label><textarea id="af_brands" spellcheck="false" style="min-height:90px"></textarea></div>
+          <div class="fld"><label>Vị trí — Khối <b>Cửa hàng</b> (mỗi dòng 1 vị trí)</label><textarea id="af_pos_store" spellcheck="false" style="min-height:150px"></textarea></div>
+          <div class="fld"><label>Vị trí — <b>Khối Văn Phòng</b> (mỗi dòng 1 vị trí)</label><textarea id="af_pos_office" spellcheck="false" style="min-height:200px"></textarea></div>
+          <div class="fld"><label>Vị trí — <b>Khối Kho &amp; Xưởng Sản Xuất</b> (mỗi dòng 1 vị trí)</label><textarea id="af_pos_prod" spellcheck="false" style="min-height:120px"></textarea></div>
+          <button class="btn primary" id="afSave" style="justify-content:center;margin-top:6px">Lưu</button>
+          <p class="hintnote">Tên 3 <b>Khối công việc</b> giữ cố định (điều khiển hiển thị Thương hiệu/CV &amp; định tuyến chiến dịch), chỉ chỉnh danh sách vị trí bên trong. Ô “Khác” ở mục Vị trí được giữ tự động. Tên <b>Thương hiệu</b> phải trùng đúng với tab <b>Chiến dịch</b> để hồ sơ vào đúng chiến dịch 1Office. Thay đổi áp dụng ngay cho trang ứng tuyển.</p>
         </div>
       </div>
 
@@ -692,6 +715,7 @@ function switchView(v) {
   $('#viewRecruit').style.display = v === 'recruit' ? 'flex' : 'none';
   $('#viewGallery').style.display = v === 'gallery' ? 'flex' : 'none';
   $('#viewForm').style.display = v === 'form' ? 'flex' : 'none';
+  $('#viewApply').style.display = v === 'apply' ? 'flex' : 'none';
   $('#viewEmail').style.display = v === 'email' ? 'flex' : 'none';
   $('#viewJobs').style.display = v === 'jobs' ? 'flex' : 'none';
   $('#viewLog').style.display = v === 'log' ? 'flex' : 'none';
@@ -702,6 +726,7 @@ function switchView(v) {
   $('#tabRecruit').classList.toggle('act', v === 'recruit');
   $('#tabGallery').classList.toggle('act', v === 'gallery');
   $('#tabForm').classList.toggle('act', v === 'form');
+  $('#tabApply').classList.toggle('act', v === 'apply');
   $('#tabEmail').classList.toggle('act', v === 'email');
   $('#tabJobs').classList.toggle('act', v === 'jobs');
   $('#tabLog').classList.toggle('act', v === 'log');
@@ -711,6 +736,7 @@ function switchView(v) {
   if (v === 'recruit') loadRecruit();
   if (v === 'gallery') loadGallery();
   if (v === 'form') loadTrainingForm();
+  if (v === 'apply') loadApplyForm();
   if (v === 'email') loadEmailCfg();
   if (v === 'jobs') loadJobs();
   if (v === 'log') loadLog();
@@ -727,6 +753,7 @@ $('#tabLog').addEventListener('click', function () { switchView('log'); });
 $('#tabRecruit').addEventListener('click', function () { switchView('recruit'); });
 $('#tabGallery').addEventListener('click', function () { switchView('gallery'); });
 $('#tabForm').addEventListener('click', function () { switchView('form'); });
+$('#tabApply').addEventListener('click', function () { switchView('apply'); });
 $('#tabEmail').addEventListener('click', function () { switchView('email'); });
 $('#tabJobs').addEventListener('click', function () { switchView('jobs'); });
 
@@ -862,6 +889,42 @@ $('#tfSave').addEventListener('click', function () {
   var btn = $('#tfSave'); btn.disabled = true; var old = btn.textContent; btn.textContent = 'Đang lưu…';
   api('/api/agent/trainingform', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
     .then(function (res) { btn.disabled = false; btn.textContent = old; if (res && res.ok) { $('#tfOk').textContent = 'Đã lưu. Mở lại form để xem thay đổi.'; $('#tfOk').classList.add('show'); toast('Đã lưu form đào tạo.'); } else toast('Lưu thất bại.'); })
+    .catch(function (e) { btn.disabled = false; btn.textContent = old; if (e.message === '401') return logout(); toast('Lỗi kết nối.'); });
+});
+
+/* ===== FORM ỨNG TUYỂN ===== */
+function loadApplyForm() {
+  api('/api/agent/applyform').then(function (d) {
+    d = d || {};
+    var pos = d.positions || {};
+    $('#af_title').value = d.title || '';
+    $('#af_desc').value = d.desc || '';
+    $('#af_genders').value = (d.genders || []).join('\n');
+    $('#af_workareas').value = (d.workareas || []).join('\n');
+    $('#af_brands').value = (d.brands || []).join('\n');
+    $('#af_pos_store').value = (pos['Cửa hàng'] || []).join('\n');
+    $('#af_pos_office').value = (pos['Khối Văn Phòng'] || []).join('\n');
+    $('#af_pos_prod').value = (pos['Khối Kho & Xưởng Sản Xuất'] || []).join('\n');
+  }).catch(function (e) { if (e.message === '401') logout(); });
+}
+$('#afSave').addEventListener('click', function () {
+  $('#afOk').classList.remove('show');
+  function lines(id) { return $(id).value.split('\n').map(function (s) { return s.trim(); }).filter(Boolean); }
+  var data = {
+    title: $('#af_title').value.trim(),
+    desc: $('#af_desc').value.trim(),
+    genders: lines('#af_genders'),
+    workareas: lines('#af_workareas'),
+    brands: lines('#af_brands'),
+    positions: {
+      'Cửa hàng': lines('#af_pos_store'),
+      'Khối Văn Phòng': lines('#af_pos_office'),
+      'Khối Kho & Xưởng Sản Xuất': lines('#af_pos_prod')
+    }
+  };
+  var btn = $('#afSave'); btn.disabled = true; var old = btn.textContent; btn.textContent = 'Đang lưu…';
+  api('/api/agent/applyform', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+    .then(function (res) { btn.disabled = false; btn.textContent = old; if (res && res.ok) { $('#afOk').textContent = 'Đã lưu. Mở lại form ứng tuyển để xem thay đổi.'; $('#afOk').classList.add('show'); toast('Đã lưu form ứng tuyển.'); } else toast('Lưu thất bại.'); })
     .catch(function (e) { btn.disabled = false; btn.textContent = old; if (e.message === '401') return logout(); toast('Lỗi kết nối.'); });
 });
 
