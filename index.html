@@ -1530,7 +1530,8 @@
     .ms-opt.sel { color: var(--red); font-weight: 700 }
     .ms-opt.sel::after { content: '✓'; margin-left: auto }
     .ms-empty { padding: 12px; color: var(--muted); font-size: 14px; text-align: center }
-    .dist-blocks { display: flex; flex-direction: column; gap: 14px; margin-top: 14px }
+    .dist-blocks { display: flex; flex-direction: column; gap: 14px }
+    .dist-blocks:empty { display: none }
     .dist-block {
       border: 1px solid rgba(198, 147, 32, .28); border-radius: 12px;
       padding: 14px 16px; background: var(--card-2)
@@ -2111,21 +2112,23 @@
               <label for="region">Xã phường, Quận huyện, Tỉnh thành <span class="req">*</span></label>
               <input type="text" id="region" name="region" placeholder="VD: P. Xuân Hòa, TP.HCM" />
             </div>
-            <div class="field full">
+            <div class="field">
               <label>Khu vực mong muốn làm việc <span class="req">*</span></label>
               <div class="ms" id="provinceMs">
                 <div class="ms-control">
-                  <input type="text" class="ms-input" id="provinceInput" placeholder="Tìm &amp; chọn Tỉnh/Thành (có thể chọn nhiều)…" autocomplete="off" />
+                  <input type="text" class="ms-input" id="provinceInput" placeholder="Tìm &amp; chọn Tỉnh/Thành…" autocomplete="off" />
                 </div>
                 <div class="ms-menu" hidden></div>
               </div>
-              <p class="jgb-hint" style="margin-top:7px">Chọn một hoặc nhiều Tỉnh/Thành, sau đó chọn Quận/Huyện tương ứng bên dưới.</p>
-              <div id="districtBlocks" class="dist-blocks"></div>
-              <input type="hidden" id="workarea" name="workarea" />
+              <p class="jgb-hint" style="margin-top:7px">Có thể chọn nhiều Tỉnh/Thành; Quận/Huyện sẽ hiện bên dưới.</p>
             </div>
             <div class="field">
               <label for="referrer">Người giới thiệu</label>
               <input type="text" id="referrer" name="referrer" placeholder="Họ tên & phòng ban (nếu có)" />
+            </div>
+            <div class="field full">
+              <div id="districtBlocks" class="dist-blocks"></div>
+              <input type="hidden" id="workarea" name="workarea" />
             </div>
             <div class="field full">
               <div class="jobgroup-box">
