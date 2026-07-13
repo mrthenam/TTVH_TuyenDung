@@ -2120,7 +2120,7 @@
                 </div>
                 <div class="ms-menu" hidden></div>
               </div>
-              <p class="jgb-hint" style="margin-top:7px">Có thể chọn nhiều Tỉnh/Thành; Quận/Huyện sẽ hiện bên dưới.</p>
+              <p class="jgb-hint" style="margin-top:7px">Chọn 1 Tỉnh/Thành, sau đó chọn Quận/Huyện bên dưới.</p>
             </div>
             <div class="field">
               <label for="referrer">Người giới thiệu</label>
@@ -2656,13 +2656,17 @@
         }
         function open() { msEl.classList.add('open'); menu.hidden = false; renderMenu(); }
         function close() { msEl.classList.remove('open'); menu.hidden = true; input.value = ''; }
+        function atMax() { return config.max && selected.length >= config.max; }
+        function syncMax() { if (config.max) input.style.display = atMax() ? 'none' : ''; } // đủ số lượng -> ẩn ô nhập, không cho chọn thêm
         function toggle(v) {
           var i = selected.indexOf(v);
-          if (i >= 0) selected.splice(i, 1); else selected.push(v);
-          renderTags(); renderMenu(); emit();
+          if (i >= 0) selected.splice(i, 1);
+          else { if (atMax()) return; selected.push(v); }
+          renderTags(); emit(); syncMax();
+          if (atMax()) close(); else renderMenu();
         }
 
-        control.addEventListener('click', function() { input.focus(); if (menu.hidden) open(); });
+        control.addEventListener('click', function() { if (atMax()) return; input.focus(); if (menu.hidden) open(); });
         input.addEventListener('focus', function() { control.classList.add('focus'); });
         input.addEventListener('blur', function() { control.classList.remove('focus'); });
         input.addEventListener('input', function() { if (menu.hidden) open(); else renderMenu(); });
@@ -2726,7 +2730,7 @@
 
       fetch('/vn-locations.json').then(function(r) { return r.json(); }).then(function(d) {
         LOCATIONS = d || {};
-        provPicker = makeMultiSelect(provMs, { options: Object.keys(LOCATIONS), onChange: onProvinceChange });
+        provPicker = makeMultiSelect(provMs, { options: Object.keys(LOCATIONS), max: 1, onChange: onProvinceChange });
       }).catch(function() {
         // Fallback: cho nhập tay nếu không tải được dữ liệu địa phương
         provMs.innerHTML = '<input type="text" id="provinceInput" placeholder="Nhập khu vực mong muốn làm việc" autocomplete="off" style="width:100%;padding:14px 16px;border-radius:12px;border:1px solid var(--line-2);background:var(--bg);font-size:15px;font-family:inherit" />';
