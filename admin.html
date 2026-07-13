@@ -353,6 +353,8 @@
       <div class="trainview" id="viewStaff" style="display:none">
         <div class="pagehd">
           <div><h1>👥 Quản lý nhân viên</h1><div class="sub" id="scount">0 tài khoản</div></div>
+          <div class="spacer"></div>
+          <div class="tbar"><button class="btn" id="pwOpen">🔑 Đổi mật khẩu của tôi</button></div>
         </div>
         <div class="staffgrid">
           <div class="addbox">
@@ -557,6 +559,36 @@
       <button class="btn" id="tmCancel">Hủy</button>
       <button class="btn primary" id="tmSave">Lưu</button>
     </div>
+  </div>
+</div>
+
+<!-- MODAL SỬA NHÂN VIÊN -->
+<div class="overlay" id="seModal">
+  <div class="modal" style="width:460px">
+    <div class="mh"><h3>Sửa nhân viên</h3><button class="x" id="seX">×</button></div>
+    <div class="mb">
+      <div id="seErr" class="boxmsg err"></div>
+      <input type="hidden" id="se_old" />
+      <div class="fld"><label>Tên đăng nhập <span class="req">*</span></label><input id="se_user" type="text" autocomplete="off" /></div>
+      <div class="fld"><label>Tên hiển thị</label><input id="se_name" type="text" autocomplete="off" /></div>
+      <div class="fld"><label>Mật khẩu mới</label><input id="se_pass" type="text" placeholder="Để trống nếu giữ nguyên" autocomplete="new-password" /></div>
+    </div>
+    <div class="mf"><button class="btn" id="seCancel">Hủy</button><button class="btn primary" id="seSave">Lưu</button></div>
+  </div>
+</div>
+
+<!-- MODAL ĐỔI MẬT KHẨU CỦA TÔI -->
+<div class="overlay" id="pwModal">
+  <div class="modal" style="width:420px">
+    <div class="mh"><h3>Đổi mật khẩu của tôi</h3><button class="x" id="pwX">×</button></div>
+    <div class="mb">
+      <div id="pwErr" class="boxmsg err"></div>
+      <div id="pwOk" class="boxmsg ok"></div>
+      <div class="fld"><label>Mật khẩu hiện tại <span class="req">*</span></label><input id="pw_cur" type="password" autocomplete="current-password" /></div>
+      <div class="fld"><label>Mật khẩu mới <span class="req">*</span></label><input id="pw_new" type="password" placeholder="Tối thiểu 4 ký tự" autocomplete="new-password" /></div>
+      <div class="fld"><label>Nhập lại mật khẩu mới <span class="req">*</span></label><input id="pw_new2" type="password" autocomplete="new-password" /></div>
+    </div>
+    <div class="mf"><button class="btn" id="pwCancel">Hủy</button><button class="btn primary" id="pwSave">Đổi mật khẩu</button></div>
   </div>
 </div>
 
@@ -1211,6 +1243,7 @@ $('#cAdd').addEventListener('click', function () {
 /* ===== NHÂN VIÊN ===== */
 var myUser = '';
 var STAFF_IS_ADMIN = false;
+var STAFF_CACHE = [];
 var STAFF_DEPTS = ['Cửa hàng', 'Văn phòng', 'Khối sản xuất'];
 function permCell(a) {
   // Tài khoản quản trị: toàn quyền
@@ -1235,10 +1268,12 @@ function loadStaff() {
     // Ẩn form thêm nhân viên với người không phải quản trị
     var addbox = document.querySelector('#viewStaff .addbox');
     if (addbox) addbox.style.display = STAFF_IS_ADMIN ? '' : 'none';
-    var ag = d.agents || []; $('#navStaffCnt').textContent = ag.length; $('#scount').textContent = ag.length + ' tài khoản';
-    var html = '<thead><tr><th>#</th><th>Tên đăng nhập</th><th>Tên hiển thị</th><th>Quyền đăng / sửa tin tuyển dụng</th></tr></thead><tbody>';
+    var ag = d.agents || []; STAFF_CACHE = ag; $('#navStaffCnt').textContent = ag.length; $('#scount').textContent = ag.length + ' tài khoản';
+    var actCol = STAFF_IS_ADMIN ? '<th>Thao tác</th>' : '';
+    var html = '<thead><tr><th>#</th><th>Tên đăng nhập</th><th>Tên hiển thị</th><th>Quyền đăng / sửa tin tuyển dụng</th>' + actCol + '</tr></thead><tbody>';
     ag.forEach(function (a, i) {
-      html += '<tr><td class="idx">' + (i + 1) + '</td><td>' + esc(a.username) + (a.username === myUser ? '<span class="youtag">Bạn</span>' : '') + '</td><td>' + esc(a.display_name || '') + '</td><td>' + permCell(a) + '</td></tr>';
+      var actCell = STAFF_IS_ADMIN ? '<td><button class="btn" data-edit-user="' + esc(a.username) + '">✏ Sửa</button></td>' : '';
+      html += '<tr><td class="idx">' + (i + 1) + '</td><td>' + esc(a.username) + (a.username === myUser ? '<span class="youtag">Bạn</span>' : '') + '</td><td>' + esc(a.display_name || '') + '</td><td>' + permCell(a) + '</td>' + actCell + '</tr>';
     });
     $('#stable').innerHTML = html + '</tbody>';
   }).catch(function (e) { if (e.message === '401') logout(); });
@@ -1274,6 +1309,65 @@ $('#sAdd').addEventListener('click', function () {
       } else { sMsg('#sErr', (res && res.error) || 'Thêm thất bại.'); }
     })
     .catch(function (e) { btn.disabled = false; btn.textContent = old; if (e.message === '401') return logout(); sMsg('#sErr', 'Lỗi kết nối, vui lòng thử lại.'); });
+});
+
+// ----- Sửa 1 nhân viên (admin) -----
+function openStaffEdit(username) {
+  var a = STAFF_CACHE.filter(function (x) { return x.username === username; })[0] || { username: username, display_name: '' };
+  $('#se_old').value = a.username;
+  $('#se_user').value = a.username;
+  $('#se_name').value = a.display_name || '';
+  $('#se_pass').value = '';
+  sMsg('#seErr', '');
+  $('#seModal').classList.add('show');
+}
+$('#stable').addEventListener('click', function (e) {
+  var b = e.target.closest ? e.target.closest('[data-edit-user]') : null;
+  if (b) openStaffEdit(b.getAttribute('data-edit-user'));
+});
+$('#seX').addEventListener('click', function () { $('#seModal').classList.remove('show'); });
+$('#seCancel').addEventListener('click', function () { $('#seModal').classList.remove('show'); });
+$('#seModal').addEventListener('click', function (e) { if (e.target === $('#seModal')) $('#seModal').classList.remove('show'); });
+$('#seSave').addEventListener('click', function () {
+  sMsg('#seErr', '');
+  var data = { oldUsername: $('#se_old').value, username: $('#se_user').value.trim(), displayName: $('#se_name').value.trim(), password: $('#se_pass').value };
+  if (!data.username) { sMsg('#seErr', 'Vui lòng nhập tên đăng nhập.'); return; }
+  var btn = $('#seSave'); btn.disabled = true; var old = btn.textContent; btn.textContent = 'Đang lưu…';
+  api('/api/agent/update', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+    .then(function (res) {
+      btn.disabled = false; btn.textContent = old;
+      if (res && res.ok) {
+        $('#seModal').classList.remove('show'); toast('Đã cập nhật nhân viên.');
+        if (data.oldUsername === ME.username) loadMe(function () { });
+        loadStaff();
+      } else sMsg('#seErr', (res && res.error) || 'Lưu thất bại.');
+    })
+    .catch(function (er) { btn.disabled = false; btn.textContent = old; if (er.message === '401') return logout(); sMsg('#seErr', 'Lỗi kết nối.'); });
+});
+
+// ----- Đổi mật khẩu của chính mình (mọi nhân viên) -----
+$('#pwOpen').addEventListener('click', function () {
+  sMsg('#pwErr', ''); sMsg('#pwOk', '');
+  $('#pw_cur').value = ''; $('#pw_new').value = ''; $('#pw_new2').value = '';
+  $('#pwModal').classList.add('show');
+});
+$('#pwX').addEventListener('click', function () { $('#pwModal').classList.remove('show'); });
+$('#pwCancel').addEventListener('click', function () { $('#pwModal').classList.remove('show'); });
+$('#pwModal').addEventListener('click', function (e) { if (e.target === $('#pwModal')) $('#pwModal').classList.remove('show'); });
+$('#pwSave').addEventListener('click', function () {
+  sMsg('#pwErr', ''); sMsg('#pwOk', '');
+  var cur = $('#pw_cur').value, n1 = $('#pw_new').value, n2 = $('#pw_new2').value;
+  if (!cur || !n1) { sMsg('#pwErr', 'Vui lòng nhập đầy đủ.'); return; }
+  if (n1.length < 4) { sMsg('#pwErr', 'Mật khẩu mới tối thiểu 4 ký tự.'); return; }
+  if (n1 !== n2) { sMsg('#pwErr', 'Mật khẩu nhập lại không khớp.'); return; }
+  var btn = $('#pwSave'); btn.disabled = true; var old = btn.textContent; btn.textContent = 'Đang đổi…';
+  api('/api/agent/password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ currentPassword: cur, newPassword: n1 }) })
+    .then(function (res) {
+      btn.disabled = false; btn.textContent = old;
+      if (res && res.ok) { sMsg('#pwOk', 'Đổi mật khẩu thành công.'); toast('Đã đổi mật khẩu.'); setTimeout(function () { $('#pwModal').classList.remove('show'); }, 900); }
+      else sMsg('#pwErr', (res && res.error) || 'Đổi mật khẩu thất bại.');
+    })
+    .catch(function (er) { btn.disabled = false; btn.textContent = old; if (er.message === '401') return logout(); sMsg('#pwErr', 'Lỗi kết nối.'); });
 });
 
 /* ===== TRAINING LIST ===== */

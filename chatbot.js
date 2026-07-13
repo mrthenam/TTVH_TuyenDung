@@ -441,6 +441,32 @@ async function handleChat(req, res, url, loadConfig) {
         if (!n) return sendJson(res, 404, { error: 'Không tìm thấy nhân viên.' });
         return sendJson(res, 200, { ok: true });
       }
+      // Sửa 1 nhân viên: tên đăng nhập / tên hiển thị / mật khẩu (chỉ admin)
+      if (p === '/api/agent/update' && req.method === 'POST') {
+        if (!mePerm.isAdmin) return sendJson(res, 403, { error: 'Chỉ tài khoản quản trị mới được sửa nhân viên.' });
+        const b = await readBody(req) || {};
+        const oldUsername = (b.oldUsername || '').toString().trim().toLowerCase();
+        const username = (b.username || '').toString().trim().toLowerCase();
+        const displayName = (b.displayName || '').toString().trim();
+        const password = (b.password || '').toString();
+        if (!oldUsername) return sendJson(res, 400, { error: 'Thiếu tài khoản cần sửa.' });
+        if (username && !/^[a-z0-9._-]{3,}$/.test(username)) return sendJson(res, 400, { error: 'Tên đăng nhập tối thiểu 3 ký tự, chỉ gồm chữ thường/số/._-' });
+        if (password && password.length < 4) return sendJson(res, 400, { error: 'Mật khẩu tối thiểu 4 ký tự' });
+        const r = await db.updateAgent(oldUsername, { username: username || oldUsername, displayName: displayName, password: password });
+        if (!r.ok) return sendJson(res, 400, { error: r.error || 'Sửa thất bại.' });
+        return sendJson(res, 200, { ok: true, username: r.username });
+      }
+      // Đổi mật khẩu của chính mình (mọi nhân viên đã đăng nhập) — cần đúng mật khẩu hiện tại
+      if (p === '/api/agent/password' && req.method === 'POST') {
+        const b = await readBody(req) || {};
+        const currentPassword = (b.currentPassword || '').toString();
+        const newPassword = (b.newPassword || '').toString();
+        if (newPassword.length < 4) return sendJson(res, 400, { error: 'Mật khẩu mới tối thiểu 4 ký tự' });
+        if (!(await db.verifyAgent(sess.username, currentPassword))) return sendJson(res, 400, { error: 'Mật khẩu hiện tại không đúng.' });
+        const r = await db.updateAgent(sess.username, { password: newPassword });
+        if (!r.ok) return sendJson(res, 400, { error: r.error || 'Đổi mật khẩu thất bại.' });
+        return sendJson(res, 200, { ok: true });
+      }
 
       // Quản lý chiến dịch theo thương hiệu
       if (p === '/api/agent/campaigns' && req.method === 'GET') return sendJson(res, 200, { rows: await db.listBrandCampaigns() });

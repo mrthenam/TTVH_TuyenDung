@@ -137,6 +137,32 @@ async function updateAgentPerms(username, perms) {
   if (HAS_PG) { const r = await pool.query('UPDATE agents SET perms=$2 WHERE username=$1', [username, permsStr]); return r.rowCount; }
   const a = memAgents.get(username); if (!a) return 0; a.perms = permsStr; return 1;
 }
+// Sửa 1 nhân viên: đổi tên đăng nhập / tên hiển thị / mật khẩu (mật khẩu để trống = giữ nguyên)
+async function updateAgent(oldUsername, fields) {
+  oldUsername = (oldUsername || '').trim().toLowerCase();
+  fields = fields || {};
+  const cur = await getAgent(oldUsername);
+  if (!cur) return { ok: false, error: 'Không tìm thấy nhân viên.' };
+  const newUsername = (fields.username != null && String(fields.username).trim()) ? String(fields.username).trim().toLowerCase() : oldUsername;
+  const displayName = (fields.displayName != null && String(fields.displayName).trim()) ? String(fields.displayName).trim() : (cur.display_name || newUsername);
+  let ph = cur.pass_hash, salt = cur.salt;
+  if (fields.password) { salt = genSalt(); ph = hashPw(fields.password, salt); }
+  const renaming = newUsername !== oldUsername;
+  if (renaming && (await getAgent(newUsername))) return { ok: false, error: 'Tên đăng nhập "' + newUsername + '" đã tồn tại.' };
+  if (HAS_PG) {
+    await pool.query('UPDATE agents SET username=$2, display_name=$3, pass_hash=$4, salt=$5 WHERE username=$1',
+      [oldUsername, newUsername, displayName, ph, salt]);
+    if (renaming) { try { await pool.query('UPDATE sessions SET username=$2 WHERE username=$1', [oldUsername, newUsername]); } catch (e) {} }
+  } else {
+    const a = memAgents.get(oldUsername);
+    a.display_name = displayName; a.pass_hash = ph; a.salt = salt;
+    if (renaming) {
+      a.username = newUsername; memAgents.delete(oldUsername); memAgents.set(newUsername, a);
+      for (const s of sessions.values()) { if (s.username === oldUsername) s.username = newUsername; }
+    }
+  }
+  return { ok: true, username: newUsername };
+}
 async function listAgents() {
   if (HAS_PG) {
     const r = await pool.query('SELECT username, display_name, perms, is_admin FROM agents ORDER BY username');
@@ -488,7 +514,7 @@ async function setSetting(k, v) {
 
 module.exports = {
   init, HAS_PG,
-  verifyAgent, createAgent, listAgents, getAgentPerms, updateAgentPerms, JOB_DEPTS, normDept,
+  verifyAgent, createAgent, listAgents, getAgentPerms, updateAgentPerms, updateAgent, JOB_DEPTS, normDept,
   createSession, getSession,
   ensureConv, addMessage, getMessages, setHumanMode, getConv, listConversations,
   setTyping, isTyping,
