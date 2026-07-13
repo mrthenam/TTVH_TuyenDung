@@ -328,7 +328,75 @@
     .pill.hot {
       background: rgba(198, 147, 32, .10);
       border-color: rgba(198, 147, 32, .3);
-      color: var(--red)
+      color: var(--red);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      animation: hotGlow 2.4s ease-in-out infinite
+    }
+
+    .pill.hot .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--red);
+      flex: none;
+      position: relative;
+      animation: hotDot 1.5s ease-in-out infinite
+    }
+
+    .pill.hot .live-dot::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: var(--red);
+      animation: hotRing 1.5s ease-out infinite
+    }
+
+    @keyframes hotDot {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: .5
+      }
+    }
+
+    @keyframes hotRing {
+      0% {
+        transform: scale(1);
+        opacity: .5
+      }
+
+      100% {
+        transform: scale(2.8);
+        opacity: 0
+      }
+    }
+
+    @keyframes hotGlow {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(198, 147, 32, 0)
+      }
+
+      50% {
+        box-shadow: 0 0 14px 1px rgba(198, 147, 32, .28)
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+      .pill.hot,
+      .pill.hot .live-dot,
+      .pill.hot .live-dot::after {
+        animation: none
+      }
     }
 
     .pill-link {
@@ -1880,7 +1948,7 @@
     <div class="wrap">
       <img src="images/logo-ttvh.jpg" alt="Thịnh Thế Vinh Hoa F&amp;B Group" class="hero-logo" />
       <div class="badge-row">
-        <span class="pill hot">● ĐANG TUYỂN GẤP</span>
+        <span class="pill hot"><span class="live-dot"></span>ĐANG TUYỂN GẤP</span>
         <button type="button" class="pill pill-link" data-goto="store">Toàn thời gian &amp; Bán thời gian</button>
         <button type="button" class="pill pill-link" data-goto="office">Khối Văn Phòng</button>
         <button type="button" class="pill pill-link" data-goto="prod">Khối Kho & Xưởng Sản Xuất</button>
