@@ -2796,7 +2796,9 @@
         label.innerHTML = 'Quận/Huyện tại <b>' + msEsc(prov) + '</b>';
         var ms = document.createElement('div'); ms.className = 'ms';
         ms.innerHTML = '<div class="ms-control"><input type="text" class="ms-input" autocomplete="off" /></div><div class="ms-menu" hidden></div>';
-        block.appendChild(label); block.appendChild(ms);
+        var hint = document.createElement('p'); hint.className = 'jgb-hint'; hint.style.marginTop = '8px';
+        hint.textContent = 'Có thể chọn nhiều Quận/Huyện tại tỉnh/thành này.';
+        block.appendChild(label); block.appendChild(ms); block.appendChild(hint);
         districtWrap.appendChild(block);
         var picker = makeMultiSelect(ms, { options: LOCATIONS[prov] || [], placeholder: 'Tìm & chọn Quận/Huyện…', onChange: composeValue });
         distPickers[prov] = { picker: picker, blockEl: block };
