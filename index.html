@@ -1608,6 +1608,17 @@
     .dist-block-label b { color: var(--txt) }
     .dist-block .ms-control { background: var(--bg) }
 
+    /* Khu vực làm việc + Người giới thiệu cùng hàng; Quận/Huyện full-width bên dưới */
+    .loc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start }
+    .loc-dist { grid-column: 1 / -1 }
+    .loc-dist:has(.dist-blocks:empty) { display: none }
+    @media (max-width: 680px) {
+      .loc-grid { grid-template-columns: 1fr }
+      .loc-prov { order: 1 }
+      .loc-dist { order: 2 }
+      .loc-ref { order: 3 }
+    }
+
     #formErr {
       display: none;
       background: rgba(198, 147, 32, .08);
@@ -2180,23 +2191,27 @@
               <label for="region">Xã phường, Quận huyện, Tỉnh thành <span class="req">*</span></label>
               <input type="text" id="region" name="region" placeholder="VD: P. Xuân Hòa, TP.HCM" />
             </div>
-            <div class="field">
-              <label>Khu vực mong muốn làm việc <span class="req">*</span></label>
-              <div class="ms" id="provinceMs">
-                <div class="ms-control">
-                  <input type="text" class="ms-input" id="provinceInput" placeholder="Tìm &amp; chọn Tỉnh/Thành…" autocomplete="off" />
-                </div>
-                <div class="ms-menu" hidden></div>
-              </div>
-              <p class="jgb-hint" style="margin-top:7px">Chọn 1 Tỉnh/Thành, sau đó chọn Quận/Huyện bên dưới.</p>
-            </div>
-            <div class="field">
-              <label for="referrer">Người giới thiệu</label>
-              <input type="text" id="referrer" name="referrer" placeholder="Họ tên & phòng ban (nếu có)" />
-            </div>
             <div class="field full">
-              <div id="districtBlocks" class="dist-blocks"></div>
-              <input type="hidden" id="workarea" name="workarea" />
+              <div class="loc-grid">
+                <div class="loc-cell loc-prov">
+                  <label>Khu vực mong muốn làm việc <span class="req">*</span></label>
+                  <div class="ms" id="provinceMs">
+                    <div class="ms-control">
+                      <input type="text" class="ms-input" id="provinceInput" placeholder="Tìm &amp; chọn Tỉnh/Thành…" autocomplete="off" />
+                    </div>
+                    <div class="ms-menu" hidden></div>
+                  </div>
+                  <p class="jgb-hint" style="margin-top:7px">Chọn 1 Tỉnh/Thành, sau đó chọn Quận/Huyện bên dưới.</p>
+                </div>
+                <div class="loc-cell loc-ref">
+                  <label for="referrer">Người giới thiệu</label>
+                  <input type="text" id="referrer" name="referrer" placeholder="Họ tên & phòng ban (nếu có)" />
+                </div>
+                <div class="loc-cell loc-dist">
+                  <div id="districtBlocks" class="dist-blocks"></div>
+                  <input type="hidden" id="workarea" name="workarea" />
+                </div>
+              </div>
             </div>
             <div class="field full">
               <div class="jobgroup-box">
