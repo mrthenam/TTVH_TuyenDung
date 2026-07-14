@@ -507,7 +507,7 @@
       color: transparent;
       margin: 0 auto 30px;
       display: inline-block;
-      animation: slogShine 4.5s linear infinite
+      animation: slogShine 8s linear infinite
     }
 
     @keyframes slogShine {
@@ -522,6 +522,17 @@
 
     @media (prefers-reduced-motion: reduce) {
       .hero-slogan {
+        animation: none;
+        background-image: var(--grad)
+      }
+    }
+
+    /* Mobile: câu thường xuống 2 dòng -> nền gradient 300% cho hiệu ứng lướt
+       bị kéo dãn sai trên khối nhiều dòng, làm vài ký tự mờ gần như biến mất.
+       Tắt animation, dùng gradient tĩnh để chữ luôn hiển thị đầy đủ, rõ ràng. */
+    @media (max-width: 560px) {
+      .hero-slogan {
+        font-size: 16px;
         animation: none;
         background-image: var(--grad)
       }
