@@ -139,12 +139,32 @@
     .btn-primary {
       background: var(--grad);
       color: #fff;
-      box-shadow: 0 14px 34px -10px rgba(198, 147, 32, .55)
+      box-shadow: 0 14px 34px -10px rgba(198, 147, 32, .55);
+      animation: ctaGlow 2.2s ease-in-out infinite
     }
 
     .btn-primary:hover {
       transform: translateY(-3px);
-      box-shadow: 0 22px 44px -12px rgba(198, 147, 32, .7)
+      box-shadow: 0 22px 44px -12px rgba(198, 147, 32, .7);
+      animation-play-state: paused
+    }
+
+    @keyframes ctaGlow {
+
+      0%,
+      100% {
+        box-shadow: 0 14px 34px -10px rgba(198, 147, 32, .55), 0 0 0 0 rgba(212, 175, 55, 0)
+      }
+
+      50% {
+        box-shadow: 0 14px 36px -8px rgba(198, 147, 32, .8), 0 0 20px 3px rgba(212, 175, 55, .4)
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .btn-primary {
+        animation: none
+      }
     }
 
     .btn-ghost {
