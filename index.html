@@ -783,6 +783,102 @@
       }
     }
 
+    /* Ảnh thẻ bấm được -> báo hiệu + xem toàn ảnh */
+    .clickable-thumb {
+      position: relative;
+      cursor: zoom-in
+    }
+
+    .clickable-thumb::before {
+      content: "🔍";
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      z-index: 2;
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      background: rgba(255, 255, 255, .92);
+      border-radius: 9px;
+      box-shadow: 0 4px 12px -5px rgba(42, 24, 16, .5);
+      transition: transform .2s
+    }
+
+    .clickable-thumb::after {
+      content: "🔍 Nhấn để xem ảnh";
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(42, 24, 16, .42);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      opacity: 0;
+      transition: opacity .2s;
+      pointer-events: none
+    }
+
+    .show-card:hover .clickable-thumb::after {
+      opacity: 1
+    }
+
+    .show-card:hover .clickable-thumb::before {
+      transform: scale(1.1)
+    }
+
+    /* LIGHTBOX xem toàn ảnh */
+    .img-lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 12, 6, .88);
+      backdrop-filter: blur(3px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 300;
+      padding: 24px
+    }
+
+    .img-lightbox.show {
+      display: flex
+    }
+
+    .img-lightbox img {
+      max-width: 96vw;
+      max-height: 92vh;
+      width: auto;
+      height: auto;
+      border-radius: 12px;
+      box-shadow: 0 30px 90px -20px rgba(0, 0, 0, .7);
+      cursor: default
+    }
+
+    .img-lightbox-x {
+      position: fixed;
+      top: 18px;
+      right: 20px;
+      width: 44px;
+      height: 44px;
+      border: none;
+      background: rgba(255, 255, 255, .16);
+      color: #fff;
+      font-size: 28px;
+      line-height: 1;
+      border-radius: 12px;
+      cursor: pointer;
+      z-index: 301;
+      transition: background .15s
+    }
+
+    .img-lightbox-x:hover {
+      background: rgba(255, 255, 255, .3)
+    }
+
     /* POPUP THÔNG TIN TUYỂN DỤNG */
     .jobmodal-ov {
       position: fixed;
@@ -2151,6 +2247,12 @@
     </div>
   </div>
 
+  <!-- LIGHTBOX XEM TOÀN ẢNH -->
+  <div class="img-lightbox" id="imgLightbox">
+    <button class="img-lightbox-x" id="imgLightboxX" type="button" aria-label="Đóng">×</button>
+    <img id="imgLightboxImg" src="" alt="" />
+  </div>
+
 
   <!-- BENEFITS -->
   <section class="sec benefits">
@@ -2559,6 +2661,43 @@
       document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') close();
       });
+    })();
+
+    /* Lightbox: bấm vào ảnh thẻ thương hiệu/khối -> xem toàn ảnh */
+    (function() {
+      var lb = document.getElementById('imgLightbox');
+      if (!lb) return;
+      var lbImg = document.getElementById('imgLightboxImg');
+
+      function openLb(src, alt) {
+        lbImg.src = src;
+        lbImg.alt = alt || '';
+        lb.classList.add('show');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeLb() {
+        lb.classList.remove('show');
+        document.body.style.overflow = '';
+        lbImg.src = '';
+      }
+      // Chỉ những thumb CÓ ảnh mới bấm được (khối sản xuất dùng icon -> bỏ qua)
+      [].forEach.call(document.querySelectorAll('.show-thumb, .job-thumb'), function(th) {
+        var img = th.querySelector('img');
+        if (!img) return;
+        th.classList.add('clickable-thumb');
+        th.setAttribute('role', 'button');
+        th.setAttribute('tabindex', '0');
+        th.setAttribute('aria-label', 'Xem ảnh tuyển dụng' + (img.alt ? ': ' + img.alt : ''));
+        th.addEventListener('click', function() { openLb(img.currentSrc || img.src, img.alt); });
+        th.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLb(img.currentSrc || img.src, img.alt); }
+        });
+      });
+      document.getElementById('imgLightboxX').addEventListener('click', closeLb);
+      lbImg.addEventListener('click', function(e) { e.stopPropagation(); }); // bấm vào ảnh -> giữ nguyên
+      lb.addEventListener('click', closeLb); // bấm ra ngoài ảnh -> đóng
+      document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeLb(); });
     })();
 
     /* Ngày sinh dd/mm/yyyy: format khi gõ, parse để validate/gửi, đồng bộ với lịch native */
