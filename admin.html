@@ -1071,7 +1071,10 @@ function loadRecruit() {
   api('/api/agent/recruitment').then(function (d) {
     recRows = d.rows || [];
     if (!recRows.length) { $('#recruitTabs').innerHTML = ''; $('#recruitList').innerHTML = '<div class="norows">Chưa có dữ liệu.</div>'; return; }
-    if (!recSel || !recRows.some(function (r) { return r.brand === recSel; })) recSel = recRows[0].brand;
+    if (!recSel || !recRows.some(function (r) { return r.brand === recSel; })) {
+      var visible = recRows.filter(function (r) { return REC_HIDDEN_KEYS.indexOf(r.brand) === -1; });
+      recSel = (visible[0] || recRows[0]).brand;
+    }
     renderRecruit();
   }).catch(function (e) { if (e.message === '401') logout(); });
 }
@@ -1082,14 +1085,15 @@ function captureRecEdit() {
   r.title = card.querySelector('.r_title').value; r.content = card.querySelector('.r_content').value;
 }
 var REC_GROUPS = [
-  { label: 'Cửa hàng', keys: ['maycha', 'tamhao', 'gagion', 'trahu'] },
-  { label: 'Văn phòng', keys: ['marketing', 'hr', 'it', 'finance'] },
-  { label: 'Khối sản xuất', keys: ['sanxuat', 'qaqc', 'khovan', 'kythuat'] }
+  { label: 'Cửa hàng', keys: ['maycha', 'tamhao', 'gagion', 'trahu'] }
 ];
+// Văn phòng/Khối sản xuất không còn dùng popup này (đã chuyển sang mở thẳng trang Việc làm) -> ẩn khỏi màn quản trị
+var REC_HIDDEN_KEYS = ['marketing', 'hr', 'it', 'finance', 'sanxuat', 'qaqc', 'khovan', 'kythuat'];
 function recPill(r) { return '<button class="rtab' + (r.brand === recSel ? ' act' : '') + '" data-b="' + esc(r.brand) + '">' + esc(r.name || r.brand) + '</button>'; }
 function renderRecruit() {
   var byKey = {}; recRows.forEach(function (r) { byKey[r.brand] = r; });
   var used = {}, html = '';
+  REC_HIDDEN_KEYS.forEach(function (k) { used[k] = 1; });
   REC_GROUPS.forEach(function (g) {
     var pills = g.keys.filter(function (k) { return byKey[k]; }).map(function (k) { used[k] = 1; return recPill(byKey[k]); }).join('');
     if (pills) html += '<div class="rgroup"><span class="rglabel">' + esc(g.label) + '</span><div class="rgpills">' + pills + '</div></div>';
