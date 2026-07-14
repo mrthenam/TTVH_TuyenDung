@@ -2167,7 +2167,9 @@
               <label for="birthday">Ngày sinh <span class="req">*</span></label>
               <div class="date-field">
                 <input type="text" id="birthday" name="birthday" placeholder="01/01/2000" inputmode="numeric" maxlength="10" autocomplete="bday" />
-                <button type="button" class="date-pick-btn" id="birthdayPickBtn" aria-label="Chọn ngày sinh từ lịch">📅</button>
+                <button type="button" class="date-pick-btn" id="birthdayPickBtn" aria-label="Chọn ngày sinh từ lịch">
+                  <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5" /><path d="M3.5 9.5h17" /><path d="M8 3v3.4M16 3v3.4" /><path d="M7.3 13.2h1.6M11.2 13.2h1.6M15.1 13.2h1.6M7.3 16.7h1.6M11.2 16.7h1.6" /></svg>
+                </button>
                 <input type="date" id="birthday_native" class="date-native-hidden" tabindex="-1" aria-hidden="true" />
               </div>
             </div>
