@@ -626,8 +626,8 @@
     }
 
     .show-thumb img {
-      max-height: 156px;
-      max-width: 80%;
+      max-height: 192px;
+      max-width: 96%;
       width: auto;
       height: auto;
       object-fit: contain
@@ -741,12 +741,21 @@
       min-height: 200px;
       display: grid;
       place-items: center;
-      background: var(--grad-soft)
+      background: var(--grad-soft);
+      overflow: hidden
     }
 
     .job-ic {
       font-size: 64px;
       line-height: 1
+    }
+
+    .job-thumb img {
+      max-height: 192px;
+      max-width: 96%;
+      width: auto;
+      height: auto;
+      object-fit: contain
     }
 
     @media(max-width:560px) {
@@ -767,6 +776,10 @@
 
       .job-ic {
         font-size: 52px
+      }
+
+      .job-thumb img {
+        max-height: 142px
       }
     }
 
@@ -2044,22 +2057,22 @@
       <div class="career-panel fade" id="panel-store">
         <div class="showcase-grid">
           <div class="show-card">
-            <div class="show-thumb tile-light"><img src="images/logo-maycha.png" alt="MayCha" /></div>
+            <div class="show-thumb tile-light"><img src="images/ảnh tuyển dụng/ảnh tuyển dụng maycha.jpg" alt="MayCha" /></div>
             <div class="meta"><b>Trà Sữa MayCha</b><span>Trà sữa — “Hạnh phúc trong từng lần hút”</span></div>
             <button type="button" class="btn-job" data-job="maycha" data-name="MayCha">Xem tuyển dụng MayCha →</button>
           </div>
           <div class="show-card">
-            <div class="show-thumb tile-cream"><img src="images/logo-tamhao.png" alt="Hồng Trà Sữa Tam Hảo" /></div>
+            <div class="show-thumb tile-cream"><img src="images/ảnh tuyển dụng/ảnh tuyển dụng ba cô gái.jpg" alt="Hồng Trà Sữa Tam Hảo" /></div>
             <div class="meta"><b>Hồng Trà Sữa Tam Hảo</b><span>Trà ngon · giá hợp lý · phục vụ chân thành</span></div>
             <button type="button" class="btn-job" data-job="tamhao" data-name="Hồng Trà Sữa Tam Hảo">Xem tuyển dụng Tam Hảo →</button>
           </div>
           <div class="show-card">
-            <div class="show-thumb tile-light"><img src="images/logo-gagion.png" alt="Gà Giòn Sốt Ba Cô Gái" /></div>
+            <div class="show-thumb tile-light"><img src="images/ảnh tuyển dụng/ảnh tuyển dụng gà rán.jpg" alt="Gà Giòn Sốt Ba Cô Gái" /></div>
             <div class="meta"><b>Gà Giòn Sốt Ba Cô Gái</b><span>Gà giòn rụm · sốt đặc trưng · combo hời</span></div>
             <button type="button" class="btn-job" data-job="gagion" data-name="Gà Giòn Sốt Ba Cô Gái">Xem tuyển dụng Gà Giòn Sốt →</button>
           </div>
           <div class="show-card">
-            <div class="show-thumb tile-tea"><img src="images/logo-trahu.png" alt="Trà Hú" /></div>
+            <div class="show-thumb tile-tea"><img src="images/ảnh tuyển dụng/ảnh tuyển dụng trà hú.jpg" alt="Trà Hú" /></div>
             <div class="meta"><b>Trà Hú — Đậm Hú Hồn</b><span>Trà sữa Đậm Vị · Đậm Vibe · Đậm Gắn Kết</span></div>
             <button type="button" class="btn-job" data-job="trahu" data-name="Trà Hú">Xem tuyển dụng Trà Hú →</button>
           </div>
@@ -2070,22 +2083,22 @@
       <div class="career-panel fade" id="panel-office" style="display:none">
         <div class="showcase-grid">
           <div class="show-card">
-            <div class="job-thumb"><span class="job-ic">📣</span></div>
+            <div class="job-thumb"><img src="images/ảnh tuyển dụng/ảnh tuyển dụng văn phòng.jpg" alt="Khối Văn Phòng" /></div>
             <div class="meta"><b>Marketing</b><span>Truyền thông · Content · Quảng cáo</span></div>
             <button type="button" class="btn-job" data-job="marketing" data-name="Marketing">Xem tuyển dụng Marketing →</button>
           </div>
           <div class="show-card">
-            <div class="job-thumb"><span class="job-ic">🧑‍💼</span></div>
+            <div class="job-thumb"><img src="images/ảnh tuyển dụng/ảnh tuyển dụng văn phòng.jpg" alt="Khối Văn Phòng" /></div>
             <div class="meta"><b>Nhân sự (HR)</b><span>Tuyển dụng · Đào tạo · C&amp;B</span></div>
             <button type="button" class="btn-job" data-job="hr" data-name="Nhân sự (HR)">Xem tuyển dụng HR →</button>
           </div>
           <div class="show-card">
-            <div class="job-thumb"><span class="job-ic">💻</span></div>
+            <div class="job-thumb"><img src="images/ảnh tuyển dụng/ảnh tuyển dụng văn phòng.jpg" alt="Khối Văn Phòng" /></div>
             <div class="meta"><b>IT</b><span>Hệ thống · Phần mềm · Hạ tầng</span></div>
             <button type="button" class="btn-job" data-job="it" data-name="IT">Xem tuyển dụng IT→</button>
           </div>
           <div class="show-card">
-            <div class="job-thumb"><span class="job-ic">📊</span></div>
+            <div class="job-thumb"><img src="images/ảnh tuyển dụng/ảnh tuyển dụng văn phòng.jpg" alt="Khối Văn Phòng" /></div>
             <div class="meta"><b>Tài chính – Kế toán</b><span>Kế toán · Tài chính · Kiểm soát</span></div>
             <button type="button" class="btn-job" data-job="finance" data-name="Tài chính – Kế toán">Xem td Tài chính - kế toán→</button>
           </div>
