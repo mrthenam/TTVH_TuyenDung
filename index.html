@@ -500,12 +500,31 @@
       font-size: clamp(18px, 2.6vw, 26px);
       font-weight: 800;
       letter-spacing: .01em;
-      background: var(--grad);
+      background-image: linear-gradient(100deg, #c69320 0%, #c69320 42%, #fdf3d6 48%, #fffef8 50%, #fdf3d6 52%, #c69320 58%, #c69320 100%);
+      background-size: 300% 100%;
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
       margin: 0 auto 30px;
       display: inline-block;
+      animation: slogShine 4.5s linear infinite
+    }
+
+    @keyframes slogShine {
+      0% {
+        background-position: 160% 0
+      }
+
+      100% {
+        background-position: -160% 0
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .hero-slogan {
+        animation: none;
+        background-image: var(--grad)
+      }
     }
 
     .hero-actions {
