@@ -505,6 +505,14 @@ async function createCandidate(form, cfg, res) {
     payload.birthday = p[2] + "/" + p[1] + "/" + p[0];
   }
 
+  // Ngày nộp hồ sơ (date_filing): tự điền ngày hôm nay (dd/mm/YYYY) nếu chưa có
+  if (!payload.date_filing) {
+    const n = new Date();
+    const p2 = (x) => (x < 10 ? "0" : "") + x;
+    payload.date_filing =
+      p2(n.getDate()) + "/" + p2(n.getMonth() + 1) + "/" + n.getFullYear();
+  }
+
   // CV đính kèm (nếu có) -> field "files" của 1Office: JSON [{name, file: base64}] (chỉ nhận 1 file duy nhất)
   if (form.cv_base64 && form.cv_name) {
     payload.files = JSON.stringify([
