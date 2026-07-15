@@ -2361,46 +2361,15 @@
             <div class="field full">
               <div class="loc-grid">
                 <div class="loc-cell loc-prov">
-                  <label for="workarea">Khu vực mong muốn làm việc <span class="req">*</span></label>
-                  <select id="workarea" name="workarea">
-                    <option value="" disabled selected>Chọn khu vực mong muốn làm việc</option>
-                    <option>Quận 1</option>
-                    <option>Quận 2</option>
-                    <option>Quận 3</option>
-                    <option>Quận 4</option>
-                    <option>Quận 5</option>
-                    <option>Quận 6</option>
-                    <option>Quận 7</option>
-                    <option>Quận 8</option>
-                    <option>Quận 9</option>
-                    <option>Quận 10</option>
-                    <option>Quận 11</option>
-                    <option>Quận 12</option>
-                    <option>TP. Thủ Dầu Một</option>
-                    <option>Long An</option>
-                    <option>Tây Ninh</option>
-                    <option>Bà Rịa - Vũng Tàu</option>
-                    <option>Đà Nẵng</option>
-                    <option>Các quận tại Hà Nội</option>
-                    <option>Quận Tân Bình</option>
-                    <option>Quận Tân Phú</option>
-                    <option>Quận Phú Nhuận</option>
-                    <option>Quận Gò Vấp</option>
-                    <option>Quận Bình Thạnh</option>
-                    <option>Quận Bình Tân</option>
-                    <option>TP. Thủ Đức (bao gồm Q2, Q9, Thủ Đức)</option>
-                    <option>Huyện Bình Chánh</option>
-                    <option>Huyện Hóc Môn</option>
-                    <option>Huyện Nhà Bè</option>
-                    <option>Huyện Củ Chi</option>
-                    <option>TP. Dĩ An (Bình Dương)</option>
-                    <option>TX. Thuận An</option>
-                    <option>Đồng Nai</option>
-                    <option>Tiền Giang</option>
-                    <option>An Giang</option>
-                    <option>Cần Thơ</option>
-                    <option>... và một số tỉnh thành khác</option>
-                    <option value="__other__">Khác — chọn khác và nhập địa điểm mong muốn</option>
+                  <label for="workarea_zone">Khu vực mong muốn làm việc <span class="req">*</span></label>
+                  <select id="workarea_zone" name="workarea_zone">
+                    <option value="" disabled selected>Chọn khu vực</option>
+                    <option value="hcm">Khu vực TP. Hồ Chí Minh</option>
+                    <option value="hn">Khu vực Hà Nội</option>
+                    <option value="other">Khu vực Tỉnh/Thành phố khác</option>
+                  </select>
+                  <select id="workarea" name="workarea" disabled style="margin-top:8px">
+                    <option value="" disabled selected>Chọn địa điểm cụ thể</option>
                   </select>
                   <input type="text" id="workarea_other" placeholder="Nhập địa điểm mong muốn làm việc" style="display:none;margin-top:8px" />
                 </div>
@@ -2934,11 +2903,63 @@
       });
     })();
 
-    /* Khu vực mong muốn làm việc: dropdown đơn (khớp option 1Office) + "Khác" để nhập tay */
+    /* Khu vực mong muốn làm việc: chọn Khu vực (HCM/Hà Nội/Tỉnh khác) rồi chọn địa điểm cụ thể (khớp option 1Office) + "Khác" để nhập tay */
     (function() {
+      var zoneSel = document.getElementById('workarea_zone');
       var waSel = document.getElementById('workarea');
       var waOther = document.getElementById('workarea_other');
-      if (!waSel || !waOther) return;
+      if (!zoneSel || !waSel || !waOther) return;
+
+      var WORKAREA_ZONES = {
+        hcm: {
+          groups: [
+            { label: 'Quận nội thành', items: ['Quận 1', 'Quận 2', 'Quận 3', 'Quận 4', 'Quận 5', 'Quận 6', 'Quận 7', 'Quận 8', 'Quận 9', 'Quận 10', 'Quận 11', 'Quận 12'] },
+            { label: 'Thành phố', items: ['TP. Thủ Đức (bao gồm Q2, Q9, Thủ Đức)'] },
+            { label: 'Quận khác', items: ['Quận Tân Bình', 'Quận Tân Phú', 'Quận Phú Nhuận', 'Quận Gò Vấp', 'Quận Bình Thạnh', 'Quận Bình Tân'] },
+            { label: 'Huyện ngoại thành', items: ['Huyện Bình Chánh', 'Huyện Hóc Môn', 'Huyện Nhà Bè', 'Huyện Củ Chi'] }
+          ]
+        },
+        hn: {
+          groups: [
+            { label: 'Trung tâm', items: ['Hoàn Kiếm (Hà Nội)', 'Ba Đình (Hà Nội)', 'Đống Đa (Hà Nội)', 'Hai Bà Trưng (Hà Nội)', 'Tây Hồ (Hà Nội)'] },
+            { label: 'Nội thành khác', items: ['Cầu Giấy (Hà Nội)', 'Thanh Xuân (Hà Nội)', 'Hoàng Mai (Hà Nội)', 'Long Biên (Hà Nội)'] },
+            { label: 'Ngoại thành', items: ['Nam Từ Liêm (Hà Nội)', 'Bắc Từ Liêm (Hà Nội)', 'Hà Đông (Hà Nội)'] }
+          ]
+        },
+        other: {
+          groups: [
+            { label: 'Bình Dương', items: ['TP. Thủ Dầu Một', 'TP. Dĩ An', 'TX. Thuận An'] },
+            { label: 'Miền Tây', items: ['Long An', 'Tiền Giang', 'An Giang', 'Đồng Tháp', 'Trà Vinh', 'Kiên Giang', 'TP. Rạch Giá', 'Cần Thơ'] },
+            { label: 'Miền Trung & Tây Nguyên', items: ['Đà Nẵng', 'Thành phố Huế', 'Thành phố Đà Lạt', 'Bình Thuận', 'Phan Thiết'] },
+            { label: 'Vùng khác', items: ['Đồng Nai', 'Tây Ninh', 'Bà Rịa', 'Vũng Tàu'] }
+          ]
+        }
+      };
+
+      function fillWorkarea(zone) {
+        var z = WORKAREA_ZONES[zone];
+        waOther.style.display = 'none'; waOther.value = '';
+        if (!z) {
+          waSel.innerHTML = '<option value="" disabled selected>Chọn khu vực trước</option>';
+          waSel.disabled = true;
+          return;
+        }
+        var html = '<option value="" disabled selected>Chọn địa điểm cụ thể</option>';
+        z.groups.forEach(function(g) {
+          html += '<optgroup label="' + g.label + '">' +
+            g.items.map(function(it) { return '<option>' + it + '</option>'; }).join('') +
+            '</optgroup>';
+        });
+        html += '<option value="__other__">Khác — chọn khác và nhập địa điểm mong muốn</option>';
+        waSel.innerHTML = html;
+        waSel.disabled = false;
+      }
+
+      zoneSel.addEventListener('change', function() {
+        fillWorkarea(zoneSel.value);
+        zoneSel.classList.remove('err');
+        waSel.classList.remove('err');
+      });
       waSel.addEventListener('change', function() {
         var isOther = waSel.value === '__other__';
         waOther.style.display = isOther ? 'block' : 'none';
@@ -3120,10 +3141,15 @@
             if (!firstBad) firstBad = brandSel;
           }
         }
-        // Khu vực mong muốn làm việc: bắt buộc chọn; nếu "Khác" thì phải nhập địa điểm
+        // Khu vực mong muốn làm việc: bắt buộc chọn Khu vực + địa điểm cụ thể; nếu "Khác" thì phải nhập địa điểm
+        var zoneEl = document.getElementById('workarea_zone');
         var waEl = document.getElementById('workarea');
         var waOtherEl = document.getElementById('workarea_other');
-        if (!waEl.value) {
+        if (!zoneEl.value) {
+          zoneEl.classList.add('err');
+          ok = false;
+          if (!firstBad) firstBad = zoneEl;
+        } else if (!waEl.value) {
           waEl.classList.add('err');
           ok = false;
           if (!firstBad) firstBad = waEl;
