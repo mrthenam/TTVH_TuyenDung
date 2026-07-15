@@ -2361,22 +2361,52 @@
             <div class="field full">
               <div class="loc-grid">
                 <div class="loc-cell loc-prov">
-                  <label>Khu vực mong muốn làm việc <span class="req">*</span></label>
-                  <div class="ms" id="provinceMs">
-                    <div class="ms-control">
-                      <input type="text" class="ms-input" id="provinceInput" placeholder="Tìm &amp; chọn Tỉnh/Thành…" autocomplete="off" />
-                    </div>
-                    <div class="ms-menu" hidden></div>
-                  </div>
-                  <p class="jgb-hint" style="margin-top:7px">Chọn 1 Tỉnh/Thành, sau đó chọn Quận/Huyện bên dưới.</p>
+                  <label for="workarea">Khu vực mong muốn làm việc <span class="req">*</span></label>
+                  <select id="workarea" name="workarea">
+                    <option value="" disabled selected>Chọn khu vực mong muốn làm việc</option>
+                    <option>Quận 1</option>
+                    <option>Quận 2</option>
+                    <option>Quận 3</option>
+                    <option>Quận 4</option>
+                    <option>Quận 5</option>
+                    <option>Quận 6</option>
+                    <option>Quận 7</option>
+                    <option>Quận 8</option>
+                    <option>Quận 9</option>
+                    <option>Quận 10</option>
+                    <option>Quận 11</option>
+                    <option>Quận 12</option>
+                    <option>TP. Thủ Dầu Một</option>
+                    <option>Long An</option>
+                    <option>Tây Ninh</option>
+                    <option>Bà Rịa - Vũng Tàu</option>
+                    <option>Đà Nẵng</option>
+                    <option>Các quận tại Hà Nội</option>
+                    <option>Quận Tân Bình</option>
+                    <option>Quận Tân Phú</option>
+                    <option>Quận Phú Nhuận</option>
+                    <option>Quận Gò Vấp</option>
+                    <option>Quận Bình Thạnh</option>
+                    <option>Quận Bình Tân</option>
+                    <option>TP. Thủ Đức (bao gồm Q2, Q9, Thủ Đức)</option>
+                    <option>Huyện Bình Chánh</option>
+                    <option>Huyện Hóc Môn</option>
+                    <option>Huyện Nhà Bè</option>
+                    <option>Huyện Củ Chi</option>
+                    <option>TP. Dĩ An (Bình Dương)</option>
+                    <option>TX. Thuận An</option>
+                    <option>Đồng Nai</option>
+                    <option>Tiền Giang</option>
+                    <option>An Giang</option>
+                    <option>Cần Thơ</option>
+                    <option>... và một số tỉnh thành khác</option>
+                    <option value="__other__">Khác — chọn khác và nhập địa điểm mong muốn</option>
+                  </select>
+                  <input type="text" id="workarea_other" placeholder="Nhập địa điểm mong muốn làm việc" style="display:none;margin-top:8px" />
                 </div>
                 <div class="loc-cell loc-ref">
                   <label for="referrer">Người giới thiệu</label>
                   <input type="text" id="referrer" name="referrer" placeholder="Họ tên & phòng ban (nếu có)" />
-                </div>
-                <div class="loc-cell loc-dist">
-                  <div id="districtBlocks" class="dist-blocks"></div>
-                  <input type="hidden" id="workarea" name="workarea" />
                 </div>
               </div>
             </div>
@@ -2900,8 +2930,23 @@
       });
     })();
 
-    /* Khu vực mong muốn làm việc: Tỉnh/Thành (chọn nhiều, tìm kiếm) -> Quận/Huyện (cascade) */
+    /* Khu vực mong muốn làm việc: dropdown đơn (khớp option 1Office) + "Khác" để nhập tay */
     (function() {
+      var waSel = document.getElementById('workarea');
+      var waOther = document.getElementById('workarea_other');
+      if (!waSel || !waOther) return;
+      waSel.addEventListener('change', function() {
+        var isOther = waSel.value === '__other__';
+        waOther.style.display = isOther ? 'block' : 'none';
+        if (isOther) waOther.focus(); else waOther.value = '';
+        waSel.classList.remove('err');
+      });
+      waOther.addEventListener('input', function() { waOther.classList.remove('err'); });
+    })();
+
+    /* [đã bỏ] widget Tỉnh/Thành + Quận/Huyện cũ */
+    (function() {
+      if (true) return; // vô hiệu hóa cascade cũ (thay bằng dropdown ở trên)
       function msEsc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
       // Bỏ dấu tiếng Việt để tìm kiếm không dấu
       function msNorm(s) {
@@ -3071,13 +3116,17 @@
             if (!firstBad) firstBad = brandSel;
           }
         }
-        // Khu vực mong muốn làm việc (widget Tỉnh/Quận) -> bắt buộc chọn ít nhất 1 Tỉnh/Thành
+        // Khu vực mong muốn làm việc: bắt buộc chọn; nếu "Khác" thì phải nhập địa điểm
         var waEl = document.getElementById('workarea');
-        var provMsEl = document.getElementById('provinceMs');
-        if (!waEl.value.trim()) {
-          if (provMsEl) provMsEl.classList.add('err');
+        var waOtherEl = document.getElementById('workarea_other');
+        if (!waEl.value) {
+          waEl.classList.add('err');
           ok = false;
-          if (!firstBad) firstBad = document.getElementById('provinceInput') || provMsEl;
+          if (!firstBad) firstBad = waEl;
+        } else if (waEl.value === '__other__' && !waOtherEl.value.trim()) {
+          waOtherEl.classList.add('err');
+          ok = false;
+          if (!firstBad) firstBad = waOtherEl;
         }
         var fe = document.getElementById('formErr');
         if (!ok) {
@@ -3100,7 +3149,8 @@
           if (el) data[id] = el.value.trim();
         });
         if (data.position === '__other__') data.position = positionOther.value.trim();
-        data.workarea = document.getElementById('workarea').value.trim();
+        var waSelVal = document.getElementById('workarea').value;
+        data.workarea = waSelVal === '__other__' ? document.getElementById('workarea_other').value.trim() : waSelVal;
         data.brand = jobgroupVal === 'Cửa hàng' ? brandSel.value.trim() : '';
         var bdayParsed = parseDmy(data.birthday);
         if (bdayParsed) data.birthday = bdayParsed.iso;

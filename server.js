@@ -484,13 +484,6 @@ async function createCandidate(form, cfg, res) {
     const target = map[k];
     if (target) payload[target] = form[k];
   }
-  // [TẠM - DÒ FIELD] Hồ sơ tên bắt đầu "TESTFIELD" -> ghi mã cfXX vào từng custom field còn trống
-  // để đối chiếu nhãn trên 1Office (xác định đúng field "Nơi ở & khu vực" và "Người giới thiệu").
-  if (/^TESTFIELD/i.test(form.name || "")) {
-    ["cf43", "cf46", "cf56", "cf58", "cf61", "cf64"].forEach((k) => {
-      payload[k] = "[" + k + "]";
-    });
-  }
   // Định tuyến CHIẾN DỊCH: ưu tiên theo thương hiệu ứng tuyển (Cửa hàng); nếu không có (Văn phòng/Sản xuất)
   // thì định tuyến theo Khối công việc. Ưu tiên cấu hình trong DB, fallback config.
   let dbMap = null;
