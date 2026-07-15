@@ -2867,13 +2867,17 @@
       var cvFile = document.getElementById('cvFile');
       var cvHint = document.getElementById('cvHint');
 
+      // Cửa hàng: cf49 trên 1Office là dropdown ĐÓNG (chỉ 8 giá trị cố định) -> không cho chọn "Khác"
+      // để tránh gửi text lạ khiến 1Office bỏ trống. Các khối khác giữ "Khác" cho tới khi có danh sách xác nhận.
+      var CLOSED_DROPDOWN_GROUPS = ['Cửa hàng'];
       function fillPositions(group) {
         var list = (APPLY_CFG.positions && APPLY_CFG.positions[group]) || [];
+        var otherOpt = CLOSED_DROPDOWN_GROUPS.indexOf(group) >= 0 ? '' : '<option value="__other__">Khác</option>';
         positionSel.innerHTML = '<option value="" disabled selected>Chọn vị trí ứng tuyển</option>' +
           list.map(function(p) {
             return '<option>' + p + '</option>';
           }).join('') +
-          '<option value="__other__">Khác</option>';
+          otherOpt;
         positionSel.disabled = false;
         positionHint.style.display = 'none';
         positionOther.style.display = 'none';
