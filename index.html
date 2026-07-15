@@ -2942,25 +2942,28 @@
       var waOther = document.getElementById('workarea_other');
       if (!zoneSel || !waSel || !waOther) return;
 
+      // GIÁ TRỊ (value) phải khớp TỪNG KÝ TỰ với option đóng của cf56 trên 1Office
+      // (theo API document - Hồ sơ ứng viên); lệch 1 dấu chấm là 1Office bỏ trống field.
+      // item = chuỗi (value = nhãn hiển thị) hoặc { v: giá-trị-1Office, label: nhãn-hiển-thị }.
       var WORKAREA_ZONES = {
         hcm: {
           groups: [
             { label: 'Quận nội thành', items: ['Quận 1', 'Quận 2', 'Quận 3', 'Quận 4', 'Quận 5', 'Quận 6', 'Quận 7', 'Quận 8', 'Quận 9', 'Quận 10', 'Quận 11', 'Quận 12'] },
-            { label: 'Thành phố', items: ['TP. Thủ Đức (bao gồm Q2, Q9, Thủ Đức)'] },
+            { label: 'Thành phố', items: [{ v: 'TP. Thủ Đức', label: 'TP. Thủ Đức (bao gồm Q2, Q9, Thủ Đức)' }] },
             { label: 'Quận khác', items: ['Quận Tân Bình', 'Quận Tân Phú', 'Quận Phú Nhuận', 'Quận Gò Vấp', 'Quận Bình Thạnh', 'Quận Bình Tân'] },
-            { label: 'Huyện ngoại thành', items: ['Huyện Bình Chánh', 'Huyện Hóc Môn', 'Huyện Nhà Bè', 'Huyện Củ Chi'] }
+            { label: 'Huyện ngoại thành', items: ['Huyện Bình Chánh', 'Huyện Hóc Môn', 'Huyện Nhà Bè', { v: 'Củ Chi', label: 'Huyện Củ Chi' }] }
           ]
         },
         hn: {
           groups: [
             { label: 'Trung tâm', items: ['Hoàn Kiếm (Hà Nội)', 'Ba Đình (Hà Nội)', 'Đống Đa (Hà Nội)', 'Hai Bà Trưng (Hà Nội)', 'Tây Hồ (Hà Nội)'] },
-            { label: 'Nội thành khác', items: ['Cầu Giấy (Hà Nội)', 'Thanh Xuân (Hà Nội)', 'Hoàng Mai (Hà Nội)', 'Long Biên (Hà Nội)'] },
+            { label: 'Nội thành khác', items: ['Cầu Giấy (Hà Nội)', 'Hoàng Mai (Hà Nội)', 'Long Biên (Hà Nội)'] },
             { label: 'Ngoại thành', items: ['Nam Từ Liêm (Hà Nội)', 'Bắc Từ Liêm (Hà Nội)', 'Hà Đông (Hà Nội)'] }
           ]
         },
         other: {
           groups: [
-            { label: 'Bình Dương', items: ['TP. Thủ Dầu Một', 'TP. Dĩ An', 'TX. Thuận An'] },
+            { label: 'Bình Dương', items: [{ v: 'TP Thủ Dầu Một', label: 'TP. Thủ Dầu Một' }, 'TP. Dĩ An', 'TX. Thuận An'] },
             { label: 'Miền Tây', items: ['Long An', 'Tiền Giang', 'An Giang', 'Đồng Tháp', 'Trà Vinh', 'Kiên Giang', 'TP. Rạch Giá', 'Cần Thơ'] },
             { label: 'Miền Trung & Tây Nguyên', items: ['Đà Nẵng', 'Thành phố Huế', 'Thành phố Đà Lạt', 'Bình Thuận', 'Phan Thiết'] },
             { label: 'Vùng khác', items: ['Đồng Nai', 'Tây Ninh', 'Bà Rịa', 'Vũng Tàu'] }
@@ -2972,14 +2975,18 @@
         var z = WORKAREA_ZONES[zone];
         waOther.style.display = 'none'; waOther.value = '';
         if (!z) {
-          waSel.innerHTML = '<option value="" disabled selected>Chọn khu vực trước</option>';
+          waSel.innerHTML = '<option value="" disabled selected>Chọn địa điểm cụ thể</option>';
           waSel.disabled = true;
           return;
         }
         var html = '<option value="" disabled selected>Chọn địa điểm cụ thể</option>';
         z.groups.forEach(function(g) {
           html += '<optgroup label="' + g.label + '">' +
-            g.items.map(function(it) { return '<option>' + it + '</option>'; }).join('') +
+            g.items.map(function(it) {
+              var v = typeof it === 'string' ? it : it.v;
+              var label = typeof it === 'string' ? it : it.label;
+              return '<option value="' + v + '">' + label + '</option>';
+            }).join('') +
             '</optgroup>';
         });
         html += '<option value="__other__">Khác — chọn khác và nhập địa điểm mong muốn</option>';

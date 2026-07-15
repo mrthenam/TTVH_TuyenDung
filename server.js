@@ -499,6 +499,23 @@ async function createCandidate(form, cfg, res) {
     pickBrandCampaign(c.brandCampaigns, form.jobgroup);
   if (brandCode) payload.campaign_current_id = brandCode;
 
+  // Thương hiệu -> cf63 là dropdown ĐÓNG trên 1Office (option: Maycha / Tam Hảo / Food / Trà Hú
+  // theo API document). Tên trên form dài hơn -> phải đổi sang đúng option, lệch là 1Office bỏ trống.
+  const BRAND_VALUE_MAP = Object.assign(
+    {
+      MayCha: "Maycha",
+      "Trà Sữa MayCha": "Maycha",
+      "Hồng Trà Sữa Tam Hảo": "Tam Hảo",
+      "Gà Giòn Sốt Ba Cô Gái": "Food",
+      "Trà Hú": "Trà Hú",
+    },
+    c.brandValueMap || {},
+  );
+  const brandTarget = map.brand;
+  if (brandTarget && payload[brandTarget] && BRAND_VALUE_MAP[payload[brandTarget]]) {
+    payload[brandTarget] = BRAND_VALUE_MAP[payload[brandTarget]];
+  }
+
   // Ngày sinh: input HTML là yyyy-mm-dd -> 1Office cần dd/mm/YYYY
   if (payload.birthday && /^\d{4}-\d{2}-\d{2}$/.test(payload.birthday)) {
     const p = payload.birthday.split("-");
