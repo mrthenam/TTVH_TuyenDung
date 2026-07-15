@@ -1424,7 +1424,7 @@ function renderTraining() {
   if (!rows.length) { $('#ttable').innerHTML = '<tbody><tr><td class="norows">' + (trainRows.length ? 'Không có kết quả phù hợp.' : 'Chưa có đăng ký đào tạo nào. Bấm “Thêm đăng ký”.') + '</td></tr></tbody>'; return; }
   var html = '<thead><tr><th>#</th><th>Thời gian gửi</th><th>Họ tên</th><th>SĐT</th><th>Email</th><th>Tỉnh thành</th><th>Quận huyện</th><th>Vị trí</th><th>Hình thức</th><th>Ngày dự kiến</th><th>Cửa hàng</th><th>Thao tác</th></tr></thead><tbody>';
   rows.forEach(function (r, i) {
-    html += '<tr><td class="idx">' + (i + 1) + '</td><td>' + esc(fmtTs(r.ts)) + '</td><td>' + esc(r.name) + '</td><td>' + esc(r.phone) + '</td><td>' + esc(r.email) + '</td><td>' + esc(r.province) + '</td><td>' + esc(r.district) + '</td><td>' + esc(normPos(r.position)) + '</td><td class="wr">' + esc(r.mode) + '</td><td>' + esc(fmtDate(r.sess_date)) + '</td><td class="wr">' + esc(r.store) + '</td>'
+    html += '<tr><td class="idx">' + (i + 1) + '</td><td>' + esc(fmtTs(r.ts)) + '</td><td>' + esc(r.name) + '</td><td>' + esc(r.phone) + '</td><td>' + esc(r.email) + '</td><td class="wr">' + esc(r.province) + '</td><td class="wr">' + esc(r.district) + '</td><td class="wr">' + esc(normPos(r.position)) + '</td><td class="wr">' + esc(r.mode) + '</td><td>' + esc(fmtDate(r.sess_date)) + '</td><td class="wr">' + esc(r.store) + '</td>'
       + '<td><div class="rowact"><button class="iconbtn edit" data-edit="' + r.id + '">✎ Sửa</button><button class="iconbtn del" data-del="' + r.id + '">🗑 Xóa</button></div></td></tr>';
   });
   html += '</tbody>';
