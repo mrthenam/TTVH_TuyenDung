@@ -48,10 +48,10 @@
         "idcard": "private_code",
         "address": "current_address",
         "region": "place_current_address",
-        "workarea": "work_place",
+        "workarea": "cf56",
         "position": "cf49",
         "brand": "cf63",
-        "referrer": "note",
+        "referrer": "cf43",
         "source_id": "source",
         "campaign_current_id": "campaign_current_id"
       },
