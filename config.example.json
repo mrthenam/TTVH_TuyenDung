@@ -48,7 +48,7 @@
         "idcard": "private_code",
         "address": "current_address",
         "region": "place_current_address",
-        "workarea": "cf56",
+        "workarea": "work_place",
         "position": "cf49",
         "brand": "cf63",
         "referrer": "note",
