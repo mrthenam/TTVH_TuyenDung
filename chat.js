@@ -70,7 +70,17 @@
   function addMsg(role, text, ts) {
     var cls = role === 'user' ? 'u' : (role === 'agent' ? 'a' : 'b');
     var row = document.createElement('div'); row.className = 'ttvh-row ' + cls;
-    var bub = document.createElement('div'); bub.className = 'ttvh-bub'; bub.textContent = text;
+    var bub = document.createElement('div'); bub.className = 'ttvh-bub';
+    if (role === 'user') { bub.textContent = text; }
+    else {
+      // Bot/nhân viên: biến URL trong tin nhắn thành link bấm được (escape HTML trước cho an toàn)
+      var esc = String(text == null ? '' : text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      bub.innerHTML = esc.replace(/(https?:\/\/[^\s<]+)/g, function (u) {
+        var sameSite = u.indexOf(location.origin + '/') === 0 || u === location.origin;
+        var tgt = sameSite ? '' : ' target="_blank" rel="noopener"';
+        return '<a href="' + u + '"' + tgt + ' style="color:inherit;font-weight:700;text-decoration:underline">' + u.replace(/^https?:\/\//, '') + '</a>';
+      });
+    }
     row.appendChild(bub); body.insertBefore(row, typing); scrollDown();
     if (ts && ts > lastTs) lastTs = ts;
   }
