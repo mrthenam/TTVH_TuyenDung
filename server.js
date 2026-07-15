@@ -796,6 +796,15 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, APPLYFORM_DEFAULTS);
     }
   }
+  // Ảnh thương hiệu ở các thẻ "Cửa hàng" (công khai cho trang index.html)
+  if (url.pathname === "/api/brandimages" && req.method === "GET") {
+    try {
+      const v = await db.getSetting("brandimages");
+      return sendJson(res, 200, (v && JSON.parse(v)) || BRANDIMAGES_DEFAULTS);
+    } catch (e) {
+      return sendJson(res, 200, BRANDIMAGES_DEFAULTS);
+    }
+  }
   // Khoảnh khắc Vinh Hoa (công khai cho carousel trang chủ)
   if (url.pathname === "/api/gallery" && req.method === "GET") {
     try {
@@ -1058,6 +1067,14 @@ const APPLYFORM_DEFAULTS = {
   },
 };
 
+// Ảnh mặc định 4 thẻ thương hiệu ở tab "Cửa hàng" trang chủ (khớp đúng ảnh đang gắn cứng trong index.html)
+const BRANDIMAGES_DEFAULTS = {
+  maycha: "images/ảnh tuyển dụng/ảnh tuyển dụng maycha.jpg",
+  tamhao: "images/ảnh tuyển dụng/ảnh tuyển dụng ba cô gái.jpg",
+  gagion: "images/ảnh tuyển dụng/ảnh tuyển dụng gà rán.jpg",
+  trahu: "images/ảnh tuyển dụng/ảnh tuyển dụng trà hú.jpg",
+};
+
 chatbot
   .init()
   .then(() => {
@@ -1087,6 +1104,13 @@ chatbot
   .then(async () => {
     if (!(await db.getSetting("applyform")))
       await db.setSetting("applyform", JSON.stringify(APPLYFORM_DEFAULTS));
+  })
+  .then(async () => {
+    if (!(await db.getSetting("brandimages")))
+      await db.setSetting(
+        "brandimages",
+        JSON.stringify(BRANDIMAGES_DEFAULTS),
+      );
   })
   .then(async () => {
     if (!(await db.getSetting("emailcfg")))

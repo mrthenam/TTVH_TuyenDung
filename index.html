@@ -2153,22 +2153,22 @@
       <div class="career-panel fade" id="panel-store">
         <div class="showcase-grid">
           <div class="show-card">
-            <div class="show-thumb tile-light"><img src="images/ảnh tuyển dụng/ảnh tuyển dụng maycha.jpg" alt="MayCha" /></div>
+            <div class="show-thumb tile-light"><img id="brandimg-maycha" src="images/ảnh tuyển dụng/ảnh tuyển dụng maycha.jpg" alt="MayCha" /></div>
             <div class="meta"><b>Trà Sữa MayCha</b><span>Trà sữa — “Hạnh phúc trong từng lần hút”</span></div>
             <button type="button" class="btn-job" data-job="maycha" data-name="MayCha">Xem tuyển dụng MayCha →</button>
           </div>
           <div class="show-card">
-            <div class="show-thumb tile-cream"><img src="images/ảnh tuyển dụng/ảnh tuyển dụng ba cô gái.jpg" alt="Hồng Trà Sữa Tam Hảo" /></div>
+            <div class="show-thumb tile-cream"><img id="brandimg-tamhao" src="images/ảnh tuyển dụng/ảnh tuyển dụng ba cô gái.jpg" alt="Hồng Trà Sữa Tam Hảo" /></div>
             <div class="meta"><b>Hồng Trà Sữa Tam Hảo</b><span>Trà ngon · giá hợp lý · phục vụ chân thành</span></div>
             <button type="button" class="btn-job" data-job="tamhao" data-name="Hồng Trà Sữa Tam Hảo">Xem tuyển dụng Tam Hảo →</button>
           </div>
           <div class="show-card">
-            <div class="show-thumb tile-light"><img src="images/ảnh tuyển dụng/ảnh tuyển dụng gà rán.jpg" alt="Gà Giòn Sốt Ba Cô Gái" /></div>
+            <div class="show-thumb tile-light"><img id="brandimg-gagion" src="images/ảnh tuyển dụng/ảnh tuyển dụng gà rán.jpg" alt="Gà Giòn Sốt Ba Cô Gái" /></div>
             <div class="meta"><b>Gà Giòn Sốt Ba Cô Gái</b><span>Gà giòn rụm · sốt đặc trưng · combo hời</span></div>
             <button type="button" class="btn-job" data-job="gagion" data-name="Gà Giòn Sốt Ba Cô Gái">Xem tuyển dụng Gà Giòn Sốt →</button>
           </div>
           <div class="show-card">
-            <div class="show-thumb tile-tea"><img src="images/ảnh tuyển dụng/ảnh tuyển dụng trà hú.jpg" alt="Trà Hú" /></div>
+            <div class="show-thumb tile-tea"><img id="brandimg-trahu" src="images/ảnh tuyển dụng/ảnh tuyển dụng trà hú.jpg" alt="Trà Hú" /></div>
             <div class="meta"><b>Trà Hú — Đậm Hú Hồn</b><span>Trà sữa Đậm Vị · Đậm Vibe · Đậm Gắn Kết</span></div>
             <button type="button" class="btn-job" data-job="trahu" data-name="Trà Hú">Xem tuyển dụng Trà Hú →</button>
           </div>
@@ -2822,6 +2822,15 @@
         positions: (d.positions && typeof d.positions === 'object') ? d.positions : APPLY_DEFAULTS.positions
       };
       renderApplyStatics();
+    }).catch(function() {});
+
+    /* Ảnh 4 thẻ thương hiệu (tab Cửa hàng) — chỉnh trong dashboard tab "Ảnh thương hiệu" */
+    fetch('/api/brandimages').then(function(r) { return r.json(); }).then(function(d) {
+      if (!d || typeof d !== 'object') return;
+      ['maycha', 'tamhao', 'gagion', 'trahu'].forEach(function(k) {
+        var img = document.getElementById('brandimg-' + k);
+        if (img && d[k]) img.src = d[k];
+      });
     }).catch(function() {});
 
     /* Khối công việc -> Vị trí ứng tuyển (cascading) + tùy chọn "Khác" */

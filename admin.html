@@ -157,6 +157,14 @@
   .galbar input#g_url:focus{outline:none;border-color:var(--red)}
   #gUploadBtn{cursor:pointer}
   .gal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
+  .brandimg-grid{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+  .brandimg-card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 12px 30px -26px rgba(224,52,43,.5);display:flex;flex-direction:column}
+  .brandimg-card img{width:100%;height:150px;object-fit:cover;display:block;background:var(--bg-soft)}
+  .brandimg-card .bi-body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px}
+  .brandimg-card .bi-name{font-weight:800}
+  .brandimg-card .bi-url{border:1px solid var(--line-2);border-radius:9px;padding:8px 10px;font-family:inherit;font-size:12.5px;background:var(--card)}
+  .brandimg-card .bi-actions{display:flex;gap:8px}
+  .brandimg-card .bi-actions .btn{flex:1;justify-content:center;padding:8px 10px;font-size:12.5px}
   .galcard{position:relative;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 12px 30px -26px rgba(224,52,43,.5);cursor:grab}
   .galcard.drag{opacity:.4}
   .galcard.over{outline:2px dashed var(--red);outline-offset:-2px}
@@ -300,7 +308,7 @@
       <button class="navbtn" id="tabCamp"><span class="ic">🎯</span><span class="t">Chiến dịch</span><span class="cnt" id="navCampCnt">0</span></button>
       <button class="navbtn" id="tabRecruit"><span class="ic">📢</span><span class="t">Thông tin tuyển dụng</span></button>
       <button class="navbtn" id="tabJobs"><span class="ic">💼</span><span class="t">Việc làm (tuyển dụng)</span></button>
-      <button class="navbtn" id="tabGallery"><span class="ic">📸</span><span class="t">Khoảnh khắc Vinh Hoa</span></button>
+      <button class="navbtn" id="tabGallery"><span class="ic">🏷️</span><span class="t">Ảnh thương hiệu</span></button>
       <button class="navbtn" id="tabForm"><span class="ic">📝</span><span class="t">Form đào tạo</span></button>
       <button class="navbtn" id="tabApply"><span class="ic">🧾</span><span class="t">Form ứng tuyển</span></button>
       <button class="navbtn" id="tabEmail"><span class="ic">✉️</span><span class="t">Email tự động</span></button>
@@ -414,17 +422,12 @@
         <div id="recruitList" class="recruitlist"></div>
       </div>
 
-      <!-- KHOẢNH KHẮC VINH HOA -->
+      <!-- ẢNH THƯƠNG HIỆU -->
       <div class="trainview" id="viewGallery" style="display:none">
         <div class="pagehd">
-          <div><h1>📸 Khoảnh khắc Vinh Hoa</h1><div class="sub" id="galcount">Ảnh hiển thị trên carousel trang chủ — kéo-thả để sắp xếp.</div></div>
+          <div><h1>🏷️ Ảnh thương hiệu</h1><div class="sub">Ảnh hiển thị trên 4 thẻ thương hiệu ở tab "Cửa hàng" trang chủ (index.html).</div></div>
         </div>
-        <div class="galbar">
-          <input id="g_url" type="text" placeholder="Đường dẫn ảnh, vd: images/anh vinh danh/6.jpg  hoặc  https://..." />
-          <button class="btn primary" id="gAdd">＋ Thêm ảnh</button>
-          <label class="btn" id="gUploadBtn">⬆ Tải ảnh lên<input id="g_file" type="file" accept="image/*" style="display:none" /></label>
-        </div>
-        <div id="galGrid" class="gal-grid"></div>
+        <div id="brandimgGrid" class="gal-grid brandimg-grid"></div>
       </div>
 
       <!-- FORM ĐÀO TẠO -->
@@ -768,7 +771,7 @@ function switchView(v) {
   if (v === 'staff') loadStaff();
   if (v === 'camp') loadCampaigns();
   if (v === 'recruit') loadRecruit();
-  if (v === 'gallery') loadGallery();
+  if (v === 'gallery') loadBrandImages();
   if (v === 'form') loadTrainingForm();
   if (v === 'apply') loadApplyForm();
   if (v === 'email') loadEmailCfg();
@@ -1009,64 +1012,56 @@ $('#emTestBtn').addEventListener('click', function () {
     .catch(function (e) { btn.disabled = false; btn.textContent = old; if (e.message === '401') return logout(); emMsg('#emErr', 'Lỗi kết nối.'); });
 });
 
-/* ===== KHOẢNH KHẮC VINH HOA ===== */
-var galRows = [], galDragId = null;
-function loadGallery() {
-  api('/api/agent/gallery').then(function (d) { galRows = d.rows || []; renderGallery(); })
+/* ===== ẢNH THƯƠNG HIỆU (4 thẻ tab Cửa hàng trang chủ) ===== */
+var BRAND_SLOTS = [
+  { key: 'maycha', name: 'Trà Sữa MayCha' },
+  { key: 'tamhao', name: 'Hồng Trà Sữa Tam Hảo' },
+  { key: 'gagion', name: 'Gà Giòn Sốt Ba Cô Gái' },
+  { key: 'trahu', name: 'Trà Hú — Đậm Hú Hồn' }
+];
+var brandImages = {};
+function loadBrandImages() {
+  api('/api/agent/brandimages').then(function (d) { brandImages = d || {}; renderBrandImages(); })
     .catch(function (e) { if (e.message === '401') logout(); });
 }
-function renderGallery() {
-  $('#galcount').textContent = galRows.length + ' ảnh — kéo-thả để sắp xếp thứ tự hiển thị.';
-  if (!galRows.length) { $('#galGrid').innerHTML = '<div class="norows">Chưa có ảnh. Thêm bằng đường dẫn hoặc tải ảnh lên.</div>'; return; }
-  $('#galGrid').innerHTML = galRows.map(function (r, i) {
-    return '<div class="galcard" draggable="true" data-id="' + r.id + '">'
-      + '<span class="gidx">' + (i + 1) + '</span>'
-      + '<button class="gdel" data-del="' + r.id + '" title="Xóa">×</button>'
-      + '<img src="' + esc(r.url) + '" alt="" loading="lazy" />'
-      + '<div class="gurl">' + esc((r.url || '').slice(0, 60)) + '</div></div>';
+function renderBrandImages() {
+  $('#brandimgGrid').innerHTML = BRAND_SLOTS.map(function (s) {
+    var url = brandImages[s.key] || '';
+    return '<div class="brandimg-card" data-key="' + s.key + '">'
+      + '<img src="' + esc(url) + '" alt="" loading="lazy" />'
+      + '<div class="bi-body">'
+      + '<div class="bi-name">' + esc(s.name) + '</div>'
+      + '<input type="text" class="bi-url" value="' + esc(url) + '" placeholder="Đường dẫn ảnh hoặc https://..." />'
+      + '<div class="bi-actions">'
+      + '<button class="btn primary" data-save="' + s.key + '">Lưu ảnh</button>'
+      + '<label class="btn" data-upload="' + s.key + '">⬆ Tải lên<input type="file" accept="image/*" style="display:none" /></label>'
+      + '</div></div></div>';
   }).join('');
-  [].forEach.call(document.querySelectorAll('#galGrid .gdel'), function (b) { b.onclick = function (e) { e.stopPropagation(); delGallery(b.getAttribute('data-del')); }; });
-  [].forEach.call(document.querySelectorAll('#galGrid .galcard'), function (card) {
-    card.addEventListener('dragstart', function () { galDragId = card.getAttribute('data-id'); card.classList.add('drag'); });
-    card.addEventListener('dragend', function () { card.classList.remove('drag'); [].forEach.call(document.querySelectorAll('.galcard'), function (c) { c.classList.remove('over'); }); });
-    card.addEventListener('dragover', function (e) { e.preventDefault(); card.classList.add('over'); });
-    card.addEventListener('dragleave', function () { card.classList.remove('over'); });
-    card.addEventListener('drop', function (e) {
-      e.preventDefault(); card.classList.remove('over');
-      var from = galDragId, to = card.getAttribute('data-id'); if (from === to) return;
-      var fi = galRows.findIndex(function (x) { return String(x.id) === String(from); });
-      var ti = galRows.findIndex(function (x) { return String(x.id) === String(to); });
-      if (fi < 0 || ti < 0) return;
-      var moved = galRows.splice(fi, 1)[0]; galRows.splice(ti, 0, moved);
-      renderGallery(); saveGalleryOrder();
+  [].forEach.call(document.querySelectorAll('#brandimgGrid [data-save]'), function (b) {
+    b.onclick = function () {
+      var key = b.getAttribute('data-save');
+      var card = b.closest('.brandimg-card');
+      setBrandImage(key, card.querySelector('.bi-url').value.trim());
+    };
+  });
+  [].forEach.call(document.querySelectorAll('#brandimgGrid [data-upload] input'), function (inp) {
+    inp.addEventListener('change', function () {
+      var f = this.files && this.files[0]; if (!f) return;
+      var key = this.closest('[data-upload]').getAttribute('data-upload');
+      if (f.size > 2.5 * 1024 * 1024) { toast('Ảnh quá lớn (>2.5MB). Nên dùng đường dẫn file thay vì tải lên.'); this.value = ''; return; }
+      var rd = new FileReader();
+      rd.onload = function () { setBrandImage(key, rd.result); };
+      rd.readAsDataURL(f); this.value = '';
     });
   });
 }
-function saveGalleryOrder() {
-  api('/api/agent/gallery/reorder', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids: galRows.map(function (r) { return r.id; }) }) })
-    .then(function () { toast('Đã lưu thứ tự ảnh.'); }).catch(function () {});
-}
-function addGalleryUrl(u) {
-  u = (u || '').trim(); if (!u) { toast('Nhập đường dẫn ảnh.'); return; }
-  api('/api/agent/gallery', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: u }) })
-    .then(function (res) { if (res && res.ok) { toast('Đã thêm ảnh.'); $('#g_url').value = ''; loadGallery(); } else toast((res && res.error) || 'Thêm thất bại.'); })
+function setBrandImage(key, url) {
+  url = (url || '').trim(); if (!url) { toast('Nhập đường dẫn ảnh.'); return; }
+  var body = {}; body[key] = url;
+  api('/api/agent/brandimages', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+    .then(function (res) { if (res && res.ok) { toast('Đã lưu ảnh.'); loadBrandImages(); } else toast((res && res.error) || 'Lưu thất bại.'); })
     .catch(function (e) { if (e.message === '401') logout(); else toast('Lỗi kết nối.'); });
 }
-function delGallery(id) {
-  if (!confirm('Xóa ảnh này khỏi carousel?')) return;
-  api('/api/agent/gallery?id=' + encodeURIComponent(id), { method: 'DELETE' })
-    .then(function (res) { if (res && res.ok) { toast('Đã xóa ảnh.'); loadGallery(); } else toast('Xóa thất bại.'); })
-    .catch(function (e) { if (e.message === '401') logout(); else toast('Lỗi kết nối.'); });
-}
-$('#gAdd').addEventListener('click', function () { addGalleryUrl($('#g_url').value); });
-$('#g_url').addEventListener('keydown', function (e) { if (e.key === 'Enter') addGalleryUrl(this.value); });
-$('#g_file').addEventListener('change', function () {
-  var f = this.files && this.files[0]; if (!f) return;
-  if (f.size > 2.5 * 1024 * 1024) { toast('Ảnh quá lớn (>2.5MB). Nên dùng đường dẫn file thay vì tải lên.'); this.value = ''; return; }
-  var rd = new FileReader();
-  rd.onload = function () { addGalleryUrl(rd.result); };
-  rd.readAsDataURL(f); this.value = '';
-});
 
 /* ===== THÔNG TIN TUYỂN DỤNG (menu theo thương hiệu) ===== */
 var recRows = [], recSel = '';

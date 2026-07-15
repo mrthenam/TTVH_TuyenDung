@@ -376,6 +376,20 @@ async function handleChat(req, res, url, loadConfig) {
         return sendJson(res, 200, r);
       }
 
+      // Ảnh 4 thẻ thương hiệu (tab Cửa hàng trang chủ)
+      if (p === '/api/agent/brandimages' && req.method === 'GET') {
+        const v = await db.getSetting('brandimages');
+        return sendJson(res, 200, (v && JSON.parse(v)) || {});
+      }
+      if (p === '/api/agent/brandimages' && req.method === 'POST') {
+        const b = await readBody(req) || {};
+        const KEYS = ['maycha', 'tamhao', 'gagion', 'trahu'];
+        const cur = JSON.parse((await db.getSetting('brandimages')) || '{}');
+        KEYS.forEach((k) => { if (typeof b[k] === 'string' && b[k].trim()) cur[k] = b[k].trim(); });
+        await db.setSetting('brandimages', JSON.stringify(cur));
+        return sendJson(res, 200, { ok: true });
+      }
+
       // Khoảnh khắc Vinh Hoa (gallery)
       if (p === '/api/agent/gallery' && req.method === 'GET') return sendJson(res, 200, { rows: await db.listGallery() });
       if (p === '/api/agent/gallery' && req.method === 'POST') {
