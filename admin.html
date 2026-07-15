@@ -441,6 +441,7 @@
           <div class="fld"><label>Lưu ý ngày đào tạo (câu 8)</label><textarea id="tf_dateNote" style="min-height:90px"></textarea></div>
           <div class="fld"><label>Vị Trí Trúng Tuyển (mỗi dòng 1 vị trí)</label><textarea id="tf_positions" spellcheck="false" style="min-height:120px"></textarea></div>
           <div class="fld"><label>Hình Thức Tham Gia Đào Tạo (mỗi dòng 1 hình thức)</label><textarea id="tf_modes" spellcheck="false" style="min-height:100px"></textarea></div>
+          <div class="fld"><label>Thương Hiệu Bạn Ứng Tuyển (câu 9, mỗi dòng 1 thương hiệu)</label><textarea id="tf_brands" spellcheck="false" style="min-height:90px"></textarea></div>
           <button class="btn primary" id="tfSave" style="justify-content:center;margin-top:6px">Lưu</button>
           <p class="hintnote">Ô “Khác” ở mục Vị trí được giữ tự động. Thay đổi áp dụng ngay cho trang đăng ký.</p>
         </div>
@@ -908,6 +909,7 @@ function loadTrainingForm() {
     $('#tf_dateNote').value = d.dateNote || '';
     $('#tf_positions').value = (d.positions || []).join('\n');
     $('#tf_modes').value = (d.modes || []).join('\n');
+    $('#tf_brands').value = (d.brands || []).join('\n');
   }).catch(function (e) { if (e.message === '401') logout(); });
 }
 $('#tfSave').addEventListener('click', function () {
@@ -917,7 +919,8 @@ $('#tfSave').addEventListener('click', function () {
     desc: $('#tf_desc').value.trim(),
     dateNote: $('#tf_dateNote').value.trim(),
     positions: $('#tf_positions').value.split('\n').map(function (s) { return s.trim(); }).filter(Boolean),
-    modes: $('#tf_modes').value.split('\n').map(function (s) { return s.trim(); }).filter(Boolean)
+    modes: $('#tf_modes').value.split('\n').map(function (s) { return s.trim(); }).filter(Boolean),
+    brands: $('#tf_brands').value.split('\n').map(function (s) { return s.trim(); }).filter(Boolean)
   };
   var btn = $('#tfSave'); btn.disabled = true; var old = btn.textContent; btn.textContent = 'Đang lưu…';
   api('/api/agent/trainingform', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })

@@ -1020,6 +1020,7 @@ const TRAININGFORM_DEFAULTS = {
     "Tham gia Online ngày đầu - trực tiếp ngày thứ hai",
     "Tham gia Online toàn bộ",
   ],
+  brands: ["Trà Sữa MayCha", "Hồng Trà Sữa Tam Hảo", "Gà Giòn Sốt Ba Cô Gái"],
 };
 
 // Cấu hình mặc định form ứng tuyển (trang index.html). 3 khối là KHÓA CỐ ĐỊNH

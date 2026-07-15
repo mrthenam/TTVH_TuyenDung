@@ -305,7 +305,8 @@ async function handleChat(req, res, url, loadConfig) {
           desc: (b.desc || '').toString(),
           dateNote: (b.dateNote || '').toString(),
           positions: Array.isArray(b.positions) ? b.positions.map(String).map(s => s.trim()).filter(Boolean) : [],
-          modes: Array.isArray(b.modes) ? b.modes.map(String).map(s => s.trim()).filter(Boolean) : []
+          modes: Array.isArray(b.modes) ? b.modes.map(String).map(s => s.trim()).filter(Boolean) : [],
+          brands: Array.isArray(b.brands) ? b.brands.map(String).map(s => s.trim()).filter(Boolean) : []
         };
         await db.setSetting('trainingform', JSON.stringify(cfg));
         return sendJson(res, 200, { ok: true });

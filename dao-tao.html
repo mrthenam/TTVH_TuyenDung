@@ -694,6 +694,13 @@
             return '<label class="opt"><input type="radio" name="mode" value="' + escA(m) + '" />' + escA(m) + '</label>';
           }).join('');
       }
+      function buildBrands(arr) {
+        var sel = document.getElementById('brand');
+        sel.innerHTML = '<option value="" disabled selected>Chọn thương hiệu</option>' +
+          arr.map(function(b) {
+            return '<option value="' + escA(b) + '">' + escA(b) + '</option>';
+          }).join('');
+      }
       fetch('/api/trainingform').then(function(r) {
         return r.json();
       }).then(function(cfg) {
@@ -706,6 +713,7 @@
         }
         if (Array.isArray(cfg.positions) && cfg.positions.length) buildPositions(cfg.positions);
         if (Array.isArray(cfg.modes) && cfg.modes.length) buildModes(cfg.modes);
+        if (Array.isArray(cfg.brands) && cfg.brands.length) buildBrands(cfg.brands);
       }).catch(function() {});
 
       document.querySelectorAll('.opts').forEach(function(g) {
