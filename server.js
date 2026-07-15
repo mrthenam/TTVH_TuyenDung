@@ -516,6 +516,15 @@ async function createCandidate(form, cfg, res) {
     payload[brandTarget] = BRAND_VALUE_MAP[payload[brandTarget]];
   }
 
+  // cf49 (Vị trí ứng tuyển) là dropdown ĐÓNG mới chỉ có option của khối Cửa hàng.
+  // Hồ sơ Văn Phòng / Kho & Xưởng: ghi thêm Khối + Vị trí vào Ghi chú để HR không mất
+  // thông tin khi 1Office bỏ trống cf49 (cf49 vẫn gửi kèm — khi 1Office bổ sung option
+  // khớp thì trường này tự có dữ liệu, không cần sửa code).
+  if (form.position && form.jobgroup && form.jobgroup !== "Cửa hàng") {
+    const line = "[" + form.jobgroup + "] Vị trí ứng tuyển: " + form.position;
+    payload.note = payload.note ? payload.note + "\n" + line : line;
+  }
+
   // Ngày sinh: input HTML là yyyy-mm-dd -> 1Office cần dd/mm/YYYY
   if (payload.birthday && /^\d{4}-\d{2}-\d{2}$/.test(payload.birthday)) {
     const p = payload.birthday.split("-");
