@@ -1769,6 +1769,7 @@
 
     /* Khu vực làm việc + Người giới thiệu cùng hàng; Quận/Huyện full-width bên dưới */
     .loc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start }
+    .loc-grid.wa-hidden { grid-template-columns: 1fr }
     .loc-dist { grid-column: 1 / -1 }
     .loc-dist:has(.dist-blocks:empty) { display: none }
     @media (max-width: 680px) {
@@ -2359,27 +2360,6 @@
               <input type="text" id="region" name="region" placeholder="VD: P. Xuân Hòa, TP.HCM" />
             </div>
             <div class="field full">
-              <div class="loc-grid">
-                <div class="loc-cell loc-prov">
-                  <label for="workarea_zone">Khu vực mong muốn làm việc <span class="req">*</span></label>
-                  <select id="workarea_zone" name="workarea_zone">
-                    <option value="" disabled selected>Chọn khu vực</option>
-                    <option value="hcm">Khu vực TP. Hồ Chí Minh</option>
-                    <option value="hn">Khu vực Hà Nội</option>
-                    <option value="other">Khu vực Tỉnh/Thành phố khác</option>
-                  </select>
-                  <select id="workarea" name="workarea" disabled style="margin-top:8px">
-                    <option value="" disabled selected>Chọn địa điểm cụ thể</option>
-                  </select>
-                  <input type="text" id="workarea_other" placeholder="Nhập địa điểm mong muốn làm việc" style="display:none;margin-top:8px" />
-                </div>
-                <div class="loc-cell loc-ref">
-                  <label for="referrer">Người giới thiệu</label>
-                  <input type="text" id="referrer" name="referrer" placeholder="Họ tên & phòng ban (nếu có)" />
-                </div>
-              </div>
-            </div>
-            <div class="field full">
               <div class="jobgroup-box">
                 <div class="jgb-grid">
                   <div class="field">
@@ -2413,6 +2393,27 @@
                     <input type="file" id="cvFile" name="cvFile" accept=".pdf,.doc,.docx" disabled />
                     <p class="jgb-hint" id="cvHint"></p>
                   </div>
+                </div>
+              </div>
+            </div>
+            <div class="field full">
+              <div class="loc-grid wa-hidden" id="locGrid">
+                <div class="loc-cell loc-prov" id="workareaCell" style="display:none">
+                  <label for="workarea_zone">Khu vực mong muốn làm việc <span class="req">*</span></label>
+                  <select id="workarea_zone" name="workarea_zone">
+                    <option value="" disabled selected>Chọn khu vực</option>
+                    <option value="hcm">Khu vực TP. Hồ Chí Minh</option>
+                    <option value="hn">Khu vực Hà Nội</option>
+                    <option value="other">Khu vực Tỉnh/Thành phố khác</option>
+                  </select>
+                  <select id="workarea" name="workarea" disabled style="margin-top:8px">
+                    <option value="" disabled selected>Chọn địa điểm cụ thể</option>
+                  </select>
+                  <input type="text" id="workarea_other" placeholder="Nhập địa điểm mong muốn làm việc" style="display:none;margin-top:8px" />
+                </div>
+                <div class="loc-cell loc-ref">
+                  <label for="referrer">Người giới thiệu</label>
+                  <input type="text" id="referrer" name="referrer" placeholder="Họ tên & phòng ban (nếu có)" />
                 </div>
               </div>
             </div>
@@ -2880,6 +2881,27 @@
           cvHint.textContent = '';
         }
       }
+
+      // Khu vực mong muốn làm việc: chỉ áp dụng cho Khối "Cửa hàng"
+      var workareaCell = document.getElementById('workareaCell');
+      var locGrid = document.getElementById('locGrid');
+      function toggleWorkarea(show) {
+        workareaCell.style.display = show ? '' : 'none';
+        locGrid.classList.toggle('wa-hidden', !show);
+        if (!show) {
+          var zoneSel = document.getElementById('workarea_zone');
+          var waSel = document.getElementById('workarea');
+          var waOther = document.getElementById('workarea_other');
+          zoneSel.value = '';
+          zoneSel.classList.remove('err');
+          waSel.innerHTML = '<option value="" disabled selected>Chọn địa điểm cụ thể</option>';
+          waSel.disabled = true;
+          waSel.classList.remove('err');
+          waOther.value = '';
+          waOther.style.display = 'none';
+          waOther.classList.remove('err');
+        }
+      }
       cvFile.addEventListener('change', function() {
         cvFile.classList.remove('err');
         var f = cvFile.files && cvFile.files[0];
@@ -2898,6 +2920,7 @@
         fillPositions(jobgroupSel.value);
         toggleBrand(jobgroupSel.value === 'Cửa hàng');
         toggleCv(jobgroupSel.value === 'Khối Văn Phòng' || jobgroupSel.value === 'Khối Kho & Xưởng Sản Xuất');
+        toggleWorkarea(jobgroupSel.value === 'Cửa hàng');
         jobgroupSel.classList.remove('err');
       });
       positionSel.addEventListener('change', function() {
@@ -3150,22 +3173,24 @@
             if (!firstBad) firstBad = brandSel;
           }
         }
-        // Khu vực mong muốn làm việc: bắt buộc chọn Khu vực + địa điểm cụ thể; nếu "Khác" thì phải nhập địa điểm
+        // Khu vực mong muốn làm việc: chỉ bắt buộc khi Khối công việc là "Cửa hàng"
         var zoneEl = document.getElementById('workarea_zone');
         var waEl = document.getElementById('workarea');
         var waOtherEl = document.getElementById('workarea_other');
-        if (!zoneEl.value) {
-          zoneEl.classList.add('err');
-          ok = false;
-          if (!firstBad) firstBad = zoneEl;
-        } else if (!waEl.value) {
-          waEl.classList.add('err');
-          ok = false;
-          if (!firstBad) firstBad = waEl;
-        } else if (waEl.value === '__other__' && !waOtherEl.value.trim()) {
-          waOtherEl.classList.add('err');
-          ok = false;
-          if (!firstBad) firstBad = waOtherEl;
+        if (jobgroupVal === 'Cửa hàng') {
+          if (!zoneEl.value) {
+            zoneEl.classList.add('err');
+            ok = false;
+            if (!firstBad) firstBad = zoneEl;
+          } else if (!waEl.value) {
+            waEl.classList.add('err');
+            ok = false;
+            if (!firstBad) firstBad = waEl;
+          } else if (waEl.value === '__other__' && !waOtherEl.value.trim()) {
+            waOtherEl.classList.add('err');
+            ok = false;
+            if (!firstBad) firstBad = waOtherEl;
+          }
         }
         var fe = document.getElementById('formErr');
         if (!ok) {
@@ -3189,7 +3214,7 @@
         });
         if (data.position === '__other__') data.position = positionOther.value.trim();
         var waSelVal = document.getElementById('workarea').value;
-        data.workarea = waSelVal === '__other__' ? document.getElementById('workarea_other').value.trim() : waSelVal;
+        data.workarea = jobgroupVal === 'Cửa hàng' ? (waSelVal === '__other__' ? document.getElementById('workarea_other').value.trim() : waSelVal) : '';
         data.brand = jobgroupVal === 'Cửa hàng' ? brandSel.value.trim() : '';
         var bdayParsed = parseDmy(data.birthday);
         if (bdayParsed) data.birthday = bdayParsed.iso;
