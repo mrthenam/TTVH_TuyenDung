@@ -91,7 +91,15 @@
   /* ===== TRAINING ===== */
   .trainview{flex:1;display:flex;flex-direction:column;min-height:0;padding:20px 22px;gap:16px}
   /* Các view dạng cấu hình (1 khung .addbox dài) cần tự cuộn dọc khi vượt màn hình */
-  #viewForm,#viewApply{overflow-y:auto}
+  #viewForm,#viewApply,#viewKb{overflow-y:auto}
+  /* Kịch bản chatbot */
+  .kb-list{display:flex;flex-direction:column;gap:12px}
+  .kb-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:0 12px 30px -26px rgba(224,52,43,.5)}
+  .kb-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .kb-head b{font-size:13.5px}
+  .kb-grid{display:grid;grid-template-columns:300px 1fr;gap:12px}
+  .kb-grid textarea{min-height:110px}
+  @media(max-width:820px){.kb-grid{grid-template-columns:1fr}}
   .pagehd{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
   .pagehd h1{font-size:22px;font-weight:900}
   .pagehd .sub{color:var(--muted);font-size:13px;font-weight:600}
@@ -303,6 +311,7 @@
     <aside class="side">
       <div class="lbl">Quản lý</div>
       <button class="navbtn act" id="tabChat"><span class="ic">💬</span><span class="t">Chat khách hàng</span></button>
+      <button class="navbtn" id="tabKb"><span class="ic">🤖</span><span class="t">Kịch bản chatbot</span></button>
       <button class="navbtn" id="tabTrain"><span class="ic">📋</span><span class="t">Đăng ký đào tạo</span><span class="cnt" id="navTrainCnt">0</span></button>
       <button class="navbtn" id="tabStaff"><span class="ic">👥</span><span class="t">Nhân viên</span><span class="cnt" id="navStaffCnt">0</span></button>
       <button class="navbtn" id="tabCamp"><span class="ic">🎯</span><span class="t">Chiến dịch</span><span class="cnt" id="navCampCnt">0</span></button>
@@ -469,6 +478,22 @@
           <button class="btn primary" id="afSave" style="justify-content:center;margin-top:6px">Lưu</button>
           <p class="hintnote">Tên 3 <b>Khối công việc</b> giữ cố định (điều khiển hiển thị Thương hiệu/CV &amp; định tuyến chiến dịch), chỉ chỉnh danh sách vị trí bên trong. Ô “Khác” ở mục Vị trí được giữ tự động. Tên <b>Thương hiệu</b> phải trùng đúng với tab <b>Chiến dịch</b> để hồ sơ vào đúng chiến dịch 1Office. Thay đổi áp dụng ngay cho trang ứng tuyển.</p>
         </div>
+      </div>
+
+      <!-- KỊCH BẢN CHATBOT -->
+      <div class="trainview" id="viewKb" style="display:none">
+        <div class="pagehd">
+          <div><h1>🤖 Kịch bản chatbot</h1><div class="sub" id="kbCount">Câu trả lời tự động của chatbot theo từ khóa.</div></div>
+          <div class="spacer"></div>
+          <div class="tbar"><button class="btn" id="kbAdd">＋ Thêm kịch bản</button><button class="btn primary" id="kbSave">Lưu tất cả</button></div>
+        </div>
+        <div class="addbox" style="width:auto;max-width:none">
+          <div id="kbOk" class="boxmsg ok"></div>
+          <div class="fld"><label>Lời chào (khi khách mở cửa sổ chat)</label><textarea id="kb_greeting" style="min-height:60px"></textarea></div>
+          <div class="fld"><label>Câu trả lời mặc định (khi không khớp kịch bản nào &amp; AI không trả lời được)</label><textarea id="kb_fallback" style="min-height:60px"></textarea></div>
+          <p class="hintnote">Mỗi kịch bản gồm <b>Từ khóa</b> (mỗi dòng 1 cụm — khách nhắn trùng hoặc gần trùng sẽ khớp, không phân biệt hoa thường/dấu) và <b>Câu trả lời</b>. Khi khớp ngang điểm, kịch bản <b>đứng trước</b> được ưu tiên. Link http trong câu trả lời tự thành link bấm được. Kịch bản để trống từ khóa hoặc câu trả lời sẽ bị bỏ qua khi lưu. Nhớ bấm <b>Lưu tất cả</b> — thay đổi áp dụng ngay cho chatbot.</p>
+        </div>
+        <div id="kbList" class="kb-list"></div>
       </div>
 
       <!-- EMAIL TỰ ĐỘNG -->
@@ -753,6 +778,7 @@ function switchView(v) {
   $('#viewGallery').style.display = v === 'gallery' ? 'flex' : 'none';
   $('#viewForm').style.display = v === 'form' ? 'flex' : 'none';
   $('#viewApply').style.display = v === 'apply' ? 'flex' : 'none';
+  $('#viewKb').style.display = v === 'kb' ? 'flex' : 'none';
   $('#viewEmail').style.display = v === 'email' ? 'flex' : 'none';
   $('#viewJobs').style.display = v === 'jobs' ? 'flex' : 'none';
   $('#viewLog').style.display = v === 'log' ? 'flex' : 'none';
@@ -764,6 +790,7 @@ function switchView(v) {
   $('#tabGallery').classList.toggle('act', v === 'gallery');
   $('#tabForm').classList.toggle('act', v === 'form');
   $('#tabApply').classList.toggle('act', v === 'apply');
+  $('#tabKb').classList.toggle('act', v === 'kb');
   $('#tabEmail').classList.toggle('act', v === 'email');
   $('#tabJobs').classList.toggle('act', v === 'jobs');
   $('#tabLog').classList.toggle('act', v === 'log');
@@ -774,6 +801,7 @@ function switchView(v) {
   if (v === 'gallery') loadBrandImages();
   if (v === 'form') loadTrainingForm();
   if (v === 'apply') loadApplyForm();
+  if (v === 'kb') loadKb();
   if (v === 'email') loadEmailCfg();
   if (v === 'jobs') loadJobs();
   if (v === 'log') loadLog();
@@ -791,6 +819,7 @@ $('#tabRecruit').addEventListener('click', function () { switchView('recruit'); 
 $('#tabGallery').addEventListener('click', function () { switchView('gallery'); });
 $('#tabForm').addEventListener('click', function () { switchView('form'); });
 $('#tabApply').addEventListener('click', function () { switchView('apply'); });
+$('#tabKb').addEventListener('click', function () { switchView('kb'); });
 $('#tabEmail').addEventListener('click', function () { switchView('email'); });
 $('#tabJobs').addEventListener('click', function () { switchView('jobs'); });
 
@@ -962,6 +991,73 @@ $('#afSave').addEventListener('click', function () {
   var btn = $('#afSave'); btn.disabled = true; var old = btn.textContent; btn.textContent = 'Đang lưu…';
   api('/api/agent/applyform', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
     .then(function (res) { btn.disabled = false; btn.textContent = old; if (res && res.ok) { $('#afOk').textContent = 'Đã lưu. Mở lại form ứng tuyển để xem thay đổi.'; $('#afOk').classList.add('show'); toast('Đã lưu form ứng tuyển.'); } else toast('Lưu thất bại.'); })
+    .catch(function (e) { btn.disabled = false; btn.textContent = old; if (e.message === '401') return logout(); toast('Lỗi kết nối.'); });
+});
+
+/* ===== KỊCH BẢN CHATBOT ===== */
+var KB_ITEMS = [];
+function renderKbList() {
+  var wrap = $('#kbList');
+  wrap.innerHTML = KB_ITEMS.map(function (it, i) {
+    return '<div class="kb-card">'
+      + '<div class="kb-head"><b>Kịch bản ' + (i + 1) + '</b><button class="btn kb-del" data-i="' + i + '">🗑 Xóa</button></div>'
+      + '<div class="kb-grid">'
+      + '<div class="fld"><label>Từ khóa (mỗi dòng 1 cụm)</label><textarea class="kb-q" spellcheck="false">' + esc((it.q || []).join('\n')) + '</textarea></div>'
+      + '<div class="fld"><label>Câu trả lời</label><textarea class="kb-a">' + esc(it.a || '') + '</textarea></div>'
+      + '</div></div>';
+  }).join('');
+  $('#kbCount').textContent = KB_ITEMS.length + ' kịch bản · khách nhắn trùng từ khóa sẽ nhận câu trả lời tương ứng';
+  [].forEach.call(wrap.querySelectorAll('.kb-del'), function (b) {
+    b.onclick = function () {
+      collectKb();
+      KB_ITEMS.splice(+b.getAttribute('data-i'), 1);
+      renderKbList();
+    };
+  });
+}
+// Đọc lại nội dung đang gõ trong các thẻ (giữ chỉnh sửa trước khi thêm/xóa/lưu)
+function collectKb() {
+  var items = [];
+  [].forEach.call(document.querySelectorAll('#kbList .kb-card'), function (c) {
+    items.push({
+      q: c.querySelector('.kb-q').value.split('\n').map(function (s) { return s.trim(); }).filter(Boolean),
+      a: c.querySelector('.kb-a').value.trim()
+    });
+  });
+  KB_ITEMS = items;
+  return items;
+}
+function loadKb() {
+  api('/api/agent/chatbotkb').then(function (d) {
+    d = d || {};
+    $('#kb_greeting').value = d.greeting || '';
+    $('#kb_fallback').value = d.fallback || '';
+    KB_ITEMS = (d.qa || []).map(function (x) { return { q: x.q || [], a: x.a || '' }; });
+    renderKbList();
+  }).catch(function (e) { if (e.message === '401') logout(); });
+}
+$('#kbAdd').addEventListener('click', function () {
+  collectKb();
+  KB_ITEMS.unshift({ q: [], a: '' });
+  renderKbList();
+  var first = document.querySelector('#kbList .kb-q');
+  if (first) { first.focus(); first.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+});
+$('#kbSave').addEventListener('click', function () {
+  $('#kbOk').classList.remove('show');
+  var qa = collectKb().filter(function (x) { return x.q.length && x.a; });
+  var data = { greeting: $('#kb_greeting').value.trim(), fallback: $('#kb_fallback').value.trim(), qa: qa };
+  var btn = $('#kbSave'); btn.disabled = true; var old = btn.textContent; btn.textContent = 'Đang lưu…';
+  api('/api/agent/chatbotkb', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+    .then(function (res) {
+      btn.disabled = false; btn.textContent = old;
+      if (res && res.ok) {
+        KB_ITEMS = qa; renderKbList();
+        $('#kbOk').textContent = 'Đã lưu ' + qa.length + ' kịch bản. Chatbot áp dụng ngay lập tức.';
+        $('#kbOk').classList.add('show');
+        toast('Đã lưu kịch bản chatbot.');
+      } else toast('Lưu thất bại.');
+    })
     .catch(function (e) { btn.disabled = false; btn.textContent = old; if (e.message === '401') return logout(); toast('Lỗi kết nối.'); });
 });
 

@@ -138,8 +138,18 @@ function loadKB() {
   } catch (e) { KB = KB || { qa: [], greeting: '', fallback: '' }; }
   return KB;
 }
-function matchKB(text, threshold) {
-  const kb = loadKB(); const un = norm(text); if (!un) return null;
+// KB đã lưu từ dashboard (bảng settings, key 'chatbotkb'). null = chưa có -> dùng file chatbot-kb.json
+let KBCache = null;
+async function getKB() {
+  if (KBCache) return KBCache;
+  try {
+    const v = await db.getSetting('chatbotkb');
+    if (v) { KBCache = JSON.parse(v); return KBCache; }
+  } catch (e) { /* lỗi DB/parse -> rơi về file */ }
+  return loadKB();
+}
+function matchKB(kb, text, threshold) {
+  const un = norm(text); if (!un) return null;
   const ut = new Set(un.split(' '));
   let best = null, bestScore = 0;
   for (const item of kb.qa || []) for (const phrase of item.q || []) {
@@ -190,7 +200,7 @@ async function handleChat(req, res, url, loadConfig) {
   try {
     // ---------- KHÁCH ----------
     if (p === '/api/chat/config' && req.method === 'GET') {
-      const kb = loadKB();
+      const kb = await getKB();
       return sendJson(res, 200, { greeting: kb.greeting || '', zaloLink: cb.zaloLink || '' });
     }
     if (p === '/api/chat/send' && req.method === 'POST') {
@@ -213,10 +223,11 @@ async function handleChat(req, res, url, loadConfig) {
       }
 
       let reply = null, from = null;
-      const kbHit = matchKB(text, cb.matchThreshold || 0.5);
+      const kb = await getKB();
+      const kbHit = matchKB(kb, text, cb.matchThreshold || 0.5);
       if (kbHit) { reply = kbHit.answer; from = 'kb'; }
       if (!reply) { const msgs = await db.getMessages(sid, 0); reply = await callGemini(cfg, msgs); if (reply) from = 'gemini'; }
-      if (!reply) { reply = loadKB().fallback || 'Cảm ơn bạn! HR sẽ liên hệ sớm nhất ạ.'; from = 'fallback'; }
+      if (!reply) { reply = kb.fallback || 'Cảm ơn bạn! HR sẽ liên hệ sớm nhất ạ.'; from = 'fallback'; }
 
       const botTs = await db.addMessage(sid, 'bot', reply, from);
       return sendJson(res, 200, { ok: true, reply, from, ts: botTs, userTs });
@@ -334,6 +345,26 @@ async function handleChat(req, res, url, loadConfig) {
         };
         await db.setSetting('applyform', JSON.stringify(cfg));
         return sendJson(res, 200, { ok: true });
+      }
+
+      // Kịch bản chatbot (KB): lời chào, câu mặc định, danh sách từ khóa -> câu trả lời
+      if (p === '/api/agent/chatbotkb' && req.method === 'GET') {
+        return sendJson(res, 200, await getKB());
+      }
+      if (p === '/api/agent/chatbotkb' && req.method === 'POST') {
+        const b = await readBody(req) || {};
+        const qa = (Array.isArray(b.qa) ? b.qa : []).map((it) => ({
+          q: Array.isArray(it && it.q) ? it.q.map(String).map((s) => s.trim()).filter(Boolean) : [],
+          a: ((it && it.a) || '').toString().trim()
+        })).filter((it) => it.q.length && it.a);
+        const kb = {
+          greeting: (b.greeting || '').toString().trim(),
+          fallback: (b.fallback || '').toString().trim(),
+          qa
+        };
+        await db.setSetting('chatbotkb', JSON.stringify(kb));
+        KBCache = kb; // áp dụng ngay, không cần restart
+        return sendJson(res, 200, { ok: true, count: qa.length });
       }
 
       // Cấu hình EMAIL tự động (bật/tắt, chế độ test, danh sách test, tiêu đề, nội dung)
