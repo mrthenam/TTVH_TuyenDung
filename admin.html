@@ -735,7 +735,14 @@ function showApp(name) {
   refreshList(); if (!listTimer) listTimer = setInterval(refreshList, 3000);
   loadNotif(); if (!notifTimer) notifTimer = setInterval(loadNotif, 15000);
   // Tải quyền của người đăng nhập trước, rồi tải các dữ liệu phụ thuộc quyền (nhân viên / việc làm)
-  loadMe(function () { loadTraining(); loadStaff(); loadCampaigns(); });
+  loadMe(function () {
+    loadTraining(); loadStaff(); loadCampaigns();
+    // Khôi phục tab đang xem trước khi tải lại trang (mặc định: Chat)
+    var savedTab = 'chat';
+    try { savedTab = localStorage.getItem('ttvh_admin_tab') || 'chat'; } catch (e) {}
+    if (ADMIN_TABS.indexOf(savedTab) < 0) savedTab = 'chat';
+    if (savedTab !== 'chat') switchView(savedTab);
+  });
   api('/api/agent/sheetinfo').then(function (d) { SHEET_VIEW_URL = (d && d.viewUrl) || ''; GOOGLE_CLIENT_ID = (d && d.googleClientId) || ''; }).catch(function () {});
 }
 // Quyền của người đang đăng nhập (dùng để ẩn/hiện nút, giới hạn khối)
@@ -794,7 +801,9 @@ $('#reply').addEventListener('keydown', function (e) { if (e.key === 'Enter') se
 $('#reply').addEventListener('input', function () { if (sel) api('/api/agent/typing', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sel }) }).catch(function () {}); });
 
 /* ===== TAB SWITCH ===== */
+var ADMIN_TABS = ['chat', 'train', 'staff', 'camp', 'recruit', 'gallery', 'form', 'apply', 'kb', 'email', 'jobs', 'log'];
 function switchView(v) {
+  try { localStorage.setItem('ttvh_admin_tab', v); } catch (e) {}
   $('#viewChat').style.display = v === 'chat' ? 'flex' : 'none';
   $('#viewTraining').style.display = v === 'train' ? 'flex' : 'none';
   $('#viewStaff').style.display = v === 'staff' ? 'flex' : 'none';
