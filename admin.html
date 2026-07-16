@@ -1321,11 +1321,10 @@ function loadCampaigns() {
       row.querySelector('.cSave').onclick = function () { saveCampaign(brand, row.querySelector('.ci_code').value.trim(), row.querySelector('.ci_name').value.trim()); };
       row.querySelector('.cDel').onclick = function () { if (confirm('Xóa định tuyến chiến dịch của "' + brand + '"?')) delCampaign(brand); };
     });
-    // Dropdown "Thêm mới": chỉ gợi ý các mục CHƯA cấu hình + luôn có "Khác" để tự nhập
-    var used = {}; rows.forEach(function (r) { used[r.brand] = true; });
-    var remain = CAMP_KNOWN_KEYS.filter(function (k) { return !used[k]; });
+    // Dropdown "Thêm mới": luôn liệt kê đầy đủ Thương hiệu + Khối công việc (chọn lại 1 mục đã có =
+    // sửa/ghi đè mã & tên chiến dịch của mục đó) + luôn có "Khác" để tự nhập tên khác.
     $('#c_brand_select').innerHTML = '<option value="" disabled selected>-- Chọn thương hiệu / khối công việc --</option>'
-      + remain.map(function (k) { return '<option value="' + esc(k) + '">' + esc(k) + '</option>'; }).join('')
+      + CAMP_KNOWN_KEYS.map(function (k) { return '<option value="' + esc(k) + '">' + esc(k) + '</option>'; }).join('')
       + '<option value="__other__">Khác (tự nhập)</option>';
   }).catch(function (e) { if (e.message === '401') logout(); });
 }
