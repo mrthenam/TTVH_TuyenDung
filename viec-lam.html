@@ -95,8 +95,9 @@
     .dmeta .mi .v { font-weight: 700 }
     .dactions { display: flex; gap: 10px; flex-wrap: wrap; margin: 18px 0 6px }
     .ddesc { margin-top: 14px; border-top: 1px dashed var(--line); padding-top: 16px }
-    .ddesc h4 { font-family: var(--head); font-size: 17px; font-weight: 800; color: var(--red); margin: 18px 0 8px }
-    .ddesc h4:first-child { margin-top: 0 }
+    /* !important để đè inline style (border-left/padding/color) dính theo khi dán từ nguồn ngoài */
+    .ddesc h1, .ddesc h2, .ddesc h3, .ddesc h4 { font-family: var(--head) !important; font-size: 17px !important; font-weight: 800 !important; color: var(--red) !important; margin: 18px 0 8px !important; padding: 0 !important; border: 0 !important; line-height: 1.35 !important; letter-spacing: 0 !important }
+    .ddesc h1:first-child, .ddesc h2:first-child, .ddesc h3:first-child, .ddesc h4:first-child { margin-top: 0 !important }
     .ddesc ul { margin: 0 0 6px; padding-left: 4px; list-style: none }
     .ddesc ul > li { position: relative; padding-left: 20px; margin-bottom: 6px; font-size: 14.5px }
     .ddesc ul > li::before { content: "•"; position: absolute; left: 4px; color: var(--gold); font-weight: 900 }
@@ -202,31 +203,57 @@
         .replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '')
         .replace(/(href|src)\s*=\s*("javascript:[^"]*"|'javascript:[^']*'|javascript:[^\s>]*)/gi, '$1="#"');
     }
-    // Đoạn văn mà TOÀN BỘ nội dung được in đậm (kiểu người dùng tự bôi đậm làm đầu mục trong
-    // trình soạn thảo, không có nút "Tiêu đề" riêng) -> coi là đầu mục, đổi thành <h4> in vàng
-    // giống các đầu mục cũ, bỏ hết thẻ đậm/gạch chân thừa bên trong.
-    function isHeadingPara(el) {
-      var hasBold = false;
-      function walk(node) {
+    // "Dòng" mà TOÀN BỘ chữ được in đậm (người dùng tự bôi đậm làm đầu mục trong trình soạn
+    // thảo — không có nút Tiêu đề riêng) -> đổi thành <h4> in vàng giống đầu mục cũ.
+    // Bắt đủ các dạng: <p>/<div> bọc riêng, <b>/<strong> nằm trần giữa các <br>,
+    // đậm qua <span style="font-weight:..."> (nội dung dán từ nguồn ngoài).
+    function markDescHeadings(root) {
+      function isBoldEl(el) {
+        if (el.tagName === 'B' || el.tagName === 'STRONG') return true;
+        var fw = (el.style && el.style.fontWeight) || '';
+        return fw === 'bold' || fw === 'bolder' || parseInt(fw, 10) >= 600;
+      }
+      // Mọi chữ trong node đều nằm trong ngữ cảnh đậm?
+      function textAllBold(node, ctx) {
+        if (node.nodeType === 3) return !node.nodeValue.trim() || ctx;
+        if (node.nodeType !== 1) return true;
+        var c = ctx || isBoldEl(node);
         for (var i = 0; i < node.childNodes.length; i++) {
-          var ch = node.childNodes[i];
-          if (ch.nodeType === 3) { if (ch.nodeValue.trim()) return false; continue; }
-          if (ch.nodeType !== 1) continue;
-          var tag = ch.tagName;
-          if (tag === 'B' || tag === 'STRONG') { hasBold = true; continue; }
-          if (tag === 'U' || tag === 'I' || tag === 'EM' || tag === 'SPAN') { if (!walk(ch)) return false; continue; }
-          return false;
+          if (!textAllBold(node.childNodes[i], c)) return false;
         }
         return true;
       }
-      return !!el.textContent.trim() && walk(el) && hasBold;
-    }
-    function markDescHeadings(container) {
-      [].slice.call(container.children).forEach(function (el) {
-        if ((el.tagName === 'P' || el.tagName === 'DIV') && isHeadingPara(el)) {
+      var BLOCK = /^(P|DIV|UL|OL|LI|H[1-6]|TABLE|SECTION|BLOCKQUOTE)$/;
+      // Gom các node inline liên tiếp thành "dòng" (ngăn bởi <br> hoặc thẻ khối);
+      // dòng nào toàn chữ đậm -> thay bằng <h4>, nuốt luôn <br> kết dòng.
+      function processLines(parent) {
+        var group = [];
+        function flush(brNode) {
+          var hasText = group.some(function (n) { return (n.textContent != null ? n.textContent : n.nodeValue || '').trim(); });
+          if (hasText && group.every(function (n) { return textAllBold(n, false); })) {
+            var h = document.createElement('h4');
+            h.textContent = group.map(function (n) { return n.textContent != null ? n.textContent : (n.nodeValue || ''); }).join('').trim();
+            parent.insertBefore(h, group[0]);
+            group.forEach(function (n) { n.remove(); });
+            if (brNode) brNode.remove();
+          }
+          group = [];
+        }
+        [].slice.call(parent.childNodes).forEach(function (n) {
+          if (n.nodeType === 1 && n.tagName === 'BR') { flush(n); return; }
+          if (n.nodeType === 1 && BLOCK.test(n.tagName)) { flush(null); return; }
+          group.push(n);
+        });
+        flush(null);
+      }
+      processLines(root);
+      [].slice.call(root.querySelectorAll('p, div')).forEach(function (el) {
+        if (el.textContent.trim() && textAllBold(el, false)) {
           var h = document.createElement('h4');
           h.textContent = el.textContent.trim();
           el.replaceWith(h);
+        } else {
+          processLines(el);
         }
       });
     }
