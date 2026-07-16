@@ -10,19 +10,25 @@
   <meta name="description" content="Biểu mẫu đăng ký tham gia lớp đào tạo đầu vào của MayCha — Thịnh Thế Vinh Hoa F&B Group." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600;1,700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600;1,700&family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --txt: #222;
-      --muted: #555;
-      --red: #d6342a;
-      /* đỏ tiêu đề & chú thích */
-      --line: #d9d4cf;
-      --line-2: #c7c0b8;
-      --focus: #d6342a;
-      --btn: #7c756c;
-      /* nút Gửi xám như Microsoft Forms */
-      --btn-2: #655f57;
+      --bg: #fff8f0;
+      --card: #ffffff;
+      --txt: #2a1810;
+      --muted: #8b7060;
+      --red: #c69320;
+      /* vàng đồng — màu nhấn tiêu đề & chú thích, khớp trang chủ */
+      --red-2: #a87c16;
+      --gold: #d4af37;
+      --line: rgba(54, 28, 18, .10);
+      --line-2: rgba(54, 28, 18, .18);
+      --focus: #c69320;
+      --btn: linear-gradient(135deg, #e6c34d 0%, #c69320 100%);
+      --btn-2: #a87c16;
+      --grad-soft: linear-gradient(135deg, rgba(212, 175, 55, .22), rgba(198, 147, 32, .09));
+      --shadow: 0 24px 60px -22px rgba(198, 147, 32, .35);
+      --head: 'Playfair Display', Georgia, 'Times New Roman', serif;
     }
 
     * {
@@ -37,120 +43,135 @@
 
     body {
       font-family: 'Noto Serif', Georgia, 'Times New Roman', serif;
+      background: var(--bg);
       color: var(--txt);
       line-height: 1.55;
       min-height: 100vh;
       -webkit-font-smoothing: antialiased;
     }
 
-    /* ===== NỀN HOA ANH ĐÀO ĐỘNG ===== */
+    /* ===== NỀN — khớp tông màu kem/vàng đồng của trang chủ ===== */
     .bg {
       position: fixed;
       inset: 0;
-      z-index: -3;
-      background:
-        radial-gradient(120% 90% at 80% 10%, rgba(255, 209, 224, .55), transparent 55%),
-        radial-gradient(120% 90% at 10% 20%, rgba(255, 196, 216, .55), transparent 55%),
-        radial-gradient(140% 120% at 50% 120%, rgba(255, 224, 236, .7), transparent 60%),
-        linear-gradient(180deg, #a9d4f0 0%, #bfe0f3 30%, #e7d6ec 70%, #f3dde9 100%);
-      animation: skyZoom 26s ease-in-out infinite alternate;
-    }
-
-    /* các cụm hoa mờ ở 4 góc cho giống ảnh thật */
-    .bg::before,
-    .bg::after {
-      content: "";
-      position: fixed;
-      z-index: -2;
-      width: 46vw;
-      height: 46vw;
-      max-width: 560px;
-      max-height: 560px;
-      background-repeat: no-repeat;
-      background-position: center;
-      background-size: contain;
-      opacity: .9;
-      filter: saturate(1.05);
-      pointer-events: none;
-      background-image: radial-gradient(circle at 30% 30%, #ffd0e1 0 6%, transparent 7%),
-        radial-gradient(circle at 60% 25%, #ffbcd4 0 5%, transparent 6%),
-        radial-gradient(circle at 45% 55%, #ffc6da 0 7%, transparent 8%),
-        radial-gradient(circle at 70% 60%, #ffd6e6 0 6%, transparent 7%),
-        radial-gradient(circle at 25% 70%, #ffbcd4 0 5%, transparent 6%);
-    }
-
-    .bg::before {
-      top: -4vw;
-      left: -6vw;
-      animation: sway1 9s ease-in-out infinite alternate
-    }
-
-    .bg::after {
-      bottom: -6vw;
-      right: -5vw;
-      animation: sway2 11s ease-in-out infinite alternate
-    }
-
-    @keyframes skyZoom {
-      from {
-        background-size: auto, auto, auto, 140% 140%
-      }
-
-      to {
-        background-size: auto, auto, auto, 160% 160%
-      }
-    }
-
-    @keyframes sway1 {
-      from {
-        transform: translate(0, 0) rotate(-2deg)
-      }
-
-      to {
-        transform: translate(14px, 10px) rotate(2deg)
-      }
-    }
-
-    @keyframes sway2 {
-      from {
-        transform: translate(0, 0) rotate(2deg)
-      }
-
-      to {
-        transform: translate(-14px, -10px) rotate(-2deg)
-      }
-    }
-
-    /* cánh hoa rơi */
-    .petals {
-      position: fixed;
-      inset: 0;
       z-index: -1;
-      overflow: hidden;
-      pointer-events: none
+      background:
+        radial-gradient(120% 70% at 85% -10%, rgba(212, 175, 55, .12), transparent 55%),
+        radial-gradient(120% 70% at -10% 110%, rgba(212, 175, 55, .10), transparent 55%);
     }
 
-    .petal {
-      position: absolute;
-      top: -6vh;
-      width: 14px;
-      height: 14px;
-      background: radial-gradient(circle at 30% 30%, #ffd9e6, #ff9fc0);
-      border-radius: 80% 0 80% 0;
-      opacity: .85;
-      will-change: transform;
-      animation-name: fall;
-      animation-timing-function: linear;
-      animation-iteration-count: infinite
+    /* HEADER — dùng chung bố cục với trang chủ */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(14px);
+      background: rgba(255, 248, 240, .86);
+      border-bottom: 1px solid var(--line);
+      font-family: 'Be Vietnam Pro', system-ui, sans-serif;
     }
 
-    @keyframes fall {
-      0% {
-        transform: translate(0, -10vh) rotate(0deg)
+    .wrap {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 20px
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 70px;
+      flex-wrap: wrap;
+      gap: 10px
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 900
+    }
+
+    .brand .logo-img {
+      height: 46px;
+      width: auto;
+      border-radius: 10px;
+      display: block
+    }
+
+    .brand .nm {
+      font-family: var(--head);
+      font-weight: 800;
+      font-size: 17px;
+      line-height: 1.1;
+      letter-spacing: .01em;
+      color: var(--txt)
+    }
+
+    .brand small {
+      display: block;
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 700;
+      letter-spacing: .04em
+    }
+
+    .nav-cta {
+      display: flex;
+      align-items: center;
+      gap: 16px
+    }
+
+    .nav-cta .navlink {
+      font-size: 14px;
+      font-weight: 700;
+      font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+      color: var(--muted)
+    }
+
+    .nav-cta .navlink:hover {
+      color: var(--red)
+    }
+
+    .nav-cta .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+      font-weight: 800;
+      font-size: 14px;
+      color: #fff;
+      background: var(--btn);
+      padding: 11px 22px;
+      border-radius: 12px;
+      box-shadow: 0 14px 30px -12px rgba(198, 147, 32, .55);
+      transition: transform .18s ease, box-shadow .18s ease
+    }
+
+    .nav-cta .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 36px -12px rgba(198, 147, 32, .65)
+    }
+
+    @media(max-width:560px) {
+      .nav {
+        height: auto;
+        justify-content: center;
+        padding: 10px 0;
+        gap: 8px
       }
 
-      100% {
-        transform: translate(18vw, 110vh) rotate(540deg)
+      .brand {
+        flex: 1 1 auto
+      }
+
+      .brand small {
+        display: none
+      }
+
+      .nav-cta {
+        flex: 1 1 100%;
+        justify-content: center
       }
     }
 
@@ -162,11 +183,10 @@
     }
 
     .panel {
-      background: rgba(247, 245, 242, .82);
-      backdrop-filter: blur(3px);
-      border: 1px solid rgba(255, 255, 255, .6);
-      border-radius: 8px;
-      box-shadow: 0 18px 50px -18px rgba(60, 40, 60, .45);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
       padding: 40px 56px 48px
     }
 
@@ -290,10 +310,6 @@
       max-width: 100%
     }
 
-    .q.firstbox .ans {
-      min-height: 96px
-    }
-
     /* trạng thái hợp lệ / chưa hợp lệ */
     .ans.err {
       border-color: var(--red);
@@ -410,15 +426,17 @@
       border: none;
       font-family: inherit;
       font-size: 16px;
-      font-weight: 600;
-      padding: 9px 30px;
-      border-radius: 4px;
+      font-weight: 700;
+      padding: 11px 32px;
+      border-radius: 10px;
       cursor: pointer;
-      transition: background .15s
+      box-shadow: 0 14px 30px -12px rgba(198, 147, 32, .5);
+      transition: transform .18s ease, box-shadow .18s ease
     }
 
     .btn-send:hover {
-      background: var(--btn-2)
+      transform: translateY(-2px);
+      box-shadow: 0 18px 36px -12px rgba(198, 147, 32, .6)
     }
 
     .btn-send:disabled {
@@ -516,8 +534,21 @@
 <body>
 
   <div class="bg"></div>
-  <div class="petals" id="petals"></div>
 
+  <!-- HEADER -->
+  <header>
+    <div class="wrap nav">
+      <a href="index.html" class="brand">
+        <img src="images/logo-ttvh.jpg" alt="Thịnh Thế Vinh Hoa" class="logo-img" />
+        <div class="nm">Thịnh Thế Vinh Hoa<small>Vững thời - Sáng vận - Đẹp danh</small></div>
+      </a>
+      <div class="nav-cta">
+        <a href="index.html" class="navlink">Trang chủ</a>
+        <a href="viec-lam.html" class="navlink">Tuyển dụng</a>
+        <a href="index.html#ungtuyen" class="btn-primary">Ứng tuyển ngay</a>
+      </div>
+    </div>
+  </header>
 
   <div class="formwrap">
     <div class="panel">
@@ -627,24 +658,6 @@
   </div>
 
   <script>
-    /* tạo cánh hoa rơi */
-    (function() {
-      var box = document.getElementById('petals');
-      var N = 26;
-      for (var i = 0; i < N; i++) {
-        var p = document.createElement('div');
-        p.className = 'petal';
-        var size = 8 + Math.random() * 12;
-        p.style.left = (Math.random() * 100) + 'vw';
-        p.style.width = size + 'px';
-        p.style.height = size + 'px';
-        p.style.opacity = (0.5 + Math.random() * 0.5).toFixed(2);
-        var dur = (7 + Math.random() * 9).toFixed(1);
-        p.style.animationDuration = dur + 's';
-        p.style.animationDelay = (-Math.random() * dur) + 's';
-        box.appendChild(p);
-      }
-    })();
 
     /* logic form */
     (function() {
