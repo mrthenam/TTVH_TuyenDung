@@ -402,24 +402,7 @@
           <div><h1>🎯 Chiến dịch tuyển dụng</h1><div class="sub">Khi ứng viên chọn Thương hiệu (khối Cửa hàng) hoặc Khối công việc (Văn phòng / Kho &amp; Xưởng Sản Xuất), hồ sơ tự vào đúng chiến dịch 1Office bên dưới.</div></div>
         </div>
         <div id="campList" class="camplist"></div>
-        <div class="addbox" style="width:auto;max-width:640px">
-          <h3>＋ Thêm Thương hiệu/Khối công việc → chiến dịch</h3>
-          <div id="cErr" class="boxmsg err"></div>
-          <div id="cOk" class="boxmsg ok"></div>
-          <div class="grid2">
-            <div class="fld">
-              <label>Thương hiệu / Khối công việc <span class="req">*</span></label>
-              <select id="c_brand_select">
-                <option value="" disabled selected>-- Chọn thương hiệu / khối công việc --</option>
-              </select>
-              <input id="c_brand" type="text" placeholder="Nhập tên thương hiệu / khối công việc" style="display:none;margin-top:8px" />
-            </div>
-            <div class="fld"><label>Mã chiến dịch</label><input id="c_code" type="text" placeholder="vd: CTV01881806266805" /></div>
-            <div class="fld full"><label>Tên chiến dịch</label><input id="c_name" type="text" placeholder="vd: [TRAHU - Hiring Web] Tuyển dụng nhân viên mới" /></div>
-          </div>
-          <button class="btn primary" id="cAdd" style="justify-content:center;margin-top:6px">Thêm chiến dịch</button>
-          <p class="hintnote">Giá trị nhập phải trùng đúng với "Thương hiệu ứng tuyển" (khi chọn Cửa hàng) hoặc "Khối công việc" — <b>Khối Văn Phòng</b>, <b>Khối Kho &amp; Xưởng Sản Xuất</b> (khi chọn Văn phòng/Sản xuất) trên form ứng tuyển.</p>
-        </div>
+        <p class="hintnote">Tên phải trùng đúng với "Thương hiệu ứng tuyển" (khi chọn Cửa hàng) hoặc "Khối công việc" — <b>Khối Văn Phòng</b>, <b>Khối Kho &amp; Xưởng Sản Xuất</b> (khi chọn Văn phòng/Sản xuất) trên form ứng tuyển. Điền Mã/Tên chiến dịch rồi bấm Lưu cho từng mục bên trên.</p>
       </div>
 
       <!-- THÔNG TIN TUYỂN DỤNG -->
@@ -1300,32 +1283,33 @@ function campSortKey(brand) { var i = CAMP_ORDER.indexOf(brand); return i === -1
 function loadCampaigns() {
   api('/api/agent/campaigns').then(function (d) {
     var rows = d.rows || []; $('#navCampCnt').textContent = rows.length;
-    var sorted = rows.slice().sort(function (a, b) {
-      var ka = campSortKey(a.brand), kb = campSortKey(b.brand);
+    // Luôn hiện đủ 6 mục cố định (MayCha, Tam Hảo, Gà Giòn, Trà Hú, Khối Văn Phòng, Khối Kho & Xưởng
+    // Sản Xuất) dù chưa cấu hình, cộng thêm mọi mục "Khác" đã lưu trước đó ngoài 6 mục cố định.
+    var byBrand = {}; rows.forEach(function (r) { byBrand[r.brand] = r; });
+    var extra = rows.filter(function (r) { return CAMP_KNOWN_KEYS.indexOf(r.brand) < 0; }).map(function (r) { return r.brand; });
+    var allBrands = CAMP_KNOWN_KEYS.concat(extra);
+    var sorted = allBrands.slice().sort(function (a, b) {
+      var ka = campSortKey(a), kb = campSortKey(b);
       if (ka !== kb) return ka - kb;
-      return (a.brand || '').localeCompare(b.brand || '', 'vi');
+      return a.localeCompare(b, 'vi');
     });
     var html = '';
-    sorted.forEach(function (r) {
-      var isJobgroup = /^Khối /.test(r.brand || '');
-      html += '<div class="camprow" data-brand="' + esc(r.brand) + '">'
-        + '<div class="cb">' + esc(r.brand) + '<small>' + (isJobgroup ? 'Khối công việc' : 'Thương hiệu ứng tuyển') + '</small></div>'
+    sorted.forEach(function (brand) {
+      var r = byBrand[brand] || {};
+      var isJobgroup = /^Khối /.test(brand || '');
+      html += '<div class="camprow" data-brand="' + esc(brand) + '">'
+        + '<div class="cb">' + esc(brand) + '<small>' + (isJobgroup ? 'Khối công việc' : 'Thương hiệu ứng tuyển') + '</small></div>'
         + '<div class="fld"><label>Mã chiến dịch</label><input class="ci_code" value="' + esc(r.code || '') + '" /></div>'
         + '<div class="fld"><label>Tên chiến dịch</label><input class="ci_name" value="' + esc(r.name || '') + '" /></div>'
         + '<div class="acts"><button class="btn primary cSave">Lưu</button><button class="iconbtn del cDel">🗑</button></div>'
         + '</div>';
     });
-    $('#campList').innerHTML = html || '<div class="norows">Chưa có cấu hình chiến dịch. Thêm bên dưới.</div>';
+    $('#campList').innerHTML = html || '<div class="norows">Chưa có cấu hình chiến dịch.</div>';
     [].forEach.call(document.querySelectorAll('#campList .camprow'), function (row) {
       var brand = row.getAttribute('data-brand');
       row.querySelector('.cSave').onclick = function () { saveCampaign(brand, row.querySelector('.ci_code').value.trim(), row.querySelector('.ci_name').value.trim()); };
       row.querySelector('.cDel').onclick = function () { if (confirm('Xóa định tuyến chiến dịch của "' + brand + '"?')) delCampaign(brand); };
     });
-    // Dropdown "Thêm mới": luôn liệt kê đầy đủ Thương hiệu + Khối công việc (chọn lại 1 mục đã có =
-    // sửa/ghi đè mã & tên chiến dịch của mục đó) + luôn có "Khác" để tự nhập tên khác.
-    $('#c_brand_select').innerHTML = '<option value="" disabled selected>-- Chọn thương hiệu / khối công việc --</option>'
-      + CAMP_KNOWN_KEYS.map(function (k) { return '<option value="' + esc(k) + '">' + esc(k) + '</option>'; }).join('')
-      + '<option value="__other__">Khác (tự nhập)</option>';
   }).catch(function (e) { if (e.message === '401') logout(); });
 }
 function saveCampaign(brand, code, name) {
@@ -1338,30 +1322,6 @@ function delCampaign(brand) {
     .then(function (res) { if (res && res.ok) { toast('Đã xóa.'); loadCampaigns(); } else toast('Xóa thất bại.'); })
     .catch(function (e) { if (e.message === '401') logout(); else toast('Lỗi kết nối.'); });
 }
-function cMsg(id, t) { var el = $(id); el.textContent = t || ''; el.classList.toggle('show', !!t); }
-$('#c_brand_select').addEventListener('change', function () {
-  var v = $('#c_brand_select').value;
-  var txt = $('#c_brand');
-  if (v === '__other__') { txt.style.display = 'block'; txt.value = ''; txt.focus(); }
-  else { txt.style.display = 'none'; txt.value = v; }
-});
-$('#cAdd').addEventListener('click', function () {
-  cMsg('#cErr', ''); cMsg('#cOk', '');
-  var brand = $('#c_brand').value.trim();
-  if (!brand) { cMsg('#cErr', 'Vui lòng chọn hoặc nhập tên thương hiệu / khối công việc.'); return; }
-  api('/api/agent/campaigns', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ brand: brand, code: $('#c_code').value.trim(), name: $('#c_name').value.trim() }) })
-    .then(function (res) {
-      if (res && res.ok) {
-        cMsg('#cOk', 'Đã thêm "' + brand + '".');
-        $('#c_brand').value = ''; $('#c_brand').style.display = 'none';
-        $('#c_brand_select').value = '';
-        $('#c_code').value = ''; $('#c_name').value = '';
-        loadCampaigns();
-      }
-      else cMsg('#cErr', (res && res.error) || 'Thêm thất bại.');
-    })
-    .catch(function (e) { if (e.message === '401') return logout(); cMsg('#cErr', 'Lỗi kết nối.'); });
-});
 
 /* ===== NHÂN VIÊN ===== */
 var myUser = '';
