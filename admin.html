@@ -239,8 +239,6 @@
   .rte-area ul,.rte-area ol{margin:6px 0;padding-left:22px}
   .rte-area li{margin-bottom:4px}
   .rte-area p{margin:0 0 8px}
-  .rte-area h1,.rte-area h2,.rte-area h3,.rte-area h4{font-family:inherit;font-size:15px;font-weight:800;color:var(--red);margin:12px 0 6px;padding:0;border:0}
-  .rte-area h1:first-child,.rte-area h2:first-child,.rte-area h3:first-child,.rte-area h4:first-child{margin-top:0}
   .modal .mf{display:flex;gap:10px;justify-content:flex-end;padding:18px 24px;border-top:1px solid var(--line)}
   #tmErr{display:none;color:var(--red);font-weight:600;font-size:13px;margin-bottom:14px;background:rgba(224,52,43,.08);border:1px solid rgba(224,52,43,.3);padding:10px 12px;border-radius:9px}
 
@@ -951,52 +949,6 @@ function openJobModal(j) {
   });
   ed.addEventListener('keyup', syncState);
   ed.addEventListener('mouseup', syncState);
-
-  // Làm sạch nội dung dán vào: chỉ giữ thẻ định dạng, BỎ mọi thuộc tính (style/class/id...)
-  // -> xoá border-left/padding & định dạng lạ khi copy từ nguồn ngoài (1Office, Word, web...)
-  var RTE_ALLOWED = { P: 1, BR: 1, B: 1, STRONG: 1, I: 1, EM: 1, U: 1, UL: 1, OL: 1, LI: 1, H1: 1, H2: 1, H3: 1, H4: 1, H5: 1, H6: 1, A: 1, BLOCKQUOTE: 1 };
-  var RTE_MAP = { STRONG: 'b', EM: 'i', H1: 'h3', H2: 'h3', H5: 'h4', H6: 'h4' }; // gộp tiêu đề về h3/h4
-  function rteClean(node) {
-    var out = '';
-    for (var i = 0; i < node.childNodes.length; i++) {
-      var ch = node.childNodes[i];
-      if (ch.nodeType === 3) { out += esc(ch.nodeValue); continue; }
-      if (ch.nodeType !== 1) continue;
-      var tag = ch.tagName;
-      var inner = rteClean(ch);
-      if (RTE_ALLOWED[tag]) {
-        var name = RTE_MAP[tag] || tag.toLowerCase();
-        if (name === 'br') { out += '<br>'; }
-        else if (name === 'a') {
-          var href = ch.getAttribute('href') || '';
-          out += /^(https?:|mailto:)/i.test(href) ? '<a href="' + esc(href) + '" target="_blank" rel="noopener">' + inner + '</a>' : inner;
-        } else {
-          // bỏ thẻ block rỗng (trừ li) để tránh khoảng trắng thừa
-          out += (inner.trim() === '' && name !== 'li') ? '' : '<' + name + '>' + inner + '</' + name + '>';
-        }
-      } else {
-        out += inner; // thẻ không cho phép (span/div/table/h2-có-class...) -> giữ nội dung
-        if (/^(DIV|P|SECTION|ARTICLE|TR|LI|H[1-6]|BR)$/.test(tag)) out += '<br>';
-      }
-    }
-    return out;
-  }
-  ed.addEventListener('paste', function (e) {
-    var cb = e.clipboardData || window.clipboardData; if (!cb) return;
-    var html = cb.getData('text/html');
-    e.preventDefault();
-    var clean;
-    if (html) {
-      var tmp = document.createElement('div'); tmp.innerHTML = html;
-      clean = rteClean(tmp)
-        .replace(/(<\/(?:h[1-6]|p|ul|ol|li|blockquote)>)(\s*<br>)+/gi, '$1') // bỏ <br> thừa ngay sau thẻ khối
-        .replace(/(<br>\s*){3,}/gi, '<br><br>');
-    } else {
-      var text = cb.getData('text/plain') || '';
-      clean = text.split(/\n{2,}/).map(function (p) { return '<p>' + esc(p).replace(/\n/g, '<br>') + '</p>'; }).join('');
-    }
-    document.execCommand('insertHTML', false, clean);
-  });
 })();
 $('#jobAddBtn').addEventListener('click', function () { openJobModal(null); });
 $('#jmX').addEventListener('click', function () { $('#jmodal').classList.remove('show'); });
