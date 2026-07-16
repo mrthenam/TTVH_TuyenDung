@@ -202,6 +202,34 @@
         .replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '')
         .replace(/(href|src)\s*=\s*("javascript:[^"]*"|'javascript:[^']*'|javascript:[^\s>]*)/gi, '$1="#"');
     }
+    // Đoạn văn mà TOÀN BỘ nội dung được in đậm (kiểu người dùng tự bôi đậm làm đầu mục trong
+    // trình soạn thảo, không có nút "Tiêu đề" riêng) -> coi là đầu mục, đổi thành <h4> in vàng
+    // giống các đầu mục cũ, bỏ hết thẻ đậm/gạch chân thừa bên trong.
+    function isHeadingPara(el) {
+      var hasBold = false;
+      function walk(node) {
+        for (var i = 0; i < node.childNodes.length; i++) {
+          var ch = node.childNodes[i];
+          if (ch.nodeType === 3) { if (ch.nodeValue.trim()) return false; continue; }
+          if (ch.nodeType !== 1) continue;
+          var tag = ch.tagName;
+          if (tag === 'B' || tag === 'STRONG') { hasBold = true; continue; }
+          if (tag === 'U' || tag === 'I' || tag === 'EM' || tag === 'SPAN') { if (!walk(ch)) return false; continue; }
+          return false;
+        }
+        return true;
+      }
+      return !!el.textContent.trim() && walk(el) && hasBold;
+    }
+    function markDescHeadings(container) {
+      [].slice.call(container.children).forEach(function (el) {
+        if ((el.tagName === 'P' || el.tagName === 'DIV') && isHeadingPara(el)) {
+          var h = document.createElement('h4');
+          h.textContent = el.textContent.trim();
+          el.replaceWith(h);
+        }
+      });
+    }
     function renderDesc(txt) {
       txt = String(txt || '');
       // Nếu là nội dung HTML (soạn thảo có định dạng) -> hiển thị trực tiếp sau khi lọc an toàn
@@ -269,6 +297,8 @@
         '<a href="index.html#ungtuyen" class="btn btn-primary">Ứng tuyển ngay →</a>' +
         '</div>' +
         '<div class="ddesc">' + renderDesc(j.description) + '</div>';
+      var ddescEl = detailEl.querySelector('.ddesc');
+      if (ddescEl) markDescHeadings(ddescEl);
       detailEl.classList.add('open');
       detailEl.scrollTop = 0;
       var bb = document.getElementById('backBtn');
