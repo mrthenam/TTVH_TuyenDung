@@ -703,6 +703,13 @@
       }
     }
 
+    /* Khối Văn Phòng có 5 thẻ -> 5 cột trên desktop (mobile/tablet vẫn theo rule chung ở trên) */
+    @media(min-width:881px) {
+      .showcase-grid.office5 {
+        grid-template-columns: repeat(5, 1fr)
+      }
+    }
+
     /* TAB CƠ HỘI NGHỀ NGHIỆP */
     .career-tabs {
       display: flex;
@@ -2178,7 +2185,7 @@
 
       <!-- TAB: VĂN PHÒNG -->
       <div class="career-panel fade" id="panel-office" style="display:none">
-        <div class="showcase-grid">
+        <div class="showcase-grid office5">
           <div class="show-card">
             <div class="job-thumb"><img src="images/ảnh tuyển dụng/ảnh tuyển dụng văn phòng.jpg" alt="Khối Văn Phòng" /></div>
             <div class="meta"><b>Marketing</b><span>Truyền thông · Content · Quảng cáo</span></div>
@@ -2191,13 +2198,18 @@
           </div>
           <div class="show-card">
             <div class="job-thumb"><img src="images/ảnh tuyển dụng/ảnh tuyển dụng văn phòng.jpg" alt="Khối Văn Phòng" /></div>
-            <div class="meta"><b>IT</b><span>Hệ thống · Phần mềm · Hạ tầng</span></div>
-            <button type="button" class="btn-job" data-job="it" data-name="IT">Xem tuyển dụng IT→</button>
+            <div class="meta"><b>Quản lý cung ứng (SCM)</b><span>Mua hàng · Kho vận · Logistics</span></div>
+            <button type="button" class="btn-job" data-job="scm" data-name="Quản lý cung ứng (SCM)">Xem tuyển dụng SCM →</button>
           </div>
           <div class="show-card">
             <div class="job-thumb"><img src="images/ảnh tuyển dụng/ảnh tuyển dụng văn phòng.jpg" alt="Khối Văn Phòng" /></div>
             <div class="meta"><b>Tài chính – Kế toán</b><span>Kế toán · Tài chính · Kiểm soát</span></div>
             <button type="button" class="btn-job" data-job="finance" data-name="Tài chính – Kế toán">Xem td Tài chính - kế toán→</button>
+          </div>
+          <div class="show-card">
+            <div class="job-thumb"><img src="images/ảnh tuyển dụng/ảnh tuyển dụng văn phòng.jpg" alt="Khối Văn Phòng" /></div>
+            <div class="meta"><b>Các công việc khác</b><span>Hành chính · Pháp lý · Vị trí khác</span></div>
+            <button type="button" class="btn-job" data-job="other" data-name="Các công việc khác">Xem tuyển dụng khác →</button>
           </div>
         </div>
       </div>
@@ -2638,7 +2650,7 @@
         ov.classList.remove('show');
         document.body.style.overflow = '';
       }
-      var OFFICE_JOBS = ['marketing', 'hr', 'it', 'finance'];
+      var OFFICE_JOBS = ['marketing', 'hr', 'scm', 'finance', 'other'];
       var SANXUAT_JOBS = ['sanxuat', 'qaqc', 'khovan', 'kythuat'];
       [].forEach.call(document.querySelectorAll('.btn-job'), function(b) {
         b.addEventListener('click', function() {
