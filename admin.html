@@ -1294,8 +1294,8 @@ function loadLog() {
 $('#lreload').addEventListener('click', loadLog);
 
 /* ===== CHIẾN DỊCH ===== */
-var CAMP_ORDER = ['Gà Giòn Sốt Ba Cô Gái', 'Hồng Trà Sữa Tam Hảo', 'MayCha', 'Khối Văn Phòng', 'Khối Kho & Xưởng Sản Xuất'];
-var CAMP_KNOWN_KEYS = ['MayCha', 'Hồng Trà Sữa Tam Hảo', 'Gà Giòn Sốt Ba Cô Gái', 'Khối Văn Phòng', 'Khối Kho & Xưởng Sản Xuất'];
+var CAMP_ORDER = ['MayCha', 'Hồng Trà Sữa Tam Hảo', 'Gà Giòn Sốt Ba Cô Gái', 'Trà Hú', 'Khối Văn Phòng', 'Khối Kho & Xưởng Sản Xuất'];
+var CAMP_KNOWN_KEYS = ['MayCha', 'Hồng Trà Sữa Tam Hảo', 'Gà Giòn Sốt Ba Cô Gái', 'Trà Hú', 'Khối Văn Phòng', 'Khối Kho & Xưởng Sản Xuất'];
 function campSortKey(brand) { var i = CAMP_ORDER.indexOf(brand); return i === -1 ? CAMP_ORDER.length : i; }
 function loadCampaigns() {
   api('/api/agent/campaigns').then(function (d) {
