@@ -511,6 +511,10 @@ async function setSetting(k, v) {
   if (HAS_PG) { await pool.query('INSERT INTO settings(k,v) VALUES($1,$2) ON CONFLICT (k) DO UPDATE SET v=$2', [k, v]); }
   else memSettings.set(k, v);
 }
+async function deleteSetting(k) {
+  if (HAS_PG) { await pool.query('DELETE FROM settings WHERE k=$1', [k]); }
+  else memSettings.delete(k);
+}
 
 module.exports = {
   init, HAS_PG,
@@ -524,5 +528,5 @@ module.exports = {
   listRecruitment, setRecruitment, seedRecruitment,
   listGallery, addGallery, deleteGallery, reorderGallery, seedGallery,
   listJobs, getJob, addJob, updateJob, deleteJob, reorderJobs, seedJobs,
-  getSetting, setSetting
+  getSetting, setSetting, deleteSetting
 };

@@ -485,10 +485,11 @@
         <div class="pagehd">
           <div><h1>🤖 Kịch bản chatbot</h1><div class="sub" id="kbCount">Câu trả lời tự động của chatbot theo từ khóa.</div></div>
           <div class="spacer"></div>
-          <div class="tbar"><button class="btn" id="kbAdd">＋ Thêm kịch bản</button><button class="btn primary" id="kbSave">Lưu tất cả</button></div>
+          <div class="tbar"><button class="btn" id="kbReset">↺ Khôi phục theo file mặc định</button><button class="btn" id="kbAdd">＋ Thêm kịch bản</button><button class="btn primary" id="kbSave">Lưu tất cả</button></div>
         </div>
         <div class="addbox" style="width:auto;max-width:none">
           <div id="kbOk" class="boxmsg ok"></div>
+          <div id="kbSrc" class="hintnote"></div>
           <div class="fld"><label>Lời chào (khi khách mở cửa sổ chat)</label><textarea id="kb_greeting" style="min-height:60px"></textarea></div>
           <div class="fld"><label>Câu trả lời mặc định (khi không khớp kịch bản nào &amp; AI không trả lời được)</label><textarea id="kb_fallback" style="min-height:60px"></textarea></div>
           <p class="hintnote">Mỗi kịch bản gồm <b>Từ khóa</b> (mỗi dòng 1 cụm — khách nhắn trùng hoặc gần trùng sẽ khớp, không phân biệt hoa thường/dấu) và <b>Câu trả lời</b>. Khi khớp ngang điểm, kịch bản <b>đứng trước</b> được ưu tiên. Link http trong câu trả lời tự thành link bấm được. Kịch bản để trống từ khóa hoặc câu trả lời sẽ bị bỏ qua khi lưu. Nhớ bấm <b>Lưu tất cả</b> — thay đổi áp dụng ngay cho chatbot.</p>
@@ -1027,6 +1028,11 @@ function collectKb() {
   KB_ITEMS = items;
   return items;
 }
+function renderKbSrc(source) {
+  $('#kbSrc').innerHTML = source === 'db'
+    ? 'Đang dùng: <b>bản đã lưu trong dashboard</b> — sửa file <code>chatbot-kb.json</code> trong code sẽ <b>không</b> áp dụng cho tới khi bạn bấm "Lưu tất cả" ở đây hoặc "↺ Khôi phục theo file mặc định".'
+    : 'Đang dùng: <b>file mặc định chatbot-kb.json</b> trong code — sửa file này (rồi deploy) sẽ áp dụng ngay, không cần bấm gì ở đây.';
+}
 function loadKb() {
   api('/api/agent/chatbotkb').then(function (d) {
     d = d || {};
@@ -1034,8 +1040,28 @@ function loadKb() {
     $('#kb_fallback').value = d.fallback || '';
     KB_ITEMS = (d.qa || []).map(function (x) { return { q: x.q || [], a: x.a || '' }; });
     renderKbList();
+    renderKbSrc(d.source);
   }).catch(function (e) { if (e.message === '401') logout(); });
 }
+$('#kbReset').addEventListener('click', function () {
+  if (!confirm('Khôi phục kịch bản chatbot theo đúng file mặc định (chatbot-kb.json)?\nBản đã lưu riêng trong dashboard (nếu có) sẽ bị xóa và không thể hoàn tác.')) return;
+  var btn = $('#kbReset'); btn.disabled = true; var old = btn.textContent; btn.textContent = 'Đang khôi phục…';
+  api('/api/agent/chatbotkb/reset', { method: 'POST' })
+    .then(function (res) {
+      btn.disabled = false; btn.textContent = old;
+      if (res && res.ok) {
+        $('#kb_greeting').value = res.greeting || '';
+        $('#kb_fallback').value = res.fallback || '';
+        KB_ITEMS = (res.qa || []).map(function (x) { return { q: x.q || [], a: x.a || '' }; });
+        renderKbList();
+        renderKbSrc(res.source);
+        $('#kbOk').textContent = 'Đã khôi phục theo file mặc định (' + KB_ITEMS.length + ' kịch bản).';
+        $('#kbOk').classList.add('show');
+        toast('Đã khôi phục kịch bản chatbot theo file mặc định.');
+      } else toast('Khôi phục thất bại.');
+    })
+    .catch(function (e) { btn.disabled = false; btn.textContent = old; if (e.message === '401') return logout(); toast('Lỗi kết nối.'); });
+});
 $('#kbAdd').addEventListener('click', function () {
   collectKb();
   KB_ITEMS.unshift({ q: [], a: '' });
@@ -1052,7 +1078,7 @@ $('#kbSave').addEventListener('click', function () {
     .then(function (res) {
       btn.disabled = false; btn.textContent = old;
       if (res && res.ok) {
-        KB_ITEMS = qa; renderKbList();
+        KB_ITEMS = qa; renderKbList(); renderKbSrc('db');
         $('#kbOk').textContent = 'Đã lưu ' + qa.length + ' kịch bản. Chatbot áp dụng ngay lập tức.';
         $('#kbOk').classList.add('show');
         toast('Đã lưu kịch bản chatbot.');

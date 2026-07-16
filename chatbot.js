@@ -139,13 +139,16 @@ function loadKB() {
   return KB;
 }
 // KB đã lưu từ dashboard (bảng settings, key 'chatbotkb'). null = chưa có -> dùng file chatbot-kb.json
+// KBSource cho biết KBCache đang tới từ đâu ('db' hay 'file') để hiển thị trên dashboard.
 let KBCache = null;
+let KBSource = null;
 async function getKB() {
   if (KBCache) return KBCache;
   try {
     const v = await db.getSetting('chatbotkb');
-    if (v) { KBCache = JSON.parse(v); return KBCache; }
+    if (v) { KBCache = JSON.parse(v); KBSource = 'db'; return KBCache; }
   } catch (e) { /* lỗi DB/parse -> rơi về file */ }
+  KBSource = 'file';
   return loadKB();
 }
 function matchKB(kb, text, threshold) {
@@ -349,7 +352,8 @@ async function handleChat(req, res, url, loadConfig) {
 
       // Kịch bản chatbot (KB): lời chào, câu mặc định, danh sách từ khóa -> câu trả lời
       if (p === '/api/agent/chatbotkb' && req.method === 'GET') {
-        return sendJson(res, 200, await getKB());
+        const kb = await getKB();
+        return sendJson(res, 200, Object.assign({}, kb, { source: KBSource }));
       }
       if (p === '/api/agent/chatbotkb' && req.method === 'POST') {
         const b = await readBody(req) || {};
@@ -363,8 +367,15 @@ async function handleChat(req, res, url, loadConfig) {
           qa
         };
         await db.setSetting('chatbotkb', JSON.stringify(kb));
-        KBCache = kb; // áp dụng ngay, không cần restart
+        KBCache = kb; KBSource = 'db'; // áp dụng ngay, không cần restart
         return sendJson(res, 200, { ok: true, count: qa.length });
+      }
+      // Khôi phục KB về đúng nội dung file chatbot-kb.json (xóa bản đã lưu trong DB, KHÔNG sửa file)
+      if (p === '/api/agent/chatbotkb/reset' && req.method === 'POST') {
+        await db.deleteSetting('chatbotkb');
+        KBCache = null; KBSource = null;
+        const kb = await getKB();
+        return sendJson(res, 200, Object.assign({ ok: true }, kb, { source: KBSource }));
       }
 
       // Cấu hình EMAIL tự động (bật/tắt, chế độ test, danh sách test, tiêu đề, nội dung)
