@@ -229,6 +229,26 @@
   .modal .mf{display:flex;gap:10px;justify-content:flex-end;padding:18px 24px;border-top:1px solid var(--line)}
   #tmErr{display:none;color:var(--red);font-weight:600;font-size:13px;margin-bottom:14px;background:rgba(224,52,43,.08);border:1px solid rgba(224,52,43,.3);padding:10px 12px;border-radius:9px}
 
+  /* Modal việc làm kiểu TopCV: 3 phần đánh số */
+  #jmodal .modal{width:780px}
+  .jsec{border:1px solid var(--line);border-radius:14px;margin-bottom:16px;overflow:hidden}
+  .jsec-h{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--grad);color:#fff;font-weight:800;font-size:14.5px}
+  .jsec-h .n{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.25);font-size:12.5px;font-weight:900;flex:none}
+  .jsec-b{padding:16px}
+  .jsec-b .fld + .fld{margin-top:12px}
+  .fld textarea.jm-ta{padding:11px 13px;border:1px solid var(--line-2);border-radius:0 0 10px 10px;border-top:none;font-family:inherit;font-size:13.5px;background:var(--bg);color:var(--txt);min-height:96px;resize:vertical;width:100%}
+  .fld textarea.jm-ta:focus{outline:none;border-color:var(--red)}
+  .ta-tools{display:flex;gap:6px;border:1px solid var(--line-2);border-bottom:1px solid var(--line);border-radius:10px 10px 0 0;background:var(--card-2, #fff6ec);padding:6px 8px}
+  .ta-tools button{border:1px solid var(--line-2);background:var(--card);border-radius:7px;padding:4px 10px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;color:var(--txt)}
+  .ta-tools button:hover{border-color:var(--red);color:var(--red)}
+  .jm-cnt{font-size:11.5px;color:var(--muted);text-align:right;margin-top:4px}
+  .jm-salrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .jm-salrow input[type=number]{width:110px}
+  .jm-salrow .dash{color:var(--muted);font-weight:700}
+  .jm-salrow .unit{font-size:13px;color:var(--muted);font-weight:700}
+  .jm-salrow label.deal{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--txt);cursor:pointer;margin-left:auto}
+  .jm-salrow label.deal input{width:16px;height:16px;accent-color:#c69320}
+
   /* chuông thông báo */
   .bellwrap{position:relative}
   .bell{position:relative;background:var(--card);border:1px solid var(--line-2);border-radius:10px;width:42px;height:38px;cursor:pointer;font-size:18px;line-height:1}
@@ -612,23 +632,94 @@
     <div class="mb">
       <div id="jmErr"></div>
       <input type="hidden" id="j_id" />
-      <div class="grid2">
-        <div class="fld full"><label>Tên công việc <span class="req">*</span></label><input id="j_title" type="text" placeholder="VD: Nhân Viên Pha Chế Trà Sữa" /></div>
-        <div class="fld"><label>Mức lương</label><input id="j_salary" type="text" placeholder="VD: 8 - 10 triệu / Thỏa thuận" /></div>
-        <div class="fld"><label>Khối</label>
-          <select id="j_dept">
-            <option value="">— Chọn —</option>
-            <option>Cửa hàng</option>
-            <option>Văn phòng</option>
-            <option>Khối sản xuất</option>
-          </select>
+
+      <div class="jsec">
+        <div class="jsec-h"><span class="n">1</span> Thông tin chung</div>
+        <div class="jsec-b">
+          <div class="grid2">
+            <div class="fld full"><label>Tiêu đề tin <span class="req">*</span></label>
+              <input id="j_title" type="text" maxlength="100" placeholder="VD: Nhân Viên Pha Chế Trà Sữa - Quận 3" />
+              <div class="jm-cnt"><span id="jmTitleCnt">0</span>/100</div>
+            </div>
+            <div class="fld"><label>Khối <span class="req">*</span></label>
+              <select id="j_dept">
+                <option value="">— Chọn —</option>
+                <option>Cửa hàng</option>
+                <option>Văn phòng</option>
+                <option>Khối sản xuất</option>
+              </select>
+            </div>
+            <div class="fld"><label>Hình thức làm việc</label>
+              <select id="j_jobtype_sel">
+                <option value="">— Chọn —</option>
+                <option>Toàn thời gian</option>
+                <option>Bán thời gian</option>
+                <option>Toàn thời gian &amp; Bán thời gian</option>
+                <option>Thực tập</option>
+                <option>Thời vụ</option>
+                <option value="__other__">Khác (tự nhập)</option>
+              </select>
+              <input id="j_jobtype" type="text" placeholder="Nhập hình thức làm việc" style="display:none;margin-top:8px" />
+            </div>
+            <div class="fld full"><label>Mức lương</label>
+              <div class="jm-salrow">
+                <input id="j_sal_min" type="number" min="0" step="0.5" placeholder="VD: 8" />
+                <span class="dash">—</span>
+                <input id="j_sal_max" type="number" min="0" step="0.5" placeholder="VD: 10" />
+                <span class="unit">triệu/tháng</span>
+                <label class="deal"><input type="checkbox" id="j_sal_deal" /> Thỏa thuận</label>
+              </div>
+              <input id="j_salary_text" type="text" placeholder="Hoặc tự nhập, VD: 25.000đ/giờ + thưởng" style="margin-top:8px" />
+            </div>
+          </div>
         </div>
-        <div class="fld"><label>Hình thức</label><input id="j_jobtype" type="text" placeholder="VD: Toàn thời gian" /></div>
-        <div class="fld"><label>Hạn nộp</label><input id="j_deadline" type="date" /></div>
-        <div class="fld full"><label>Địa điểm làm việc</label><input id="j_location" type="text" placeholder="VD: 35 Huỳnh Tịnh Của (Quận 3), Hồ Chí Minh" /></div>
-        <div class="fld full"><label>Mô tả chi tiết</label>
-          <textarea id="j_description" spellcheck="false" style="min-height:260px;font-size:13.5px"></textarea>
-          <p class="hintnote">Gõ tiêu đề mục trên 1 dòng riêng (Mô tả công việc / Yêu cầu ứng viên / Quyền lợi được hưởng) và mỗi ý bắt đầu bằng dấu <b>•</b> để hiển thị đẹp như TopCV.</p>
+      </div>
+
+      <div class="jsec">
+        <div class="jsec-h"><span class="n">2</span> Mô tả công việc</div>
+        <div class="jsec-b">
+          <div class="fld"><label>Mô tả công việc <span class="req">*</span></label>
+            <div>
+              <div class="ta-tools"><button type="button" data-bullet="j_desc">• Gạch đầu dòng</button></div>
+              <textarea id="j_desc" class="jm-ta" spellcheck="false" style="min-height:120px" placeholder="• Pha chế đồ uống theo công thức chuẩn&#10;• Giữ vệ sinh khu vực làm việc"></textarea>
+            </div>
+          </div>
+          <div class="fld"><label>Yêu cầu ứng viên</label>
+            <div>
+              <div class="ta-tools"><button type="button" data-bullet="j_req">• Gạch đầu dòng</button></div>
+              <textarea id="j_req" class="jm-ta" spellcheck="false" placeholder="• Từ 16 tuổi trở lên&#10;• Không cần kinh nghiệm, được đào tạo từ đầu"></textarea>
+            </div>
+          </div>
+          <div class="fld"><label>Quyền lợi ứng viên</label>
+            <div>
+              <div class="ta-tools"><button type="button" data-bullet="j_ben">• Gạch đầu dòng</button></div>
+              <textarea id="j_ben" class="jm-ta" spellcheck="false" placeholder="• Lương cứng + thưởng doanh số&#10;• Giảm giá 20% sản phẩm"></textarea>
+            </div>
+          </div>
+          <div class="fld"><label>Địa điểm làm việc <span style="font-weight:500">(ngắn gọn — hiện trên thẻ tin)</span></label>
+            <input id="j_location" type="text" placeholder="VD: 35 Huỳnh Tịnh Của (Quận 3), Hồ Chí Minh" />
+          </div>
+          <div class="fld"><label>Địa điểm làm việc (chi tiết — hiện trong mô tả)</label>
+            <div>
+              <div class="ta-tools"><button type="button" data-bullet="j_loc_detail">• Gạch đầu dòng</button></div>
+              <textarea id="j_loc_detail" class="jm-ta" spellcheck="false" style="min-height:72px" placeholder="• Khu vực TP.HCM: hệ thống cửa hàng toàn thành phố"></textarea>
+            </div>
+          </div>
+          <div class="fld"><label>Thời gian làm việc</label>
+            <div>
+              <div class="ta-tools"><button type="button" data-bullet="j_time">• Gạch đầu dòng</button></div>
+              <textarea id="j_time" class="jm-ta" spellcheck="false" style="min-height:72px" placeholder="• Thứ 2 - Chủ nhật, xoay ca linh hoạt"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="jsec">
+        <div class="jsec-h"><span class="n">3</span> Thông tin nhận hồ sơ</div>
+        <div class="jsec-b">
+          <div class="grid2">
+            <div class="fld"><label>Hạn nhận hồ sơ</label><input id="j_deadline" type="date" /></div>
+          </div>
         </div>
       </div>
     </div>
@@ -868,6 +959,73 @@ function fillDeptOptions(selected) {
   });
   $('#j_dept').innerHTML = opts;
 }
+/* --- Form việc làm kiểu TopCV: các mục mô tả tách ô riêng, gộp/tách qua heading chuẩn --- */
+var JM_SECTIONS = [
+  ['Mô tả công việc', 'j_desc'], ['Yêu cầu ứng viên', 'j_req'], ['Quyền lợi được hưởng', 'j_ben'],
+  ['Địa điểm làm việc', 'j_loc_detail'], ['Thời gian làm việc', 'j_time']
+];
+// Heading cũ trong dữ liệu sẵn có -> ô tương ứng (giữ tương thích tin đã đăng)
+var JM_HEADING_MAP = {
+  'Mô tả công việc': 'j_desc', 'Chi tiết công việc:': 'j_desc',
+  'Yêu cầu ứng viên': 'j_req',
+  'Quyền lợi được hưởng': 'j_ben', 'Quyền lợi': 'j_ben',
+  'Địa điểm làm việc': 'j_loc_detail',
+  'Thời gian làm việc': 'j_time'
+};
+function jmParseDesc(text) {
+  var out = { j_desc: [], j_req: [], j_ben: [], j_loc_detail: [], j_time: [] };
+  var cur = 'j_desc';
+  String(text || '').split('\n').forEach(function (ln) {
+    var t = ln.trim();
+    if (JM_HEADING_MAP[t]) { cur = JM_HEADING_MAP[t]; return; }
+    out[cur].push(ln);
+  });
+  Object.keys(out).forEach(function (k) { $('#' + k).value = out[k].join('\n').trim(); });
+}
+function jmComposeDesc() {
+  var parts = [];
+  JM_SECTIONS.forEach(function (p) {
+    var v = $('#' + p[1]).value.trim();
+    if (v) parts.push(p[0] + '\n' + v);
+  });
+  return parts.join('\n');
+}
+var JM_JOBTYPES = ['Toàn thời gian', 'Bán thời gian', 'Toàn thời gian & Bán thời gian', 'Thực tập', 'Thời vụ'];
+function jmSetJobtype(v) {
+  v = (v || '').trim();
+  var sel = $('#j_jobtype_sel'), txt = $('#j_jobtype');
+  if (JM_JOBTYPES.indexOf(v) >= 0 || !v) { sel.value = v; txt.style.display = 'none'; txt.value = ''; }
+  else { sel.value = '__other__'; txt.style.display = 'block'; txt.value = v; }
+}
+function jmGetJobtype() {
+  var v = $('#j_jobtype_sel').value;
+  return v === '__other__' ? $('#j_jobtype').value.trim() : v;
+}
+function jmSalDealToggle() {
+  var on = $('#j_sal_deal').checked;
+  ['j_sal_min', 'j_sal_max', 'j_salary_text'].forEach(function (id) { $('#' + id).disabled = on; });
+}
+function jmSetSalary(s) {
+  s = (s || '').trim();
+  $('#j_sal_deal').checked = false; $('#j_sal_min').value = ''; $('#j_sal_max').value = ''; $('#j_salary_text').value = '';
+  if (/^thỏa thuận$/i.test(s)) $('#j_sal_deal').checked = true;
+  else {
+    var m = /^(\d+(?:[.,]\d+)?)\s*[-–—]\s*(\d+(?:[.,]\d+)?)\s*triệu(?:\/tháng)?$/i.exec(s);
+    if (m) { $('#j_sal_min').value = m[1].replace(',', '.'); $('#j_sal_max').value = m[2].replace(',', '.'); }
+    else $('#j_salary_text').value = s;
+  }
+  jmSalDealToggle();
+}
+function jmGetSalary() {
+  if ($('#j_sal_deal').checked) return 'Thỏa thuận';
+  var t = $('#j_salary_text').value.trim();
+  if (t) return t;
+  var mn = $('#j_sal_min').value, mx = $('#j_sal_max').value;
+  if (mn && mx) return mn + ' - ' + mx + ' triệu';
+  if (mn) return 'Từ ' + mn + ' triệu';
+  if (mx) return 'Đến ' + mx + ' triệu';
+  return '';
+}
 function openJobModal(j) {
   j = j || {};
   if (!j.id && !ME.isAdmin && (!ME.perms || !ME.perms.length)) { toast('Bạn chưa được cấp quyền đăng tin ở khối nào.'); return; }
@@ -876,14 +1034,57 @@ function openJobModal(j) {
   $('#jmErr').style.display = 'none';
   $('#j_id').value = j.id || '';
   $('#j_title').value = j.title || '';
-  $('#j_salary').value = j.salary || '';
+  $('#jmTitleCnt').textContent = (j.title || '').length;
   fillDeptOptions(j.dept || '');
-  $('#j_jobtype').value = j.jobtype || '';
+  jmSetJobtype(j.jobtype || '');
+  jmSetSalary(j.salary || '');
   $('#j_deadline').value = (j.deadline || '').slice(0, 10);
   $('#j_location').value = j.location || '';
-  $('#j_description').value = j.description || '';
+  jmParseDesc(j.description || '');
   $('#jmodal').classList.add('show');
 }
+$('#j_title').addEventListener('input', function () { $('#jmTitleCnt').textContent = this.value.length; });
+$('#j_jobtype_sel').addEventListener('change', function () {
+  var other = this.value === '__other__';
+  $('#j_jobtype').style.display = other ? 'block' : 'none';
+  if (other) $('#j_jobtype').focus(); else $('#j_jobtype').value = '';
+});
+$('#j_sal_deal').addEventListener('change', jmSalDealToggle);
+// Nút "• Gạch đầu dòng": thêm/bỏ • cho (các) dòng đang chọn
+[].forEach.call(document.querySelectorAll('.ta-tools [data-bullet]'), function (b) {
+  b.addEventListener('click', function () {
+    var ta = $('#' + b.getAttribute('data-bullet'));
+    var v = ta.value, s = ta.selectionStart, e = ta.selectionEnd;
+    var ls = v.lastIndexOf('\n', s - 1) + 1;
+    var le = v.indexOf('\n', e); if (le < 0) le = v.length;
+    var lines = v.slice(ls, le).split('\n');
+    var allBul = lines.filter(function (l) { return l.trim(); }).every(function (l) { return /^\s*•\s?/.test(l); });
+    var out = lines.map(function (l) {
+      if (!l.trim()) return l;
+      return allBul ? l.replace(/^(\s*)•\s?/, '$1') : (/^\s*•\s?/.test(l) ? l : '• ' + l);
+    }).join('\n');
+    ta.value = v.slice(0, ls) + out + v.slice(le);
+    ta.focus(); ta.setSelectionRange(ls, ls + out.length);
+  });
+});
+// Enter trong dòng • -> tự thêm • cho dòng mới; Enter ở dòng • rỗng -> bỏ •
+[].forEach.call(document.querySelectorAll('textarea.jm-ta'), function (ta) {
+  ta.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' || e.shiftKey) return;
+    var s = ta.selectionStart, v = ta.value;
+    var ls = v.lastIndexOf('\n', s - 1) + 1;
+    var line = v.slice(ls, s);
+    if (!/^\s*•\s?/.test(line)) return;
+    e.preventDefault();
+    if (!line.replace(/^\s*•\s?/, '').trim()) {
+      ta.value = v.slice(0, ls) + v.slice(s);
+      ta.setSelectionRange(ls, ls);
+    } else {
+      ta.value = v.slice(0, s) + '\n• ' + v.slice(ta.selectionEnd);
+      ta.setSelectionRange(s + 3, s + 3);
+    }
+  });
+});
 $('#jobAddBtn').addEventListener('click', function () { openJobModal(null); });
 $('#jmX').addEventListener('click', function () { $('#jmodal').classList.remove('show'); });
 $('#jmCancel').addEventListener('click', function () { $('#jmodal').classList.remove('show'); });
@@ -902,14 +1103,17 @@ $('#jmSave').addEventListener('click', function () {
   var data = {
     id: $('#j_id').value || undefined,
     title: $('#j_title').value.trim(),
-    salary: $('#j_salary').value.trim(),
+    salary: jmGetSalary(),
     dept: $('#j_dept').value.trim(),
-    jobtype: $('#j_jobtype').value.trim(),
+    jobtype: jmGetJobtype(),
     deadline: $('#j_deadline').value.trim(),
     location: $('#j_location').value.trim(),
-    description: $('#j_description').value
+    description: jmComposeDesc()
   };
-  if (!data.title) { var er = $('#jmErr'); er.textContent = 'Vui lòng nhập tên công việc.'; er.style.display = 'block'; er.className = ''; er.style.color = '#d6342a'; return; }
+  function jmFail(msg) { var er = $('#jmErr'); er.textContent = msg; er.style.display = 'block'; er.className = ''; er.style.color = '#d6342a'; }
+  if (!data.title) { jmFail('Vui lòng nhập tiêu đề tin.'); return; }
+  if (!data.dept) { jmFail('Vui lòng chọn Khối.'); return; }
+  if (!$('#j_desc').value.trim()) { jmFail('Vui lòng nhập Mô tả công việc.'); return; }
   var btn = $('#jmSave'); btn.disabled = true; var old = btn.textContent; btn.textContent = 'Đang lưu…';
   api('/api/agent/jobs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
     .then(function (res) { btn.disabled = false; btn.textContent = old; if (res && res.ok) { $('#jmodal').classList.remove('show'); toast('Đã lưu công việc.'); loadJobs(); } else toast('Lưu thất bại.'); })
