@@ -226,6 +226,15 @@
   .fld label .req{color:var(--red)}
   .fld input,.fld select{padding:11px 13px;border:1px solid var(--line-2);border-radius:10px;font-family:inherit;font-size:14px;background:var(--bg);color:var(--txt)}
   .fld input:focus,.fld select:focus{outline:none;border-color:var(--red)}
+  /* Ô nhập nhiều giá trị dạng chip (Địa điểm làm việc) */
+  .tagbox{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:6px 9px;border:1px solid var(--line-2);border-radius:10px;background:var(--bg);cursor:text}
+  .tagbox:focus-within{border-color:var(--red)}
+  .tagbox input{flex:1;min-width:170px;border:none !important;background:none;padding:6px 4px;font-family:inherit;font-size:14px;color:var(--txt)}
+  .tagbox input:focus{outline:none}
+  .tagchip{display:inline-flex;align-items:center;gap:6px;background:var(--grad-soft);border:1px solid var(--line-2);border-radius:999px;padding:4px 11px;font-size:12.5px;font-weight:600;max-width:100%}
+  .tagchip>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tagchip button{border:none;background:none;cursor:pointer;font-size:15px;line-height:1;color:var(--muted);padding:0;flex:none}
+  .tagchip button:hover{color:var(--red)}
   /* Trình soạn thảo có định dạng (Mô tả chi tiết) */
   .rte{border:1px solid var(--line-2);border-radius:10px;overflow:hidden;background:var(--bg)}
   .rte:focus-within{border-color:var(--red)}
@@ -638,7 +647,11 @@
         </div>
         <div class="fld"><label>Hình thức</label><input id="j_jobtype" type="text" placeholder="VD: Toàn thời gian" /></div>
         <div class="fld"><label>Hạn nộp</label><input id="j_deadline" type="date" /></div>
-        <div class="fld full"><label>Địa điểm làm việc</label><input id="j_location" type="text" placeholder="VD: 35 Huỳnh Tịnh Của (Quận 3), Hồ Chí Minh" /></div>
+        <div class="fld full"><label>Địa điểm làm việc <span style="font-weight:500">(gõ xong bấm Enter để thêm — thêm được nhiều địa điểm)</span></label>
+          <div class="tagbox" id="j_loc_box">
+            <input id="j_location_input" type="text" placeholder="VD: 35 Huỳnh Tịnh Của (Quận 3), Hồ Chí Minh" />
+          </div>
+        </div>
         <div class="fld full"><label>Mô tả chi tiết</label>
           <div class="rte">
             <div class="rte-tools" id="jmRteTools">
@@ -925,10 +938,48 @@ function openJobModal(j) {
   fillDeptOptions(j.dept || '');
   $('#j_jobtype').value = j.jobtype || '';
   $('#j_deadline').value = (j.deadline || '').slice(0, 10);
-  $('#j_location').value = j.location || '';
+  jlocSet(j.location || '');
   $('#j_description').innerHTML = jobDescToHtml(j.description || '');
   $('#jmodal').classList.add('show');
 }
+/* Địa điểm làm việc: nhập nhiều giá trị dạng chip (Enter để thêm, × để xóa);
+   lưu xuống cột location dạng chuỗi nối ", " nên dữ liệu & trang hiển thị không đổi */
+var jlocTags = [];
+function jlocRender() {
+  var box = $('#j_loc_box'), input = $('#j_location_input');
+  [].forEach.call(box.querySelectorAll('.tagchip'), function (c) { c.remove(); });
+  jlocTags.forEach(function (t, i) {
+    var chip = document.createElement('span'); chip.className = 'tagchip';
+    var txt = document.createElement('span'); txt.textContent = t; chip.appendChild(txt);
+    var x = document.createElement('button'); x.type = 'button'; x.title = 'Xóa'; x.textContent = '×';
+    x.onclick = function () { jlocTags.splice(i, 1); jlocRender(); };
+    chip.appendChild(x);
+    box.insertBefore(chip, input);
+  });
+}
+function jlocSet(str) {
+  jlocTags = String(str || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+  $('#j_location_input').value = '';
+  jlocRender();
+}
+function jlocGet() {
+  var rest = $('#j_location_input').value.trim();
+  return jlocTags.concat(rest ? [rest] : []).join(', ');
+}
+(function () {
+  var input = $('#j_location_input'), box = $('#j_loc_box');
+  if (!input) return;
+  function commit() {
+    var v = input.value.trim();
+    if (v) { jlocTags.push(v); input.value = ''; jlocRender(); }
+  }
+  input.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { e.preventDefault(); commit(); }
+    else if (e.key === 'Backspace' && !input.value && jlocTags.length) { jlocTags.pop(); jlocRender(); }
+  });
+  input.addEventListener('blur', commit);
+  box.addEventListener('click', function (e) { if (e.target === box) input.focus(); });
+})();
 /* Thanh công cụ soạn thảo Mô tả chi tiết (execCommand — không cần thư viện ngoài) */
 (function () {
   var tools = document.getElementById('jmRteTools');
@@ -972,7 +1023,7 @@ $('#jmSave').addEventListener('click', function () {
     dept: $('#j_dept').value.trim(),
     jobtype: $('#j_jobtype').value.trim(),
     deadline: $('#j_deadline').value.trim(),
-    location: $('#j_location').value.trim(),
+    location: jlocGet(),
     description: (function () { var el = $('#j_description'); return el.textContent.trim() ? el.innerHTML.trim() : ''; })()
   };
   if (!data.title) { var er = $('#jmErr'); er.textContent = 'Vui lòng nhập tên công việc.'; er.style.display = 'block'; er.className = ''; er.style.color = '#d6342a'; return; }
