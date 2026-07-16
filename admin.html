@@ -226,6 +226,19 @@
   .fld label .req{color:var(--red)}
   .fld input,.fld select{padding:11px 13px;border:1px solid var(--line-2);border-radius:10px;font-family:inherit;font-size:14px;background:var(--bg);color:var(--txt)}
   .fld input:focus,.fld select:focus{outline:none;border-color:var(--red)}
+  /* Trình soạn thảo có định dạng (Mô tả chi tiết) */
+  .rte{border:1px solid var(--line-2);border-radius:10px;overflow:hidden;background:var(--bg)}
+  .rte:focus-within{border-color:var(--red)}
+  .rte-tools{display:flex;align-items:center;gap:2px;flex-wrap:wrap;padding:6px 8px;border-bottom:1px solid var(--line);background:var(--card-2,#fff6ec)}
+  .rte-tools button{min-width:30px;height:28px;border:1px solid transparent;background:none;border-radius:6px;cursor:pointer;font-size:14px;font-family:inherit;color:var(--txt);display:inline-flex;align-items:center;justify-content:center;padding:0 7px;line-height:1}
+  .rte-tools button:hover{background:var(--card);border-color:var(--line-2)}
+  .rte-tools button.on{background:var(--grad-soft);border-color:var(--red);color:var(--red)}
+  .rte-sep{width:1px;height:18px;background:var(--line-2);margin:0 4px}
+  .rte-area{min-height:220px;max-height:440px;overflow:auto;padding:12px 14px;font-size:13.5px;line-height:1.55;outline:none;color:var(--txt)}
+  .rte-area:empty::before{content:attr(data-ph);color:var(--muted)}
+  .rte-area ul,.rte-area ol{margin:6px 0;padding-left:22px}
+  .rte-area li{margin-bottom:4px}
+  .rte-area p{margin:0 0 8px}
   .modal .mf{display:flex;gap:10px;justify-content:flex-end;padding:18px 24px;border-top:1px solid var(--line)}
   #tmErr{display:none;color:var(--red);font-weight:600;font-size:13px;margin-bottom:14px;background:rgba(224,52,43,.08);border:1px solid rgba(224,52,43,.3);padding:10px 12px;border-radius:9px}
 
@@ -627,8 +640,23 @@
         <div class="fld"><label>Hạn nộp</label><input id="j_deadline" type="date" /></div>
         <div class="fld full"><label>Địa điểm làm việc</label><input id="j_location" type="text" placeholder="VD: 35 Huỳnh Tịnh Của (Quận 3), Hồ Chí Minh" /></div>
         <div class="fld full"><label>Mô tả chi tiết</label>
-          <textarea id="j_description" spellcheck="false" style="min-height:260px;font-size:13.5px"></textarea>
-          <p class="hintnote">Gõ tiêu đề mục trên 1 dòng riêng (Mô tả công việc / Yêu cầu ứng viên / Quyền lợi được hưởng) và mỗi ý bắt đầu bằng dấu <b>•</b> để hiển thị đẹp như TopCV.</p>
+          <div class="rte">
+            <div class="rte-tools" id="jmRteTools">
+              <button type="button" data-cmd="undo" title="Hoàn tác">↶</button>
+              <button type="button" data-cmd="redo" title="Làm lại">↷</button>
+              <span class="rte-sep"></span>
+              <button type="button" data-cmd="bold" title="Đậm (Ctrl+B)"><b>B</b></button>
+              <button type="button" data-cmd="italic" title="Nghiêng (Ctrl+I)"><i>I</i></button>
+              <button type="button" data-cmd="underline" title="Gạch chân (Ctrl+U)"><u>U</u></button>
+              <span class="rte-sep"></span>
+              <button type="button" data-cmd="insertUnorderedList" title="Danh sách gạch đầu dòng">•&nbsp;≡</button>
+              <button type="button" data-cmd="insertOrderedList" title="Danh sách đánh số">1.&nbsp;≡</button>
+              <button type="button" data-cmd="outdent" title="Giảm thụt lề">⇤</button>
+              <button type="button" data-cmd="indent" title="Tăng thụt lề">⇥</button>
+            </div>
+            <div id="j_description" class="rte-area" contenteditable="true" data-ph="Nhập mô tả công việc, yêu cầu ứng viên, quyền lợi… Dùng thanh công cụ để in đậm tiêu đề mục và tạo danh sách gạch đầu dòng."></div>
+          </div>
+          <p class="hintnote">Bôi đen chữ rồi bấm <b>B</b>/<b>I</b>/<b>U</b> để định dạng; bấm biểu tượng danh sách để tạo gạch đầu dòng hoặc đánh số. Nội dung hiển thị đúng định dạng này trên trang Tuyển dụng.</p>
         </div>
       </div>
     </div>
@@ -868,6 +896,23 @@ function fillDeptOptions(selected) {
   });
   $('#j_dept').innerHTML = opts;
 }
+// Chuyển mô tả (text cũ có tiêu đề mục + dấu •, hoặc HTML mới) sang HTML để nạp vào trình soạn thảo
+var JOB_DESC_HEADINGS = ['Mô tả công việc', 'Yêu cầu ứng viên', 'Quyền lợi được hưởng', 'Quyền lợi', 'Chi tiết công việc:', 'Địa điểm làm việc', 'Thời gian làm việc'];
+function jobDescToHtml(txt) {
+  txt = String(txt || '');
+  if (/<(p|div|ul|ol|li|br|b|strong|i|em|u|h[1-6])\b/i.test(txt)) return txt; // đã là HTML (soạn thảo mới)
+  var html = '', inUl = false;
+  function closeUl() { if (inUl) { html += '</ul>'; inUl = false; } }
+  txt.split('\n').forEach(function (raw) {
+    var ln = raw.trim();
+    if (!ln) { closeUl(); return; }
+    if (ln.charAt(0) === '•') { if (!inUl) { html += '<ul>'; inUl = true; } html += '<li>' + esc(ln.replace(/^•\s*/, '')) + '</li>'; }
+    else if (JOB_DESC_HEADINGS.indexOf(ln) >= 0) { closeUl(); html += '<p><b>' + esc(ln) + '</b></p>'; }
+    else { closeUl(); html += '<p>' + esc(ln) + '</p>'; }
+  });
+  closeUl();
+  return html;
+}
 function openJobModal(j) {
   j = j || {};
   if (!j.id && !ME.isAdmin && (!ME.perms || !ME.perms.length)) { toast('Bạn chưa được cấp quyền đăng tin ở khối nào.'); return; }
@@ -881,9 +926,30 @@ function openJobModal(j) {
   $('#j_jobtype').value = j.jobtype || '';
   $('#j_deadline').value = (j.deadline || '').slice(0, 10);
   $('#j_location').value = j.location || '';
-  $('#j_description').value = j.description || '';
+  $('#j_description').innerHTML = jobDescToHtml(j.description || '');
   $('#jmodal').classList.add('show');
 }
+/* Thanh công cụ soạn thảo Mô tả chi tiết (execCommand — không cần thư viện ngoài) */
+(function () {
+  var tools = document.getElementById('jmRteTools');
+  var ed = document.getElementById('j_description');
+  if (!tools || !ed) return;
+  function syncState() {
+    ['bold', 'italic', 'underline', 'insertUnorderedList', 'insertOrderedList'].forEach(function (c) {
+      var b = tools.querySelector('[data-cmd="' + c + '"]');
+      if (b) { try { b.classList.toggle('on', document.queryCommandState(c)); } catch (_) { } }
+    });
+  }
+  tools.addEventListener('mousedown', function (e) { if (e.target.closest('button')) e.preventDefault(); }); // giữ vùng chọn
+  tools.addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-cmd]'); if (!b) return;
+    e.preventDefault(); ed.focus();
+    document.execCommand(b.getAttribute('data-cmd'), false, null);
+    syncState();
+  });
+  ed.addEventListener('keyup', syncState);
+  ed.addEventListener('mouseup', syncState);
+})();
 $('#jobAddBtn').addEventListener('click', function () { openJobModal(null); });
 $('#jmX').addEventListener('click', function () { $('#jmodal').classList.remove('show'); });
 $('#jmCancel').addEventListener('click', function () { $('#jmodal').classList.remove('show'); });
@@ -907,7 +973,7 @@ $('#jmSave').addEventListener('click', function () {
     jobtype: $('#j_jobtype').value.trim(),
     deadline: $('#j_deadline').value.trim(),
     location: $('#j_location').value.trim(),
-    description: $('#j_description').value
+    description: (function () { var el = $('#j_description'); return el.textContent.trim() ? el.innerHTML.trim() : ''; })()
   };
   if (!data.title) { var er = $('#jmErr'); er.textContent = 'Vui lòng nhập tên công việc.'; er.style.display = 'block'; er.className = ''; er.style.color = '#d6342a'; return; }
   var btn = $('#jmSave'); btn.disabled = true; var old = btn.textContent; btn.textContent = 'Đang lưu…';

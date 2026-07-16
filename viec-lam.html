@@ -98,9 +98,12 @@
     .ddesc h4 { font-family: var(--head); font-size: 17px; font-weight: 800; color: var(--red); margin: 18px 0 8px }
     .ddesc h4:first-child { margin-top: 0 }
     .ddesc ul { margin: 0 0 6px; padding-left: 4px; list-style: none }
-    .ddesc li { position: relative; padding-left: 20px; margin-bottom: 6px; font-size: 14.5px }
-    .ddesc li::before { content: "•"; position: absolute; left: 4px; color: var(--gold); font-weight: 900 }
+    .ddesc ul > li { position: relative; padding-left: 20px; margin-bottom: 6px; font-size: 14.5px }
+    .ddesc ul > li::before { content: "•"; position: absolute; left: 4px; color: var(--gold); font-weight: 900 }
+    .ddesc ol { margin: 0 0 6px; padding-left: 24px }
+    .ddesc ol > li { margin-bottom: 6px; font-size: 14.5px }
     .ddesc p { font-size: 14.5px; margin-bottom: 8px }
+    .ddesc b, .ddesc strong { font-weight: 800 }
     .backbtn { display: none; background: none; border: none; color: var(--red); font-weight: 700; font-size: 14px; cursor: pointer; margin-bottom: 12px }
     .empty { color: var(--muted); text-align: center; padding: 60px 20px }
 
@@ -192,8 +195,18 @@
 
     // Render mô tả: tiêu đề mục in đậm, gạch đầu dòng, đoạn văn
     var HEADINGS = ['Mô tả công việc', 'Yêu cầu ứng viên', 'Quyền lợi được hưởng', 'Quyền lợi', 'Chi tiết công việc:', 'Địa điểm làm việc', 'Thời gian làm việc'];
+    // Nội dung soạn thảo mới lưu dạng HTML. Lọc bỏ thẻ/thuộc tính nguy hiểm trước khi hiển thị (phòng xa).
+    function sanitizeHtml(t) {
+      return String(t)
+        .replace(/<\s*(script|style|iframe|object|embed|link|meta)\b[\s\S]*?(<\s*\/\s*\1\s*>|$)/gi, '')
+        .replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '')
+        .replace(/(href|src)\s*=\s*("javascript:[^"]*"|'javascript:[^']*'|javascript:[^\s>]*)/gi, '$1="#"');
+    }
     function renderDesc(txt) {
-      var lines = String(txt || '').split('\n').map(function (s) { return s.trim(); }).filter(Boolean);
+      txt = String(txt || '');
+      // Nếu là nội dung HTML (soạn thảo có định dạng) -> hiển thị trực tiếp sau khi lọc an toàn
+      if (/<(p|div|ul|ol|li|br|b|strong|i|em|u|h[1-6])\b/i.test(txt)) return sanitizeHtml(txt);
+      var lines = txt.split('\n').map(function (s) { return s.trim(); }).filter(Boolean);
       var html = '', inUl = false;
       function closeUl() { if (inUl) { html += '</ul>'; inUl = false; } }
       lines.forEach(function (ln) {
