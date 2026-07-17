@@ -386,7 +386,7 @@
         if (fDept && j.dept !== fDept) return false;
         if (fSub && !subMatch(j, fDept, fSub)) return false;
         if (fType && (j.jobtype || '').trim().toLowerCase() !== fType.toLowerCase()) return false;
-        if (fLoc && (j.location || '').indexOf(fLoc) < 0) return false;
+        if (fLoc && (j.location || '').toLowerCase().indexOf(fLoc.toLowerCase()) < 0) return false;
         if (fSal && !salMatch(j.salary, fSal)) return false;
         if (curQ && (j.title || '').toLowerCase().indexOf(curQ) < 0) return false;
         return true;
@@ -403,18 +403,32 @@
         var keep = sel.options[0].outerHTML;
         sel.innerHTML = keep + values.map(function (v) { return '<option>' + esc(v) + '</option>'; }).join('');
       }
+      // Gom theo khóa không phân biệt hoa/thường (VD "Toàn thời gian" & "Toàn Thời Gian" là 1
+      // lựa chọn), hiển thị theo cách viết xuất hiện nhiều nhất trong dữ liệu.
+      function tally(dict, raw) {
+        var key = raw.toLowerCase();
+        var e = dict[key] || (dict[key] = { count: 0, labels: {} });
+        e.count++;
+        e.labels[raw] = (e.labels[raw] || 0) + 1;
+      }
+      function finalize(dict) {
+        return Object.keys(dict).map(function (key) {
+          var e = dict[key];
+          var label = Object.keys(e.labels).sort(function (a, b) { return e.labels[b] - e.labels[a] || a.localeCompare(b, 'vi'); })[0];
+          return { label: label, count: e.count };
+        }).sort(function (a, b) { return b.count - a.count || a.label.localeCompare(b.label, 'vi'); }).map(function (x) { return x.label; });
+      }
       var types = {}, locs = {};
       JOBS.forEach(function (j) {
         var t = (j.jobtype || '').trim();
-        if (t) types[t] = (types[t] || 0) + 1;
+        if (t) tally(types, t);
         String(j.location || '').split(',').forEach(function (seg) {
           seg = seg.trim();
-          if (seg) locs[seg] = (locs[seg] || 0) + 1;
+          if (seg) tally(locs, seg);
         });
       });
-      function sorted(o) { return Object.keys(o).sort(function (a, b) { return o[b] - o[a] || a.localeCompare(b, 'vi'); }); }
-      fill(document.getElementById('f_type'), sorted(types));
-      fill(document.getElementById('f_loc'), sorted(locs).slice(0, 25));
+      fill(document.getElementById('f_type'), finalize(types));
+      fill(document.getElementById('f_loc'), finalize(locs).slice(0, 25));
     }
 
     function renderList() {
