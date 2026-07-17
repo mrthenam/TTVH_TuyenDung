@@ -9,6 +9,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<script>
+  /* Đã có token đăng nhập -> ẩn form đăng nhập ngay từ đầu (trước khi trang vẽ), tránh nháy màn hình đăng nhập khi tải lại trang. */
+  try { if (localStorage.getItem('ttvh_agent_token')) document.documentElement.classList.add('has-tok'); } catch (e) {}
+</script>
 <style>
   :root{
     --bg:#fff8f0;--bg-soft:#fff1e1;--card:#fff;--card-2:#fff6ec;
@@ -34,6 +38,7 @@
   .gate input:focus{outline:none;border-color:var(--red)}
   .gate button.go{width:100%;padding:13px;border:none;border-radius:11px;background:var(--grad);color:#fff;font-weight:800;cursor:pointer;font-size:15px;box-shadow:0 12px 28px -12px rgba(198,147,32,.6)}
   .gate .err{color:var(--red);font-size:13px;text-align:center;margin-bottom:12px;display:none;font-weight:600}
+  html.has-tok #gate{display:none}
 
   /* ===== APP SHELL ===== */
   #app{flex:1;flex-direction:column;min-height:0}
@@ -1955,8 +1960,11 @@ function delRow(id) {
   }).catch(function (e) { if (e.message === '401') logout(); else toast('Lỗi kết nối.'); });
 }
 
-/* tự vào nếu đã có token */
-if (TOKEN) { api('/api/agent/me').then(function (d) { showApp(d.displayName); }).catch(function () { localStorage.removeItem('ttvh_agent_token'); }); }
+/* tự vào nếu đã có token; token hỏng/hết hạn -> hiện lại form đăng nhập */
+if (TOKEN) {
+  api('/api/agent/me').then(function (d) { showApp(d.displayName); })
+    .catch(function () { localStorage.removeItem('ttvh_agent_token'); document.documentElement.classList.remove('has-tok'); });
+}
 </script>
 </body>
 </html>
