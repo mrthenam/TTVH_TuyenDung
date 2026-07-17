@@ -177,6 +177,7 @@
         <option>Văn phòng</option>
         <option>Khối sản xuất</option>
       </select>
+      <select id="f_sub" class="fsel" style="display:none"></select>
       <select id="f_type" class="fsel">
         <option value="">Hình thức</option>
       </select>
@@ -333,10 +334,57 @@
       return true;
     }
     function fVal(id) { return document.getElementById(id).value; }
+    // Bỏ dấu tiếng Việt để so khớp từ khóa không phân biệt dấu/hoa thường
+    function normVi(s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd'); }
+    // Bộ lọc phụ theo Khối: Cửa hàng -> Thương hiệu; Văn phòng -> Bộ phận.
+    // Tin không có cột brand/bộ phận nên nhận diện bằng TỪ KHÓA (không dấu) trong tiêu đề tin.
+    var SUB_FILTERS = {
+      'Cửa hàng': {
+        label: 'Thương hiệu',
+        options: [
+          { v: 'maycha', label: 'MayCha', kw: ['maycha', 'may cha'] },
+          { v: 'tamhao', label: 'Hồng Trà Sữa Tam Hảo', kw: ['tam hao'] },
+          { v: 'gagion', label: 'Gà Giòn Sốt Ba Cô Gái', kw: ['ga gion', 'ba co gai', 'ga ran'] },
+          { v: 'trahu', label: 'Trà Hú', kw: ['tra hu'] }
+        ]
+      },
+      'Văn phòng': {
+        label: 'Bộ phận',
+        options: [
+          { v: 'marketing', label: 'Marketing', kw: ['marketing', 'marcom', 'media', 'tiktok', 'social', 'content', 'truyen thong', 'quang cao', 'trade'] },
+          { v: 'hr', label: 'Nhân sự (HR)', kw: ['nhan su', 'tuyen dung', 'dao tao', 'hr ', '(hr)', 'c&b'] },
+          { v: 'scm', label: 'Quản lý cung ứng (SCM)', kw: ['cung ung', 'scm', 'mua hang', 'kho van', 'logistics', 'purchasing', 'supply'] },
+          { v: 'finance', label: 'Tài chính – Kế toán', kw: ['ke toan', 'tai chinh', 'finance', 'kiem soat', 'audit'] },
+          { v: 'other', label: 'Các công việc khác', kw: null }
+        ]
+      }
+    };
+    function subMatch(j, dept, val) {
+      var cfg = SUB_FILTERS[dept];
+      if (!cfg || !val) return true;
+      var t = ' ' + normVi(j.title) + ' ';
+      function hit(opt) { return !!opt.kw && opt.kw.some(function (k) { return t.indexOf(k) >= 0; }); }
+      var opt = null;
+      cfg.options.forEach(function (o) { if (o.v === val) opt = o; });
+      if (!opt) return true;
+      if (opt.kw) return hit(opt);
+      return !cfg.options.some(hit); // "Các công việc khác" = không khớp nhóm nào ở trên
+    }
+    // Hiện/ẩn + đổ lại dropdown phụ khi đổi Khối
+    function updateSubFilter() {
+      var sub = document.getElementById('f_sub');
+      var cfg = SUB_FILTERS[fVal('f_dept')];
+      if (!cfg) { sub.style.display = 'none'; sub.innerHTML = ''; return; }
+      sub.innerHTML = '<option value="">' + esc(cfg.label) + '</option>'
+        + cfg.options.map(function (o) { return '<option value="' + o.v + '">' + esc(o.label) + '</option>'; }).join('');
+      sub.style.display = '';
+    }
     function applyFilter() {
       var fDept = fVal('f_dept'), fType = fVal('f_type'), fLoc = fVal('f_loc'), fSal = fVal('f_sal');
+      var fSub = document.getElementById('f_sub').style.display === 'none' ? '' : fVal('f_sub');
       filtered = JOBS.filter(function (j) {
         if (fDept && j.dept !== fDept) return false;
+        if (fSub && !subMatch(j, fDept, fSub)) return false;
         if (fType && (j.jobtype || '').trim().toLowerCase() !== fType.toLowerCase()) return false;
         if (fLoc && (j.location || '').indexOf(fLoc) < 0) return false;
         if (fSal && !salMatch(j.salary, fSal)) return false;
@@ -344,7 +392,7 @@
         return true;
       });
       // Đánh dấu dropdown đang có điều kiện lọc
-      ['f_dept', 'f_type', 'f_loc', 'f_sal'].forEach(function (id) {
+      ['f_dept', 'f_sub', 'f_type', 'f_loc', 'f_sal'].forEach(function (id) {
         document.getElementById(id).classList.toggle('on', !!fVal(id));
       });
       renderList();
@@ -416,12 +464,14 @@
     listEl.addEventListener('click', function (e) {
       var card = e.target.closest('.jcard'); if (card) selectJob(card.getAttribute('data-id'));
     });
-    ['f_dept', 'f_type', 'f_loc', 'f_sal'].forEach(function (id) {
+    document.getElementById('f_dept').addEventListener('change', function () { updateSubFilter(); applyFilter(); });
+    ['f_sub', 'f_type', 'f_loc', 'f_sal'].forEach(function (id) {
       document.getElementById(id).addEventListener('change', applyFilter);
     });
     document.getElementById('fApply').addEventListener('click', applyFilter);
     document.getElementById('fClear').addEventListener('click', function () {
-      ['f_dept', 'f_type', 'f_loc', 'f_sal'].forEach(function (id) { document.getElementById(id).value = ''; });
+      ['f_dept', 'f_sub', 'f_type', 'f_loc', 'f_sal'].forEach(function (id) { document.getElementById(id).value = ''; });
+      updateSubFilter();
       var q = document.getElementById('q'); q.value = ''; curQ = '';
       applyFilter();
     });
@@ -437,7 +487,7 @@
     (function () {
       var DEPT_MAP = { office: 'Văn phòng', sanxuat: 'Khối sản xuất', store: 'Cửa hàng' };
       var p = new URLSearchParams(location.search).get('dept');
-      if (p && DEPT_MAP[p]) document.getElementById('f_dept').value = DEPT_MAP[p];
+      if (p && DEPT_MAP[p]) { document.getElementById('f_dept').value = DEPT_MAP[p]; updateSubFilter(); }
     })();
 
     fetch('/api/jobs').then(function (r) { return r.json(); }).then(function (d) {
