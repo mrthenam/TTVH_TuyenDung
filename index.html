@@ -743,6 +743,67 @@
       box-shadow: 0 12px 26px -12px rgba(198, 147, 32, .6)
     }
 
+    /* Chọn khu vực -> nhóm công việc (bố cục 2 tầng) */
+    .pick-label {
+      text-align: center;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px
+    }
+
+    .career-tabs.rg {
+      margin-bottom: 22px
+    }
+
+    .province-list {
+      display: none;
+      max-width: 660px;
+      margin: -6px auto 24px;
+      padding: 14px 16px;
+      background: var(--card);
+      border: 1px solid var(--line-2);
+      border-radius: 16px;
+      box-shadow: 0 16px 38px -26px rgba(198, 147, 32, .55);
+      text-align: center
+    }
+
+    .province-list.show {
+      display: block
+    }
+
+    .province-list .pv {
+      border: 1px solid var(--line-2);
+      background: var(--bg);
+      border-radius: 99px;
+      padding: 8px 16px;
+      margin: 4px 3px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--txt)
+    }
+
+    .province-list .pv:hover {
+      border-color: var(--gold);
+      color: var(--red)
+    }
+
+    .pick-crumb {
+      text-align: center;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--muted);
+      margin: -8px 0 28px
+    }
+
+    .pick-crumb b {
+      color: var(--red)
+    }
+
     .job-thumb {
       height: 200px;
       min-height: 200px;
@@ -2184,14 +2245,36 @@
       <div class="sec-head center fade">
         <span class="eyebrow">Cơ hội nghề nghiệp</span>
         <h2 class="title">Khám phá <span class="grad-text">cơ hội nghề nghiệp</span></h2>
-        <p class="lead">Chọn nhóm công việc phù hợp với bạn — Cửa hàng, Văn phòng hay Khối sản xuất.</p>
+        <p class="lead">Chọn nơi bạn muốn làm việc và công việc phù hợp với bạn.</p>
       </div>
 
+      <div class="pick-label fade">Chọn khu vực</div>
+      <div class="career-tabs rg fade" id="regionTabs">
+        <button type="button" class="ctab act" data-region="hcm">📍 TP. Hồ Chí Minh</button>
+        <button type="button" class="ctab" data-region="hn">📍 Hà Nội</button>
+        <button type="button" class="ctab" data-region="dn">📍 Đà Nẵng</button>
+        <button type="button" class="ctab" data-region="other" id="regionOtherBtn">📍 Tỉnh/Thành phố khác</button>
+      </div>
+      <div class="province-list fade" id="provinceList">
+        <button type="button" class="pv">Đồng Nai</button>
+        <button type="button" class="pv">Bình Dương</button>
+        <button type="button" class="pv">Bà Rịa - Vũng Tàu</button>
+        <button type="button" class="pv">Long An</button>
+        <button type="button" class="pv">Tiền Giang</button>
+        <button type="button" class="pv">An Giang</button>
+        <button type="button" class="pv">Cần Thơ</button>
+        <button type="button" class="pv">Lâm Đồng</button>
+        <button type="button" class="pv">Huế</button>
+        <button type="button" class="pv" data-any="1">Tỉnh khác…</button>
+      </div>
+
+      <div class="pick-label fade">Chọn nhóm công việc</div>
       <div class="career-tabs fade">
         <button type="button" class="ctab act" data-tab="store">🏪 Cửa Hàng</button>
         <button type="button" class="ctab" data-tab="office">🏢 Văn Phòng</button>
         <button type="button" class="ctab" data-tab="prod">🏭 Khối Sản Xuất</button>
       </div>
+      <div class="pick-crumb fade" id="pickCrumb"></div>
 
       <!-- TAB: CỬA HÀNG -->
       <div class="career-panel fade" id="panel-store">
@@ -2604,27 +2687,85 @@
       });
     });
 
-    /* Tab Cơ hội nghề nghiệp (Cửa hàng / Văn phòng / Khối sản xuất) */
+    /* Cơ hội nghề nghiệp: chọn Khu vực trước -> Nhóm công việc (Cửa hàng / Văn phòng / Khối sản xuất) */
     (function() {
-      var tabs = document.querySelectorAll('.ctab');
-      if (!tabs.length) return;
-      [].forEach.call(tabs, function(b) {
+      var groupTabs = document.querySelectorAll('.career-tabs .ctab[data-tab]');
+      if (!groupTabs.length) return;
+      var REGION_LABELS = { hcm: 'TP. Hồ Chí Minh', hn: 'Hà Nội', dn: 'Đà Nẵng', other: 'Tỉnh/Thành phố khác' };
+      var GROUP_LABELS = { store: 'Cửa hàng', office: 'Văn phòng', prod: 'Khối sản xuất' };
+      // Lựa chọn hiện tại — popup "Thông tin tuyển dụng" đọc để mở sẵn đúng mục khu vực
+      window.CAREER_PICK = { region: 'hcm', province: '', group: 'store' };
+      var crumbEl = document.getElementById('pickCrumb');
+
+      function escC(s) {
+        return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      }
+
+      function renderCrumb() {
+        if (!crumbEl) return;
+        var p = window.CAREER_PICK;
+        var parts = [REGION_LABELS[p.region]];
+        if (p.region === 'other' && p.province) parts.push(p.province);
+        parts.push(GROUP_LABELS[p.group]);
+        crumbEl.innerHTML = 'Bạn đang xem: ' + parts.map(function(x) {
+          return '<b>' + escC(x) + '</b>';
+        }).join(' › ');
+      }
+
+      // Nhóm công việc
+      [].forEach.call(groupTabs, function(b) {
         b.addEventListener('click', function() {
           var t = b.getAttribute('data-tab');
-          [].forEach.call(tabs, function(x) {
+          [].forEach.call(groupTabs, function(x) {
             x.classList.toggle('act', x === b);
           });
           ['store', 'office', 'prod'].forEach(function(k) {
             var p = document.getElementById('panel-' + k);
             if (p) p.style.display = (k === t) ? '' : 'none';
           });
+          window.CAREER_PICK.group = t;
+          renderCrumb();
         });
       });
+
+      // Khu vực: HCM / Hà Nội / Đà Nẵng chọn trực tiếp; "Tỉnh/Thành phố khác" mở rộng
+      // danh sách tỉnh ngay bên dưới (không dùng dropdown nhỏ)
+      var regionTabs = document.querySelectorAll('#regionTabs .ctab');
+      var otherBtn = document.getElementById('regionOtherBtn');
+      var provList = document.getElementById('provinceList');
+      [].forEach.call(regionTabs, function(b) {
+        b.addEventListener('click', function() {
+          var r = b.getAttribute('data-region');
+          [].forEach.call(regionTabs, function(x) {
+            x.classList.toggle('act', x === b);
+          });
+          window.CAREER_PICK.region = r;
+          if (r === 'other') {
+            provList.classList.toggle('show');
+          } else {
+            window.CAREER_PICK.province = '';
+            otherBtn.textContent = '📍 Tỉnh/Thành phố khác';
+            provList.classList.remove('show');
+          }
+          renderCrumb();
+        });
+      });
+      [].forEach.call(provList.querySelectorAll('.pv'), function(b) {
+        b.addEventListener('click', function() {
+          var any = b.getAttribute('data-any') === '1';
+          window.CAREER_PICK.province = any ? '' : b.textContent.trim();
+          otherBtn.textContent = any ? '📍 Tỉnh/Thành phố khác ✓' : ('📍 ' + b.textContent.trim() + ' ✓');
+          provList.classList.remove('show');
+          renderCrumb();
+        });
+      });
+      renderCrumb();
+
       /* Pill "Toàn thời gian & Bán thời gian / Khối Văn Phòng / Khối Kho & Xưởng Sản Xuất" -> mở đúng tab tương ứng */
       [].forEach.call(document.querySelectorAll('.pill-link'), function(b) {
         b.addEventListener('click', function() {
           var t = b.getAttribute('data-goto');
-          var tab = document.querySelector('.ctab[data-tab="' + t + '"]');
+          var tab = document.querySelector('.career-tabs .ctab[data-tab="' + t + '"]');
           if (tab) tab.click();
           document.getElementById('career').scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
@@ -2717,7 +2858,13 @@
             pick(+b.getAttribute('data-i'));
           });
         });
-        pick(0);
+        // Mở sẵn mục khớp với khu vực khách đã chọn ở phần "Cơ hội nghề nghiệp"
+        var wantKey = { hcm: 'ho chi minh', hn: 'ha noi', dn: 'da nang', other: 'khac' }[(window.CAREER_PICK || {}).region] || '';
+        var startIdx = 0;
+        if (wantKey) secs.regions.forEach(function(r, i) {
+          if (startIdx === 0 && normVi(r.name).indexOf(wantKey) >= 0) startIdx = i;
+        });
+        pick(startIdx);
       }
 
       function openJob(job, name) {
