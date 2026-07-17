@@ -64,14 +64,29 @@
 
     /* ===== LAYOUT ===== */
     .main { padding: 26px 20px 60px }
-    .toolbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 18px }
-    .tabs { display: flex; gap: 8px; flex-wrap: wrap }
-    .tab { background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 8px 16px; font-weight: 600; font-size: 13.5px; cursor: pointer; color: var(--muted) }
-    .tab.act { background: var(--grad); color: #fff; border-color: transparent }
-    .search { margin-left: auto; position: relative }
-    .search input { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 10px 16px 10px 38px; font-family: inherit; font-size: 14px; width: 260px; max-width: 60vw; color: var(--txt) }
+
+    /* Thanh bộ lọc (kiểu trang phim: hàng dropdown + Xóa lọc + Lọc) */
+    .filterbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; margin-bottom: 18px; box-shadow: 0 14px 34px -26px rgba(198, 147, 32, .55) }
+    .fsel { appearance: none; border: 1px solid var(--line); background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%238b7060' stroke-width='1.8'/%3E%3C/svg%3E") no-repeat right 12px center; border-radius: 10px; padding: 10px 32px 10px 13px; font-family: inherit; font-size: 13.5px; font-weight: 600; color: var(--txt); cursor: pointer; min-width: 120px; max-width: 185px }
+    .fsel:focus { outline: none; border-color: var(--gold) }
+    .fsel.on { border-color: var(--gold); color: var(--red); background-color: rgba(212, 175, 55, .1) }
+    .search { position: relative }
+    .search input { border: 1px solid var(--line); background: #fff; border-radius: 10px; padding: 10px 14px 10px 36px; font-family: inherit; font-size: 13.5px; width: 200px; max-width: 60vw; color: var(--txt) }
     .search input:focus { outline: none; border-color: var(--gold) }
-    .search .si { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted) }
+    .search .si { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted) }
+    .factions { display: flex; gap: 10px; margin-left: auto }
+    .fbtn { border: none; border-radius: 10px; padding: 10px 16px; font-family: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer; white-space: nowrap }
+    .fbtn.ghost { background: #fff; border: 1px solid var(--line); color: var(--muted) }
+    .fbtn.ghost:hover { color: var(--red); border-color: var(--gold) }
+    .fbtn.primary { background: var(--grad); color: #fff; box-shadow: 0 10px 22px -10px rgba(198, 147, 32, .6) }
+    .fbtn.primary:hover { transform: translateY(-1px) }
+    @media(max-width:680px) {
+      .fsel { flex: 1 1 45%; max-width: none }
+      .filterbar .search { flex: 1 1 100% }
+      .filterbar .search input { width: 100%; max-width: 100% }
+      .factions { margin-left: 0; flex: 1 1 100% }
+      .fbtn { flex: 1 1 45% }
+    }
 
     .layout { display: grid; grid-template-columns: 400px 1fr; gap: 22px; align-items: start }
     .joblist { display: flex; flex-direction: column; gap: 12px }
@@ -155,16 +170,33 @@
   </section>
 
   <main class="main wrap">
-    <div class="toolbar">
-      <div class="tabs" id="tabs">
-        <button class="tab act" data-dept="">Tất cả</button>
-        <button class="tab" data-dept="Cửa hàng">Cửa hàng</button>
-        <button class="tab" data-dept="Văn phòng">Văn phòng</button>
-        <button class="tab" data-dept="Khối sản xuất">Khối sản xuất</button>
-      </div>
+    <div class="filterbar">
+      <select id="f_dept" class="fsel">
+        <option value="">Tất cả khối</option>
+        <option>Cửa hàng</option>
+        <option>Văn phòng</option>
+        <option>Khối sản xuất</option>
+      </select>
+      <select id="f_type" class="fsel">
+        <option value="">Hình thức</option>
+      </select>
+      <select id="f_loc" class="fsel">
+        <option value="">Địa điểm</option>
+      </select>
+      <select id="f_sal" class="fsel">
+        <option value="">Mức lương</option>
+        <option value="deal">Thỏa thuận</option>
+        <option value="lt8">Dưới 8 triệu</option>
+        <option value="8-12">8 – 12 triệu</option>
+        <option value="gt12">Trên 12 triệu</option>
+      </select>
       <div class="search">
         <span class="si">🔍</span>
         <input type="text" id="q" placeholder="Tìm theo tên công việc…" />
+      </div>
+      <div class="factions">
+        <button type="button" class="fbtn ghost" id="fClear">✕ Xóa lọc</button>
+        <button type="button" class="fbtn primary" id="fApply">🔎 Lọc việc làm</button>
       </div>
     </div>
 
@@ -186,7 +218,7 @@
   </div>
 
   <script>
-    var JOBS = [], filtered = [], curDept = '', curQ = '', selId = null;
+    var JOBS = [], filtered = [], curQ = '', selId = null;
     var listEl = document.getElementById('joblist');
     var detailEl = document.getElementById('detail');
     var countEl = document.getElementById('jcount');
@@ -279,13 +311,62 @@
       return html;
     }
 
+    /* ===== Bộ lọc ===== */
+    // Đọc khoảng lương từ chuỗi salary ("8 - 10 triệu", "Từ 8 triệu", "Thỏa thuận"...)
+    function salInfo(s) {
+      s = String(s || '');
+      if (/thỏa\s*thuận/i.test(s)) return { deal: true };
+      function num(x) { return parseFloat(String(x).replace(',', '.')); }
+      var m = /([\d.,]+)\s*(?:-|–|—|đến)\s*([\d.,]+)\s*triệu/i.exec(s);
+      if (m) return { min: num(m[1]), max: num(m[2]) };
+      m = /([\d.,]+)\s*triệu/i.exec(s);
+      if (m) { var n = num(m[1]); return /từ/i.test(s) ? { min: n, max: Infinity } : { min: n, max: n }; }
+      return null;
+    }
+    function salMatch(s, key) {
+      var i = salInfo(s);
+      if (key === 'deal') return !!(i && i.deal);
+      if (!i || i.deal) return false;
+      if (key === 'lt8') return i.min < 8;
+      if (key === '8-12') return i.min <= 12 && i.max >= 8;
+      if (key === 'gt12') return i.max > 12;
+      return true;
+    }
+    function fVal(id) { return document.getElementById(id).value; }
     function applyFilter() {
+      var fDept = fVal('f_dept'), fType = fVal('f_type'), fLoc = fVal('f_loc'), fSal = fVal('f_sal');
       filtered = JOBS.filter(function (j) {
-        if (curDept && j.dept !== curDept) return false;
+        if (fDept && j.dept !== fDept) return false;
+        if (fType && (j.jobtype || '').trim().toLowerCase() !== fType.toLowerCase()) return false;
+        if (fLoc && (j.location || '').indexOf(fLoc) < 0) return false;
+        if (fSal && !salMatch(j.salary, fSal)) return false;
         if (curQ && (j.title || '').toLowerCase().indexOf(curQ) < 0) return false;
         return true;
       });
+      // Đánh dấu dropdown đang có điều kiện lọc
+      ['f_dept', 'f_type', 'f_loc', 'f_sal'].forEach(function (id) {
+        document.getElementById(id).classList.toggle('on', !!fVal(id));
+      });
       renderList();
+    }
+    // Đổ danh sách Hình thức & Địa điểm từ dữ liệu tin (địa điểm tách theo dấu phẩy, xếp theo tần suất)
+    function buildFilterOptions() {
+      function fill(sel, values) {
+        var keep = sel.options[0].outerHTML;
+        sel.innerHTML = keep + values.map(function (v) { return '<option>' + esc(v) + '</option>'; }).join('');
+      }
+      var types = {}, locs = {};
+      JOBS.forEach(function (j) {
+        var t = (j.jobtype || '').trim();
+        if (t) types[t] = (types[t] || 0) + 1;
+        String(j.location || '').split(',').forEach(function (seg) {
+          seg = seg.trim();
+          if (seg) locs[seg] = (locs[seg] || 0) + 1;
+        });
+      });
+      function sorted(o) { return Object.keys(o).sort(function (a, b) { return o[b] - o[a] || a.localeCompare(b, 'vi'); }); }
+      fill(document.getElementById('f_type'), sorted(types));
+      fill(document.getElementById('f_loc'), sorted(locs).slice(0, 25));
     }
 
     function renderList() {
@@ -335,10 +416,14 @@
     listEl.addEventListener('click', function (e) {
       var card = e.target.closest('.jcard'); if (card) selectJob(card.getAttribute('data-id'));
     });
-    document.getElementById('tabs').addEventListener('click', function (e) {
-      var t = e.target.closest('.tab'); if (!t) return;
-      document.querySelectorAll('.tab').forEach(function (x) { x.classList.remove('act'); });
-      t.classList.add('act'); curDept = t.getAttribute('data-dept'); applyFilter();
+    ['f_dept', 'f_type', 'f_loc', 'f_sal'].forEach(function (id) {
+      document.getElementById(id).addEventListener('change', applyFilter);
+    });
+    document.getElementById('fApply').addEventListener('click', applyFilter);
+    document.getElementById('fClear').addEventListener('click', function () {
+      ['f_dept', 'f_type', 'f_loc', 'f_sal'].forEach(function (id) { document.getElementById(id).value = ''; });
+      var q = document.getElementById('q'); q.value = ''; curQ = '';
+      applyFilter();
     });
     document.getElementById('q').addEventListener('input', function () { curQ = this.value.trim().toLowerCase(); applyFilter(); });
 
@@ -348,22 +433,17 @@
       iToggle.textContent = intro.classList.contains('collapsed') ? 'Xem thêm ▾' : 'Thu gọn ▴';
     });
 
-    /* Pre-select tab from URL param ?dept=office|sanxuat|store */
+    /* Chọn sẵn Khối theo tham số URL ?dept=office|sanxuat|store */
     (function () {
       var DEPT_MAP = { office: 'Văn phòng', sanxuat: 'Khối sản xuất', store: 'Cửa hàng' };
       var p = new URLSearchParams(location.search).get('dept');
-      if (p && DEPT_MAP[p]) {
-        curDept = DEPT_MAP[p];
-        document.querySelectorAll('.tab').forEach(function (t) {
-          var match = t.getAttribute('data-dept') === curDept;
-          t.classList.toggle('act', match);
-        });
-      }
+      if (p && DEPT_MAP[p]) document.getElementById('f_dept').value = DEPT_MAP[p];
     })();
 
     fetch('/api/jobs').then(function (r) { return r.json(); }).then(function (d) {
       JOBS = (d && d.rows) || [];
       document.querySelector('#jobChip b').textContent = JOBS.length;
+      buildFilterOptions();
       applyFilter();
       if (JOBS.length && window.innerWidth > 880) selectJob(filtered[0] ? filtered[0].id : JOBS[0].id);
       else detailEl.innerHTML = '<div class="empty">Chọn một công việc để xem mô tả chi tiết.</div>';
