@@ -1820,67 +1820,205 @@
     }
 
     /* Multi-select tìm kiếm: Khu vực mong muốn làm việc (Tỉnh/Thành + Quận/Huyện) */
-    .ms { position: relative }
+    .ms {
+      position: relative
+    }
+
     .ms-control {
-      display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
-      min-height: 50px; padding: 8px 12px; border-radius: 12px;
-      border: 1px solid var(--line-2); background: var(--bg); cursor: text;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      min-height: 50px;
+      padding: 8px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--line-2);
+      background: var(--bg);
+      cursor: text;
       transition: border-color .2s
     }
-    .ms.open .ms-control, .ms-control.focus { border-color: var(--red) }
-    .ms.err .ms-control { border-color: var(--red) }
+
+    .ms.open .ms-control,
+    .ms-control.focus {
+      border-color: var(--red)
+    }
+
+    .ms.err .ms-control {
+      border-color: var(--red)
+    }
+
     .ms-tag {
-      display: inline-flex; align-items: center; gap: 6px; max-width: 100%;
-      background: var(--card-2); border: 1px solid rgba(198, 147, 32, .4);
-      color: var(--txt); border-radius: 999px; padding: 4px 8px 4px 12px;
-      font-size: 13px; font-weight: 600
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      max-width: 100%;
+      background: var(--card-2);
+      border: 1px solid rgba(198, 147, 32, .4);
+      color: var(--txt);
+      border-radius: 999px;
+      padding: 4px 8px 4px 12px;
+      font-size: 13px;
+      font-weight: 600
     }
-    .ms-tag span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+
+    .ms-tag span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+
     .ms-tag button {
-      border: none; background: rgba(198, 147, 32, .18); color: var(--red);
-      width: 18px; height: 18px; border-radius: 50%; cursor: pointer; flex: none;
-      font-size: 13px; line-height: 1; display: flex; align-items: center; justify-content: center
+      border: none;
+      background: rgba(198, 147, 32, .18);
+      color: var(--red);
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      cursor: pointer;
+      flex: none;
+      font-size: 13px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center
     }
-    .ms-tag button:hover { background: var(--red); color: #fff }
+
+    .ms-tag button:hover {
+      background: var(--red);
+      color: #fff
+    }
+
     .ms-input {
-      flex: 1; min-width: 90px; border: none; background: transparent;
-      padding: 6px 2px; font-family: inherit; font-size: 15px; color: var(--txt); outline: none
+      flex: 1;
+      min-width: 90px;
+      border: none;
+      background: transparent;
+      padding: 6px 2px;
+      font-family: inherit;
+      font-size: 15px;
+      color: var(--txt);
+      outline: none
     }
+
     .ms-menu {
-      position: absolute; z-index: 40; left: 0; right: 0; top: calc(100% + 6px);
-      max-height: 264px; overflow-y: auto; background: var(--bg);
-      border: 1px solid var(--line-2); border-radius: 12px; padding: 6px;
+      position: absolute;
+      z-index: 40;
+      left: 0;
+      right: 0;
+      top: calc(100% + 6px);
+      max-height: 264px;
+      overflow-y: auto;
+      background: var(--bg);
+      border: 1px solid var(--line-2);
+      border-radius: 12px;
+      padding: 6px;
       box-shadow: 0 20px 50px -24px rgba(54, 28, 18, .5)
     }
-    .ms-menu[hidden] { display: none }
+
+    .ms-menu[hidden] {
+      display: none
+    }
+
     .ms-opt {
-      padding: 10px 12px; border-radius: 9px; cursor: pointer; font-size: 14.5px;
-      display: flex; align-items: center; gap: 9px
+      padding: 10px 12px;
+      border-radius: 9px;
+      cursor: pointer;
+      font-size: 14.5px;
+      display: flex;
+      align-items: center;
+      gap: 9px
     }
-    .ms-opt:hover, .ms-opt.active { background: var(--card-2) }
-    .ms-opt.sel { color: var(--red); font-weight: 700 }
-    .ms-opt.sel::after { content: '✓'; margin-left: auto }
-    .ms-empty { padding: 12px; color: var(--muted); font-size: 14px; text-align: center }
-    .dist-blocks { display: flex; flex-direction: column; gap: 14px }
-    .dist-blocks:empty { display: none }
+
+    .ms-opt:hover,
+    .ms-opt.active {
+      background: var(--card-2)
+    }
+
+    .ms-opt.sel {
+      color: var(--red);
+      font-weight: 700
+    }
+
+    .ms-opt.sel::after {
+      content: '✓';
+      margin-left: auto
+    }
+
+    .ms-empty {
+      padding: 12px;
+      color: var(--muted);
+      font-size: 14px;
+      text-align: center
+    }
+
+    .dist-blocks {
+      display: flex;
+      flex-direction: column;
+      gap: 14px
+    }
+
+    .dist-blocks:empty {
+      display: none
+    }
+
     .dist-block {
-      border: 1px solid rgba(198, 147, 32, .28); border-radius: 12px;
-      padding: 14px 16px; background: var(--card-2)
+      border: 1px solid rgba(198, 147, 32, .28);
+      border-radius: 12px;
+      padding: 14px 16px;
+      background: var(--card-2)
     }
-    .dist-block-label { font-size: 13px; font-weight: 700; color: var(--muted); margin-bottom: 9px }
-    .dist-block-label b { color: var(--txt) }
-    .dist-block .ms-control { background: var(--bg) }
+
+    .dist-block-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 9px
+    }
+
+    .dist-block-label b {
+      color: var(--txt)
+    }
+
+    .dist-block .ms-control {
+      background: var(--bg)
+    }
 
     /* Khu vực làm việc + Người giới thiệu cùng hàng; Quận/Huyện full-width bên dưới */
-    .loc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start }
-    .loc-grid.wa-hidden { grid-template-columns: 1fr }
-    .loc-dist { grid-column: 1 / -1 }
-    .loc-dist:has(.dist-blocks:empty) { display: none }
+    .loc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      align-items: start
+    }
+
+    .loc-grid.wa-hidden {
+      grid-template-columns: 1fr
+    }
+
+    .loc-dist {
+      grid-column: 1 / -1
+    }
+
+    .loc-dist:has(.dist-blocks:empty) {
+      display: none
+    }
+
     @media (max-width: 680px) {
-      .loc-grid { grid-template-columns: 1fr }
-      .loc-prov { order: 1 }
-      .loc-dist { order: 2 }
-      .loc-ref { order: 3 }
+      .loc-grid {
+        grid-template-columns: 1fr
+      }
+
+      .loc-prov {
+        order: 1
+      }
+
+      .loc-dist {
+        order: 2
+      }
+
+      .loc-ref {
+        order: 3
+      }
     }
 
     #formErr {
@@ -2245,10 +2383,9 @@
       <div class="sec-head center fade">
         <span class="eyebrow">Cơ hội nghề nghiệp</span>
         <h2 class="title">Khám phá <span class="grad-text">cơ hội nghề nghiệp</span></h2>
-        <p class="lead">Chọn nơi bạn muốn làm việc và công việc phù hợp với bạn.</p>
       </div>
 
-      <div class="pick-label fade">Chọn khu vực</div>
+      <div class="pick-label fade">Chọn nơi bạn muốn làm việc và công việc phù hợp với bạn.</div>
       <div class="career-tabs rg fade" id="regionTabs">
         <button type="button" class="ctab act" data-region="hcm">📍 TP. Hồ Chí Minh</button>
         <button type="button" class="ctab" data-region="hn">📍 Hà Nội</button>
@@ -2268,7 +2405,7 @@
         <button type="button" class="pv" data-any="1">Tỉnh khác…</button>
       </div>
 
-      <div class="pick-label fade">Chọn nhóm công việc</div>
+
       <div class="career-tabs fade">
         <button type="button" class="ctab act" data-tab="store">🏪 Cửa Hàng</button>
         <button type="button" class="ctab" data-tab="office">🏢 Văn Phòng</button>
@@ -2465,7 +2602,12 @@
               <div class="date-field">
                 <input type="text" id="birthday" name="birthday" placeholder="01/01/2000" inputmode="numeric" maxlength="10" autocomplete="bday" />
                 <button type="button" class="date-pick-btn" id="birthdayPickBtn" aria-label="Chọn ngày sinh từ lịch">
-                  <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5" /><path d="M3.5 9.5h17" /><path d="M8 3v3.4M16 3v3.4" /><path d="M7.3 13.2h1.6M11.2 13.2h1.6M15.1 13.2h1.6M7.3 16.7h1.6M11.2 16.7h1.6" /></svg>
+                  <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3.5" y="5" width="17" height="15.5" rx="2.5" />
+                    <path d="M3.5 9.5h17" />
+                    <path d="M8 3v3.4M16 3v3.4" />
+                    <path d="M7.3 13.2h1.6M11.2 13.2h1.6M15.1 13.2h1.6M7.3 16.7h1.6M11.2 16.7h1.6" />
+                  </svg>
                 </button>
                 <input type="date" id="birthday_native" class="date-native-hidden" tabindex="-1" aria-hidden="true" />
               </div>
@@ -2691,10 +2833,23 @@
     (function() {
       var groupTabs = document.querySelectorAll('.career-tabs .ctab[data-tab]');
       if (!groupTabs.length) return;
-      var REGION_LABELS = { hcm: 'TP. Hồ Chí Minh', hn: 'Hà Nội', dn: 'Đà Nẵng', other: 'Tỉnh/Thành phố khác' };
-      var GROUP_LABELS = { store: 'Cửa hàng', office: 'Văn phòng', prod: 'Khối sản xuất' };
+      var REGION_LABELS = {
+        hcm: 'TP. Hồ Chí Minh',
+        hn: 'Hà Nội',
+        dn: 'Đà Nẵng',
+        other: 'Tỉnh/Thành phố khác'
+      };
+      var GROUP_LABELS = {
+        store: 'Cửa hàng',
+        office: 'Văn phòng',
+        prod: 'Khối sản xuất'
+      };
       // Lựa chọn hiện tại — popup "Thông tin tuyển dụng" đọc để mở sẵn đúng mục khu vực
-      window.CAREER_PICK = { region: 'hcm', province: '', group: 'store' };
+      window.CAREER_PICK = {
+        region: 'hcm',
+        province: '',
+        group: 'store'
+      };
       var crumbEl = document.getElementById('pickCrumb');
 
       function escC(s) {
@@ -2767,7 +2922,10 @@
           var t = b.getAttribute('data-goto');
           var tab = document.querySelector('.career-tabs .ctab[data-tab="' + t + '"]');
           if (tab) tab.click();
-          document.getElementById('career').scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.getElementById('career').scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
         });
       });
     })();
@@ -2779,11 +2937,16 @@
       if (!btn || !hotline) return;
       btn.addEventListener('click', function(e) {
         e.preventDefault();
-        hotline.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        hotline.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
         hotline.classList.remove('hotline-highlight');
         void hotline.offsetWidth; // restart animation nếu bấm nhiều lần liên tiếp
         hotline.classList.add('hotline-highlight');
-        setTimeout(function() { hotline.classList.remove('hotline-highlight'); }, 2900);
+        setTimeout(function() {
+          hotline.classList.remove('hotline-highlight');
+        }, 2900);
       });
     })();
 
@@ -2820,17 +2983,25 @@
       // Tách nội dung thành các mục theo dòng tiêu đề "Khu vực ..." (VD: Khu vực Hồ Chí Minh,
       // Khu vực Hà Nội, Khu vực Đà Nẵng, Khu vực Tỉnh/Thành phố khác). Phần trước mục đầu = mở đầu chung.
       function splitRegions(c) {
-        var intro = [], regions = [], cur = null;
+        var intro = [],
+          regions = [],
+          cur = null;
         c.split('\n').forEach(function(ln) {
           var t = ln.trim();
           if (/^khu vuc\s+\S/.test(normVi(t)) && t.length <= 45) {
-            cur = { name: t.replace(/[:：]\s*$/, ''), lines: [] };
+            cur = {
+              name: t.replace(/[:：]\s*$/, ''),
+              lines: []
+            };
             regions.push(cur);
             return;
           }
           (cur ? cur.lines : intro).push(ln);
         });
-        return { intro: intro.join('\n'), regions: regions };
+        return {
+          intro: intro.join('\n'),
+          regions: regions
+        };
       }
 
       function renderJobContent(c) {
@@ -2847,6 +3018,7 @@
         html += '<div class="jm-pre" id="jmRegionBody"></div>';
         content.innerHTML = html;
         var body = document.getElementById('jmRegionBody');
+
         function pick(i) {
           [].forEach.call(content.querySelectorAll('.jm-region'), function(b, bi) {
             b.classList.toggle('act', bi === i);
@@ -2859,7 +3031,12 @@
           });
         });
         // Mở sẵn mục khớp với khu vực khách đã chọn ở phần "Cơ hội nghề nghiệp"
-        var wantKey = { hcm: 'ho chi minh', hn: 'ha noi', dn: 'da nang', other: 'khac' }[(window.CAREER_PICK || {}).region] || '';
+        var wantKey = {
+          hcm: 'ho chi minh',
+          hn: 'ha noi',
+          dn: 'da nang',
+          other: 'khac'
+        } [(window.CAREER_PICK || {}).region] || '';
         var startIdx = 0;
         if (wantKey) secs.regions.forEach(function(r, i) {
           if (startIdx === 0 && normVi(r.name).indexOf(wantKey) >= 0) startIdx = i;
@@ -2934,15 +3111,24 @@
         th.setAttribute('role', 'button');
         th.setAttribute('tabindex', '0');
         th.setAttribute('aria-label', 'Xem ảnh tuyển dụng' + (img.alt ? ': ' + img.alt : ''));
-        th.addEventListener('click', function() { openLb(img.currentSrc || img.src, img.alt); });
+        th.addEventListener('click', function() {
+          openLb(img.currentSrc || img.src, img.alt);
+        });
         th.addEventListener('keydown', function(e) {
-          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLb(img.currentSrc || img.src, img.alt); }
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openLb(img.currentSrc || img.src, img.alt);
+          }
         });
       });
       document.getElementById('imgLightboxX').addEventListener('click', closeLb);
-      lbImg.addEventListener('click', function(e) { e.stopPropagation(); }); // bấm vào ảnh -> giữ nguyên
+      lbImg.addEventListener('click', function(e) {
+        e.stopPropagation();
+      }); // bấm vào ảnh -> giữ nguyên
       lb.addEventListener('click', closeLb); // bấm ra ngoài ảnh -> đóng
-      document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeLb(); });
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeLb();
+      });
     })();
 
     /* Ngày sinh dd/mm/yyyy: format khi gõ, parse để validate/gửi, đồng bộ với lịch native */
@@ -3037,28 +3223,41 @@
     };
     var APPLY_CFG = APPLY_DEFAULTS;
 
-    function applyEsc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+    function applyEsc(s) {
+      return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
     function fillSelectOptions(sel, list, placeholder) {
       if (!sel) return;
       var cur = sel.value;
       var html = '<option value="" disabled selected>' + applyEsc(placeholder) + '</option>';
-      (list || []).forEach(function(o) { html += '<option>' + applyEsc(o) + '</option>'; });
+      (list || []).forEach(function(o) {
+        html += '<option>' + applyEsc(o) + '</option>';
+      });
       sel.innerHTML = html;
       if (cur) sel.value = cur;
     }
+
     function renderApplyStatics() {
       var h = document.getElementById('applyTitle');
       if (h) {
         var parts = String(APPLY_CFG.title || '').trim().split(/\s+/);
-        if (parts.length > 1) { var last = parts.pop(); h.innerHTML = applyEsc(parts.join(' ')) + ' <span class="grad-text">' + applyEsc(last) + '</span>'; }
-        else if (parts.length === 1 && parts[0]) { h.textContent = parts[0]; }
+        if (parts.length > 1) {
+          var last = parts.pop();
+          h.innerHTML = applyEsc(parts.join(' ')) + ' <span class="grad-text">' + applyEsc(last) + '</span>';
+        } else if (parts.length === 1 && parts[0]) {
+          h.textContent = parts[0];
+        }
       }
-      var p = document.getElementById('applyDesc'); if (p) p.textContent = APPLY_CFG.desc || '';
+      var p = document.getElementById('applyDesc');
+      if (p) p.textContent = APPLY_CFG.desc || '';
       fillSelectOptions(document.getElementById('gender'), APPLY_CFG.genders, 'Chọn giới tính');
       fillSelectOptions(document.getElementById('brand'), APPLY_CFG.brands, 'Chọn thương hiệu');
     }
     renderApplyStatics();
-    fetch('/api/applyform').then(function(r) { return r.json(); }).then(function(d) {
+    fetch('/api/applyform').then(function(r) {
+      return r.json();
+    }).then(function(d) {
       if (!d || typeof d !== 'object') return;
       APPLY_CFG = {
         title: d.title || APPLY_DEFAULTS.title,
@@ -3071,7 +3270,9 @@
     }).catch(function() {});
 
     /* Ảnh 4 thẻ thương hiệu (tab Cửa hàng) — chỉnh trong dashboard tab "Ảnh thương hiệu" */
-    fetch('/api/brandimages').then(function(r) { return r.json(); }).then(function(d) {
+    fetch('/api/brandimages').then(function(r) {
+      return r.json();
+    }).then(function(d) {
       if (!d || typeof d !== 'object') return;
       ['maycha', 'tamhao', 'gagion', 'trahu'].forEach(function(k) {
         var img = document.getElementById('brandimg-' + k);
@@ -3094,6 +3295,7 @@
       // Cửa hàng: cf49 trên 1Office là dropdown ĐÓNG (chỉ 8 giá trị cố định) -> không cho chọn "Khác"
       // để tránh gửi text lạ khiến 1Office bỏ trống. Các khối khác giữ "Khác" cho tới khi có danh sách xác nhận.
       var CLOSED_DROPDOWN_GROUPS = ['Cửa hàng'];
+
       function fillPositions(group) {
         var list = (APPLY_CFG.positions && APPLY_CFG.positions[group]) || [];
         var otherOpt = CLOSED_DROPDOWN_GROUPS.indexOf(group) >= 0 ? '' : '<option value="__other__">Khác</option>';
@@ -3130,6 +3332,7 @@
       // Khu vực mong muốn làm việc: chỉ áp dụng cho Khối "Cửa hàng"
       var workareaCell = document.getElementById('workareaCell');
       var locGrid = document.getElementById('locGrid');
+
       function toggleWorkarea(show) {
         workareaCell.style.display = show ? '' : 'none';
         locGrid.classList.toggle('wa-hidden', !show);
@@ -3192,33 +3395,73 @@
       // item = chuỗi (value = nhãn hiển thị) hoặc { v: giá-trị-1Office, label: nhãn-hiển-thị }.
       var WORKAREA_ZONES = {
         hcm: {
-          groups: [
-            { label: 'Quận nội thành', items: ['Quận 1', 'Quận 2', 'Quận 3', 'Quận 4', 'Quận 5', 'Quận 6', 'Quận 7', 'Quận 8', 'Quận 9', 'Quận 10', 'Quận 11', 'Quận 12'] },
-            { label: 'Thành phố', items: [{ v: 'TP. Thủ Đức', label: 'TP. Thủ Đức (bao gồm Q2, Q9, Thủ Đức)' }] },
-            { label: 'Quận khác', items: ['Quận Tân Bình', 'Quận Tân Phú', 'Quận Phú Nhuận', 'Quận Gò Vấp', 'Quận Bình Thạnh', 'Quận Bình Tân'] },
-            { label: 'Huyện ngoại thành', items: ['Huyện Bình Chánh', 'Huyện Hóc Môn', 'Huyện Nhà Bè', { v: 'Củ Chi', label: 'Huyện Củ Chi' }] }
+          groups: [{
+              label: 'Quận nội thành',
+              items: ['Quận 1', 'Quận 2', 'Quận 3', 'Quận 4', 'Quận 5', 'Quận 6', 'Quận 7', 'Quận 8', 'Quận 9', 'Quận 10', 'Quận 11', 'Quận 12']
+            },
+            {
+              label: 'Thành phố',
+              items: [{
+                v: 'TP. Thủ Đức',
+                label: 'TP. Thủ Đức (bao gồm Q2, Q9, Thủ Đức)'
+              }]
+            },
+            {
+              label: 'Quận khác',
+              items: ['Quận Tân Bình', 'Quận Tân Phú', 'Quận Phú Nhuận', 'Quận Gò Vấp', 'Quận Bình Thạnh', 'Quận Bình Tân']
+            },
+            {
+              label: 'Huyện ngoại thành',
+              items: ['Huyện Bình Chánh', 'Huyện Hóc Môn', 'Huyện Nhà Bè', {
+                v: 'Củ Chi',
+                label: 'Huyện Củ Chi'
+              }]
+            }
           ]
         },
         hn: {
-          groups: [
-            { label: 'Trung tâm', items: ['Hoàn Kiếm (Hà Nội)', 'Ba Đình (Hà Nội)', 'Đống Đa (Hà Nội)', 'Hai Bà Trưng (Hà Nội)', 'Tây Hồ (Hà Nội)'] },
-            { label: 'Nội thành khác', items: ['Cầu Giấy (Hà Nội)', 'Hoàng Mai (Hà Nội)', 'Long Biên (Hà Nội)'] },
-            { label: 'Ngoại thành', items: ['Nam Từ Liêm (Hà Nội)', 'Bắc Từ Liêm (Hà Nội)', 'Hà Đông (Hà Nội)'] }
+          groups: [{
+              label: 'Trung tâm',
+              items: ['Hoàn Kiếm (Hà Nội)', 'Ba Đình (Hà Nội)', 'Đống Đa (Hà Nội)', 'Hai Bà Trưng (Hà Nội)', 'Tây Hồ (Hà Nội)']
+            },
+            {
+              label: 'Nội thành khác',
+              items: ['Cầu Giấy (Hà Nội)', 'Hoàng Mai (Hà Nội)', 'Long Biên (Hà Nội)']
+            },
+            {
+              label: 'Ngoại thành',
+              items: ['Nam Từ Liêm (Hà Nội)', 'Bắc Từ Liêm (Hà Nội)', 'Hà Đông (Hà Nội)']
+            }
           ]
         },
         other: {
-          groups: [
-            { label: 'Bình Dương', items: [{ v: 'TP Thủ Dầu Một', label: 'TP. Thủ Dầu Một' }, 'TP. Dĩ An', 'TX. Thuận An'] },
-            { label: 'Miền Tây', items: ['Long An', 'Tiền Giang', 'An Giang', 'Đồng Tháp', 'Trà Vinh', 'Kiên Giang', 'TP. Rạch Giá', 'Cần Thơ'] },
-            { label: 'Miền Trung & Tây Nguyên', items: ['Đà Nẵng', 'Thành phố Huế', 'Thành phố Đà Lạt', 'Bình Thuận', 'Phan Thiết'] },
-            { label: 'Vùng khác', items: ['Đồng Nai', 'Tây Ninh', 'Bà Rịa', 'Vũng Tàu'] }
+          groups: [{
+              label: 'Bình Dương',
+              items: [{
+                v: 'TP Thủ Dầu Một',
+                label: 'TP. Thủ Dầu Một'
+              }, 'TP. Dĩ An', 'TX. Thuận An']
+            },
+            {
+              label: 'Miền Tây',
+              items: ['Long An', 'Tiền Giang', 'An Giang', 'Đồng Tháp', 'Trà Vinh', 'Kiên Giang', 'TP. Rạch Giá', 'Cần Thơ']
+            },
+            {
+              label: 'Miền Trung & Tây Nguyên',
+              items: ['Đà Nẵng', 'Thành phố Huế', 'Thành phố Đà Lạt', 'Bình Thuận', 'Phan Thiết']
+            },
+            {
+              label: 'Vùng khác',
+              items: ['Đồng Nai', 'Tây Ninh', 'Bà Rịa', 'Vũng Tàu']
+            }
           ]
         }
       };
 
       function fillWorkarea(zone) {
         var z = WORKAREA_ZONES[zone];
-        waOther.style.display = 'none'; waOther.value = '';
+        waOther.style.display = 'none';
+        waOther.value = '';
         if (!z) {
           waSel.innerHTML = '<option value="" disabled selected>Chọn địa điểm cụ thể</option>';
           waSel.disabled = true;
@@ -3247,16 +3490,21 @@
       waSel.addEventListener('change', function() {
         var isOther = waSel.value === '__other__';
         waOther.style.display = isOther ? 'block' : 'none';
-        if (isOther) waOther.focus(); else waOther.value = '';
+        if (isOther) waOther.focus();
+        else waOther.value = '';
         waSel.classList.remove('err');
       });
-      waOther.addEventListener('input', function() { waOther.classList.remove('err'); });
+      waOther.addEventListener('input', function() {
+        waOther.classList.remove('err');
+      });
     })();
 
     /* [đã bỏ] widget Tỉnh/Thành + Quận/Huyện cũ */
     (function() {
       if (true) return; // vô hiệu hóa cascade cũ (thay bằng dropdown ở trên)
-      function msEsc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+      function msEsc(s) {
+        return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
       // Bỏ dấu tiếng Việt để tìm kiếm không dấu
       function msNorm(s) {
         return String(s || '').toLowerCase()
@@ -3272,62 +3520,135 @@
         var selected = [];
         if (config.placeholder) input.setAttribute('placeholder', config.placeholder);
 
-        function emit() { if (config.onChange) config.onChange(selected.slice()); }
+        function emit() {
+          if (config.onChange) config.onChange(selected.slice());
+        }
+
         function filtered() {
           var q = msNorm(input.value.trim());
-          return options.filter(function(o) { return !q || msNorm(o).indexOf(q) >= 0; });
+          return options.filter(function(o) {
+            return !q || msNorm(o).indexOf(q) >= 0;
+          });
         }
+
         function renderTags() {
-          Array.prototype.slice.call(control.querySelectorAll('.ms-tag')).forEach(function(t) { t.remove(); });
+          Array.prototype.slice.call(control.querySelectorAll('.ms-tag')).forEach(function(t) {
+            t.remove();
+          });
           selected.forEach(function(v) {
-            var tag = document.createElement('span'); tag.className = 'ms-tag';
+            var tag = document.createElement('span');
+            tag.className = 'ms-tag';
             tag.innerHTML = '<span>' + msEsc(v) + '</span>';
-            var b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-label', 'Bỏ ' + v); b.textContent = '×';
-            b.addEventListener('mousedown', function(e) { e.preventDefault(); e.stopPropagation(); toggle(v); });
+            var b = document.createElement('button');
+            b.type = 'button';
+            b.setAttribute('aria-label', 'Bỏ ' + v);
+            b.textContent = '×';
+            b.addEventListener('mousedown', function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              toggle(v);
+            });
             tag.appendChild(b);
             control.insertBefore(tag, input);
           });
         }
+
         function renderMenu() {
           var list = filtered();
-          if (!list.length) { menu.innerHTML = '<div class="ms-empty">Không tìm thấy</div>'; return; }
+          if (!list.length) {
+            menu.innerHTML = '<div class="ms-empty">Không tìm thấy</div>';
+            return;
+          }
           menu.innerHTML = list.map(function(o) {
             return '<div class="ms-opt' + (selected.indexOf(o) >= 0 ? ' sel' : '') + '" data-val="' + msEsc(o) + '">' + msEsc(o) + '</div>';
           }).join('');
         }
-        function open() { msEl.classList.add('open'); menu.hidden = false; renderMenu(); }
-        function close() { msEl.classList.remove('open'); menu.hidden = true; input.value = ''; }
-        function atMax() { return config.max && selected.length >= config.max; }
-        function syncMax() { if (config.max) input.style.display = atMax() ? 'none' : ''; } // đủ số lượng -> ẩn ô nhập, không cho chọn thêm
+
+        function open() {
+          msEl.classList.add('open');
+          menu.hidden = false;
+          renderMenu();
+        }
+
+        function close() {
+          msEl.classList.remove('open');
+          menu.hidden = true;
+          input.value = '';
+        }
+
+        function atMax() {
+          return config.max && selected.length >= config.max;
+        }
+
+        function syncMax() {
+          if (config.max) input.style.display = atMax() ? 'none' : '';
+        } // đủ số lượng -> ẩn ô nhập, không cho chọn thêm
         function toggle(v) {
           var i = selected.indexOf(v);
           if (i >= 0) selected.splice(i, 1);
-          else { if (atMax()) return; selected.push(v); }
-          renderTags(); emit(); syncMax();
-          if (atMax()) close(); else renderMenu();
+          else {
+            if (atMax()) return;
+            selected.push(v);
+          }
+          renderTags();
+          emit();
+          syncMax();
+          if (atMax()) close();
+          else renderMenu();
         }
 
-        control.addEventListener('click', function() { if (atMax()) return; input.focus(); if (menu.hidden) open(); });
-        input.addEventListener('focus', function() { control.classList.add('focus'); });
-        input.addEventListener('blur', function() { control.classList.remove('focus'); });
-        input.addEventListener('input', function() { if (menu.hidden) open(); else renderMenu(); });
+        control.addEventListener('click', function() {
+          if (atMax()) return;
+          input.focus();
+          if (menu.hidden) open();
+        });
+        input.addEventListener('focus', function() {
+          control.classList.add('focus');
+        });
+        input.addEventListener('blur', function() {
+          control.classList.remove('focus');
+        });
+        input.addEventListener('input', function() {
+          if (menu.hidden) open();
+          else renderMenu();
+        });
         menu.addEventListener('mousedown', function(e) {
           var opt = e.target.closest ? e.target.closest('.ms-opt') : null;
           if (!opt) return;
           e.preventDefault();
           toggle(opt.getAttribute('data-val'));
-          input.value = ''; renderMenu(); input.focus();
+          input.value = '';
+          renderMenu();
+          input.focus();
         });
         input.addEventListener('keydown', function(e) {
-          if (e.key === 'Backspace' && !input.value && selected.length) { toggle(selected[selected.length - 1]); }
-          else if (e.key === 'Enter') { e.preventDefault(); var l = filtered(); if (l.length) { toggle(l[0]); input.value = ''; renderMenu(); } }
-          else if (e.key === 'Escape') { close(); input.blur(); }
+          if (e.key === 'Backspace' && !input.value && selected.length) {
+            toggle(selected[selected.length - 1]);
+          } else if (e.key === 'Enter') {
+            e.preventDefault();
+            var l = filtered();
+            if (l.length) {
+              toggle(l[0]);
+              input.value = '';
+              renderMenu();
+            }
+          } else if (e.key === 'Escape') {
+            close();
+            input.blur();
+          }
         });
-        document.addEventListener('click', function(e) { if (!msEl.contains(e.target)) close(); });
+        document.addEventListener('click', function(e) {
+          if (!msEl.contains(e.target)) close();
+        });
 
         return {
-          getValues: function() { return selected.slice(); },
-          setOptions: function(o) { options = o || []; renderMenu(); }
+          getValues: function() {
+            return selected.slice();
+          },
+          setOptions: function(o) {
+            options = o || [];
+            renderMenu();
+          }
         };
       }
 
@@ -3349,36 +3670,67 @@
       }
 
       function makeDistrictBlock(prov) {
-        var block = document.createElement('div'); block.className = 'dist-block'; block.setAttribute('data-prov', prov);
-        var label = document.createElement('div'); label.className = 'dist-block-label';
+        var block = document.createElement('div');
+        block.className = 'dist-block';
+        block.setAttribute('data-prov', prov);
+        var label = document.createElement('div');
+        label.className = 'dist-block-label';
         label.innerHTML = 'Quận/Huyện tại <b>' + msEsc(prov) + '</b>';
-        var ms = document.createElement('div'); ms.className = 'ms';
+        var ms = document.createElement('div');
+        ms.className = 'ms';
         ms.innerHTML = '<div class="ms-control"><input type="text" class="ms-input" autocomplete="off" /></div><div class="ms-menu" hidden></div>';
-        var hint = document.createElement('p'); hint.className = 'jgb-hint'; hint.style.marginTop = '8px';
+        var hint = document.createElement('p');
+        hint.className = 'jgb-hint';
+        hint.style.marginTop = '8px';
         hint.textContent = 'Có thể chọn nhiều Quận/Huyện tại tỉnh/thành này.';
-        block.appendChild(label); block.appendChild(ms); block.appendChild(hint);
+        block.appendChild(label);
+        block.appendChild(ms);
+        block.appendChild(hint);
         districtWrap.appendChild(block);
-        var picker = makeMultiSelect(ms, { options: LOCATIONS[prov] || [], placeholder: 'Tìm & chọn Quận/Huyện…', onChange: composeValue });
-        distPickers[prov] = { picker: picker, blockEl: block };
+        var picker = makeMultiSelect(ms, {
+          options: LOCATIONS[prov] || [],
+          placeholder: 'Tìm & chọn Quận/Huyện…',
+          onChange: composeValue
+        });
+        distPickers[prov] = {
+          picker: picker,
+          blockEl: block
+        };
       }
 
       function onProvinceChange(provs) {
-        provs.forEach(function(p) { if (!distPickers[p]) makeDistrictBlock(p); });
-        Object.keys(distPickers).forEach(function(p) {
-          if (provs.indexOf(p) < 0) { distPickers[p].blockEl.remove(); delete distPickers[p]; }
+        provs.forEach(function(p) {
+          if (!distPickers[p]) makeDistrictBlock(p);
         });
-        provs.forEach(function(p) { if (distPickers[p]) districtWrap.appendChild(distPickers[p].blockEl); });
+        Object.keys(distPickers).forEach(function(p) {
+          if (provs.indexOf(p) < 0) {
+            distPickers[p].blockEl.remove();
+            delete distPickers[p];
+          }
+        });
+        provs.forEach(function(p) {
+          if (distPickers[p]) districtWrap.appendChild(distPickers[p].blockEl);
+        });
         composeValue();
       }
 
-      fetch('/vn-locations.json').then(function(r) { return r.json(); }).then(function(d) {
+      fetch('/vn-locations.json').then(function(r) {
+        return r.json();
+      }).then(function(d) {
         LOCATIONS = d || {};
-        provPicker = makeMultiSelect(provMs, { options: Object.keys(LOCATIONS), max: 1, onChange: onProvinceChange });
+        provPicker = makeMultiSelect(provMs, {
+          options: Object.keys(LOCATIONS),
+          max: 1,
+          onChange: onProvinceChange
+        });
       }).catch(function() {
         // Fallback: cho nhập tay nếu không tải được dữ liệu địa phương
         provMs.innerHTML = '<input type="text" id="provinceInput" placeholder="Nhập khu vực mong muốn làm việc" autocomplete="off" style="width:100%;padding:14px 16px;border-radius:12px;border:1px solid var(--line-2);background:var(--bg);font-size:15px;font-family:inherit" />';
         var fb = provMs.querySelector('#provinceInput');
-        fb.addEventListener('input', function() { hidden.value = fb.value.trim(); if (hidden.value) provMs.classList.remove('err'); });
+        fb.addEventListener('input', function() {
+          hidden.value = fb.value.trim();
+          if (hidden.value) provMs.classList.remove('err');
+        });
       });
     })();
 
