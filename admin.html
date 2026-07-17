@@ -1339,7 +1339,7 @@ function renderRecruit() {
     + '<label>Tiêu đề popup</label><input class="r_title" value="' + esc(r.title || '') + '" />'
     + '<label>Nội dung (giữ nguyên xuống dòng; dán link http... sẽ tự thành link)</label>'
     + '<textarea class="r_content" spellcheck="false">' + esc(r.content || '') + '</textarea>'
-    + '<div class="ra"><button class="btn rprev">👁 Xem trước</button><button class="btn primary rsave">Lưu</button><span class="hintnote">Để trống nội dung = popup hiện "đang cập nhật".</span></div>'
+    + '<div class="ra"><button class="btn rprev">👁 Xem trước</button><button class="btn primary rsave">Lưu</button><span class="hintnote">Để trống nội dung = popup hiện "đang cập nhật". Dòng bắt đầu bằng <b>Khu vực ...</b> (VD: Khu vực Hồ Chí Minh / Khu vực Hà Nội / Khu vực Đà Nẵng / Khu vực Tỉnh-Thành phố khác) sẽ thành <b>nút chọn khu vực</b> trong popup — khách bấm khu vực nào xem nội dung khu vực đó; phần trước dòng khu vực đầu tiên luôn hiển thị.</span></div>'
     + '</div>';
   var card = document.querySelector('#recruitList .reccard');
   card.querySelector('.rsave').onclick = function () { captureRecEdit(); saveRecruit(r.brand, card.querySelector('.r_title').value, card.querySelector('.r_content').value, r.name); };

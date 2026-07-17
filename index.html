@@ -1027,6 +1027,42 @@
       text-decoration: underline
     }
 
+    /* Nút chọn khu vực trong popup (nội dung chia mục theo dòng "Khu vực ...") */
+    .jm-regions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 4px 0 16px;
+      white-space: normal
+    }
+
+    .jm-region {
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 9px 18px;
+      border-radius: 999px;
+      background: var(--grad);
+      color: #fff;
+      opacity: .55;
+      transition: opacity .15s, box-shadow .15s
+    }
+
+    .jm-region:hover {
+      opacity: .85
+    }
+
+    .jm-region.act {
+      opacity: 1;
+      box-shadow: 0 10px 22px -10px rgba(198, 147, 32, .65)
+    }
+
+    .jm-region.act::after {
+      content: " ✓"
+    }
+
     @media(max-width:560px) {
       .jm-body {
         padding: 18px 18px 22px
@@ -2635,11 +2671,61 @@
         });
       }
 
+      // Bỏ dấu để nhận diện dòng "Khu vực ..." không phân biệt hoa thường/dấu
+      function normVi(s) {
+        return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd');
+      }
+
+      // Tách nội dung thành các mục theo dòng tiêu đề "Khu vực ..." (VD: Khu vực Hồ Chí Minh,
+      // Khu vực Hà Nội, Khu vực Đà Nẵng, Khu vực Tỉnh/Thành phố khác). Phần trước mục đầu = mở đầu chung.
+      function splitRegions(c) {
+        var intro = [], regions = [], cur = null;
+        c.split('\n').forEach(function(ln) {
+          var t = ln.trim();
+          if (/^khu vuc\s+\S/.test(normVi(t)) && t.length <= 45) {
+            cur = { name: t.replace(/[:：]\s*$/, ''), lines: [] };
+            regions.push(cur);
+            return;
+          }
+          (cur ? cur.lines : intro).push(ln);
+        });
+        return { intro: intro.join('\n'), regions: regions };
+      }
+
+      function renderJobContent(c) {
+        var secs = splitRegions(c);
+        if (!secs.regions.length) {
+          content.innerHTML = linkify(c);
+          return;
+        }
+        var html = '';
+        if (secs.intro.trim()) html += '<div class="jm-pre">' + linkify(secs.intro.trim()) + '</div>';
+        html += '<div class="jm-regions">' + secs.regions.map(function(r, i) {
+          return '<button type="button" class="jm-region" data-i="' + i + '">' + esc(r.name) + '</button>';
+        }).join('') + '</div>';
+        html += '<div class="jm-pre" id="jmRegionBody"></div>';
+        content.innerHTML = html;
+        var body = document.getElementById('jmRegionBody');
+        function pick(i) {
+          [].forEach.call(content.querySelectorAll('.jm-region'), function(b, bi) {
+            b.classList.toggle('act', bi === i);
+          });
+          body.innerHTML = linkify(secs.regions[i].lines.join('\n').trim());
+        }
+        [].forEach.call(content.querySelectorAll('.jm-region'), function(b) {
+          b.addEventListener('click', function() {
+            pick(+b.getAttribute('data-i'));
+          });
+        });
+        pick(0);
+      }
+
       function openJob(job, name) {
         var rec = RECRUIT[job] || {},
           c = (rec.content || '').trim();
         title.textContent = rec.title || ('📋 Thông tin tuyển dụng — ' + name);
-        content.innerHTML = c ? linkify(c) :
+        if (c) renderJobContent(c);
+        else content.innerHTML =
           'Thông tin tuyển dụng của <b>' + esc(name) + '</b> đang được cập nhật.\n\nBạn vui lòng để lại hồ sơ qua form Đăng ký ứng tuyển bên dưới — đội ngũ Nhân sự sẽ liên hệ và tư vấn vị trí phù hợp nhất với bạn nhé! 🧡';
         ov.querySelector('.jm-body').scrollTop = 0;
         ov.classList.add('show');
