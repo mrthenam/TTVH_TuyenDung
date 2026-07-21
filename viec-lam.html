@@ -347,22 +347,20 @@
     // Bỏ dấu tiếng Việt để so khớp từ khóa không phân biệt dấu/hoa thường
     function normVi(s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd'); }
 
-    // Gom địa điểm theo Tỉnh/Thành (như trang chủ) thay vì liệt kê từng đoạn địa chỉ.
-    // Mỗi khu vực nhận diện qua từ khóa (không dấu) trong chuỗi địa điểm của tin.
+    // Gom địa điểm theo khu vực. Dropdown LUÔN hiện cố định 5 mục:
+    // TP. Hồ Chí Minh · Hà Nội · Miền Nam · Miền Bắc · Miền Trung.
+    // Nhận diện qua từ khóa (không dấu) trong chuỗi địa điểm của tin.
+    var LOC_HCM = ['ho chi minh', 'hcm', 'sai gon', 'thu duc', 'quan 1', 'quan 2', 'quan 3', 'quan 4', 'quan 5', 'quan 6', 'quan 7', 'quan 8', 'quan 9', 'quan 10', 'quan 11', 'quan 12', 'binh tan', 'tan phu', 'tan binh', 'binh thanh', 'go vap', 'phu nhuan', 'hoc mon', 'binh chanh', 'nha be', 'cu chi', 'tan tao', 'huynh tinh cua'];
+    var LOC_HN = ['ha noi', 'cau giay', 'dong da', 'ba dinh', 'hoan kiem', 'tay ho', 'thanh xuan', 'hoang mai', 'long bien', 'tu liem', 'ha dong', 'chua lang'];
+    var LOC_SOUTH = ['binh duong', 'di an', 'thuan an', 'thu dau mot', 'dong nai', 'bien hoa', 'ba ria', 'vung tau', 'long an', 'tien giang', 'my tho', 'an giang', 'long xuyen', 'chau doc', 'can tho', 'tay ninh', 'binh phuoc', 'dong thap', 'cao lanh', 'sa dec', 'vinh long', 'ben tre', 'tra vinh', 'soc trang', 'bac lieu', 'ca mau', 'kien giang', 'rach gia', 'phu quoc', 'hau giang'];
+    var LOC_NORTH = ['hai phong', 'quang ninh', 'ha long', 'bac ninh', 'hai duong', 'hung yen', 'nam dinh', 'thai binh', 'vinh phuc', 'phu tho', 'viet tri', 'bac giang', 'thai nguyen', 'lang son', 'ha nam', 'ninh binh', 'hoa binh', 'lao cai', 'yen bai', 'tuyen quang', 'cao bang', 'bac kan', 'son la', 'dien bien', 'lai chau', 'ha giang'];
+    var LOC_CENTRAL = ['da nang', 'hue', 'thua thien', 'quang nam', 'hoi an', 'tam ky', 'quang ngai', 'binh dinh', 'quy nhon', 'phu yen', 'tuy hoa', 'khanh hoa', 'nha trang', 'cam ranh', 'ninh thuan', 'phan rang', 'binh thuan', 'phan thiet', 'thanh hoa', 'nghe an', 'ha tinh', 'quang binh', 'dong hoi', 'quang tri', 'dong ha', 'lam dong', 'da lat', 'bao loc', 'dak lak', 'buon ma thuot', 'buon me thuot', 'gia lai', 'pleiku', 'kon tum', 'dak nong', 'tay nguyen'];
     var LOC_REGIONS = [
-      { label: 'TP. Hồ Chí Minh', kw: ['ho chi minh', 'hcm', 'sai gon', 'thu duc', 'quan 1', 'quan 2', 'quan 3', 'quan 4', 'quan 5', 'quan 6', 'quan 7', 'quan 8', 'quan 9', 'quan 10', 'quan 11', 'quan 12', 'binh tan', 'tan phu', 'tan binh', 'binh thanh', 'go vap', 'phu nhuan', 'hoc mon', 'binh chanh', 'nha be', 'cu chi', 'tan tao', 'huynh tinh cua'] },
-      { label: 'Hà Nội', kw: ['ha noi', 'cau giay', 'dong da', 'ba dinh', 'hoan kiem', 'tay ho', 'thanh xuan', 'hoang mai', 'long bien', 'tu liem', 'ha dong', 'chua lang'] },
-      { label: 'Đà Nẵng', kw: ['da nang'] },
-      { label: 'Bình Dương', kw: ['binh duong', 'di an', 'thuan an', 'thu dau mot'] },
-      { label: 'Đồng Nai', kw: ['dong nai', 'bien hoa'] },
-      { label: 'Bà Rịa - Vũng Tàu', kw: ['ba ria', 'vung tau'] },
-      { label: 'Long An', kw: ['long an'] },
-      { label: 'Tiền Giang', kw: ['tien giang'] },
-      { label: 'An Giang', kw: ['an giang'] },
-      { label: 'Cần Thơ', kw: ['can tho'] },
-      { label: 'Lâm Đồng', kw: ['lam dong', 'da lat'] },
-      { label: 'Huế', kw: ['hue', 'thua thien'] },
-      { label: 'Tây Ninh', kw: ['tay ninh'] }
+      { label: 'TP. Hồ Chí Minh', kw: LOC_HCM },
+      { label: 'Hà Nội', kw: LOC_HN },
+      { label: 'Miền Nam', kw: LOC_HCM.concat(LOC_SOUTH) },
+      { label: 'Miền Bắc', kw: LOC_HN.concat(LOC_NORTH) },
+      { label: 'Miền Trung', kw: LOC_CENTRAL }
     ];
     function locMatchRegion(loc, label) {
       var reg = null;
@@ -460,11 +458,8 @@
         if (t) tally(types, t);
       });
       fill(document.getElementById('f_type'), finalize(types));
-      // Địa điểm: gom theo Tỉnh/Thành, chỉ hiện khu vực thực sự có tin (giữ thứ tự như trang chủ)
-      var locOpts = LOC_REGIONS.filter(function (reg) {
-        return JOBS.some(function (j) { return locMatchRegion(j.location, reg.label); });
-      }).map(function (reg) { return reg.label; });
-      fill(document.getElementById('f_loc'), locOpts);
+      // Địa điểm: LUÔN hiện cố định 5 khu vực (TP.HCM / Hà Nội / Miền Nam / Miền Bắc / Miền Trung)
+      fill(document.getElementById('f_loc'), LOC_REGIONS.map(function (reg) { return reg.label; }));
     }
 
     function renderList() {
