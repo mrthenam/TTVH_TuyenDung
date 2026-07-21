@@ -346,6 +346,31 @@
     function fVal(id) { return document.getElementById(id).value; }
     // Bỏ dấu tiếng Việt để so khớp từ khóa không phân biệt dấu/hoa thường
     function normVi(s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd'); }
+
+    // Gom địa điểm theo Tỉnh/Thành (như trang chủ) thay vì liệt kê từng đoạn địa chỉ.
+    // Mỗi khu vực nhận diện qua từ khóa (không dấu) trong chuỗi địa điểm của tin.
+    var LOC_REGIONS = [
+      { label: 'TP. Hồ Chí Minh', kw: ['ho chi minh', 'hcm', 'sai gon', 'thu duc', 'quan 1', 'quan 2', 'quan 3', 'quan 4', 'quan 5', 'quan 6', 'quan 7', 'quan 8', 'quan 9', 'quan 10', 'quan 11', 'quan 12', 'binh tan', 'tan phu', 'tan binh', 'binh thanh', 'go vap', 'phu nhuan', 'hoc mon', 'binh chanh', 'nha be', 'cu chi', 'tan tao', 'huynh tinh cua'] },
+      { label: 'Hà Nội', kw: ['ha noi', 'cau giay', 'dong da', 'ba dinh', 'hoan kiem', 'tay ho', 'thanh xuan', 'hoang mai', 'long bien', 'tu liem', 'ha dong', 'chua lang'] },
+      { label: 'Đà Nẵng', kw: ['da nang'] },
+      { label: 'Bình Dương', kw: ['binh duong', 'di an', 'thuan an', 'thu dau mot'] },
+      { label: 'Đồng Nai', kw: ['dong nai', 'bien hoa'] },
+      { label: 'Bà Rịa - Vũng Tàu', kw: ['ba ria', 'vung tau'] },
+      { label: 'Long An', kw: ['long an'] },
+      { label: 'Tiền Giang', kw: ['tien giang'] },
+      { label: 'An Giang', kw: ['an giang'] },
+      { label: 'Cần Thơ', kw: ['can tho'] },
+      { label: 'Lâm Đồng', kw: ['lam dong', 'da lat'] },
+      { label: 'Huế', kw: ['hue', 'thua thien'] },
+      { label: 'Tây Ninh', kw: ['tay ninh'] }
+    ];
+    function locMatchRegion(loc, label) {
+      var reg = null;
+      LOC_REGIONS.forEach(function (r) { if (r.label === label) reg = r; });
+      if (!reg) return true;
+      var n = ' ' + normVi(loc) + ' ';
+      return reg.kw.some(function (k) { return n.indexOf(k) >= 0; });
+    }
     // Bộ lọc phụ theo Khối: Cửa hàng -> Thương hiệu; Văn phòng -> Bộ phận.
     // Tin không có cột brand/bộ phận nên nhận diện bằng TỪ KHÓA (không dấu) trong tiêu đề tin.
     var SUB_FILTERS = {
@@ -396,7 +421,7 @@
         if (fDept && j.dept !== fDept) return false;
         if (fSub && !subMatch(j, fDept, fSub)) return false;
         if (fType && (j.jobtype || '').trim().toLowerCase() !== fType.toLowerCase()) return false;
-        if (fLoc && (j.location || '').toLowerCase().indexOf(fLoc.toLowerCase()) < 0) return false;
+        if (fLoc && !locMatchRegion(j.location, fLoc)) return false;
         if (fSal && !salMatch(j.salary, fSal)) return false;
         if (curQ && (j.title || '').toLowerCase().indexOf(curQ) < 0) return false;
         return true;
@@ -429,17 +454,17 @@
           return { label: label, count: e.count };
         }).sort(function (a, b) { return b.count - a.count || a.label.localeCompare(b.label, 'vi'); }).map(function (x) { return x.label; });
       }
-      var types = {}, locs = {};
+      var types = {};
       JOBS.forEach(function (j) {
         var t = (j.jobtype || '').trim();
         if (t) tally(types, t);
-        String(j.location || '').split(',').forEach(function (seg) {
-          seg = seg.trim();
-          if (seg) tally(locs, seg);
-        });
       });
       fill(document.getElementById('f_type'), finalize(types));
-      fill(document.getElementById('f_loc'), finalize(locs).slice(0, 25));
+      // Địa điểm: gom theo Tỉnh/Thành, chỉ hiện khu vực thực sự có tin (giữ thứ tự như trang chủ)
+      var locOpts = LOC_REGIONS.filter(function (reg) {
+        return JOBS.some(function (j) { return locMatchRegion(j.location, reg.label); });
+      }).map(function (reg) { return reg.label; });
+      fill(document.getElementById('f_loc'), locOpts);
     }
 
     function renderList() {
