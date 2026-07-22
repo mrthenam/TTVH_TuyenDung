@@ -450,6 +450,7 @@
       color: var(--brand-brown);
       min-height: 54px;
       box-shadow: none;
+      align-items: center; /* không set -> item bị kéo giãn full-height, chữ trồi lên đỉnh ô + con trỏ lệch xuống dòng dưới */
     }
     .ts-wrapper.focus .ts-control { border-color: var(--brand-gold); box-shadow: 0 0 0 4px rgba(223, 170, 31, .14) }
     .ts-wrapper.err .ts-control { border-color: var(--error); box-shadow: 0 0 0 4px rgba(196, 69, 54, .12) }
