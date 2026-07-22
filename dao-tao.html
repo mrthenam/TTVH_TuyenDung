@@ -439,6 +439,21 @@
       line-height: 1.65;
     }
 
+    /* TomSelect tự copy class "ans" của <select> gốc lên .ts-wrapper -> .ts-wrapper bị dính
+       luôn khung/nền/bo góc của .ans (dùng chung cho input toàn trang), tạo thành khung
+       ngoài lồng bên ngoài khung của .ts-control -> nhìn như 2 ô lồng nhau. Bỏ khung ngoài,
+       để .ts-control (bên dưới) là khung duy nhất hiển thị (đã có đủ style mặc định/focus/lỗi). */
+    .ts-wrapper.ans,
+    .ts-wrapper.ans:focus,
+    .ts-wrapper.ans.err,
+    .ts-wrapper.ans.valid {
+      border: none;
+      border-radius: 0;
+      padding: 0;
+      min-height: 0;
+      background: transparent;
+      box-shadow: none;
+    }
     /* TomSelect đồng bộ ô nhập */
     .ts-wrapper .ts-control {
       border: 1px solid var(--border-input);
