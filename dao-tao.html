@@ -566,14 +566,14 @@
 
             <div class="q">
               <label class="qlabel" for="province">Tỉnh/Thành phố bạn đang ở <span class="req">*</span></label>
-              <p class="hint">Bạn có thể điền tỉnh thành trước khi sáp nhập. Ví dụ: TP. Hồ Chí Minh, Bình Dương, Long An…</p>
-              <input type="text" id="province" class="ans" placeholder="Nhập tỉnh/thành phố" />
+              <p class="hint">Gõ để tìm hoặc chọn trong danh sách sổ xuống. Bạn cũng có thể tự nhập tỉnh thành trước khi sáp nhập. Ví dụ: TP. Hồ Chí Minh, Bình Dương, Long An…</p>
+              <select id="province" class="ans" placeholder="Nhập hoặc chọn tỉnh/thành phố…"></select>
             </div>
 
             <div class="q">
               <label class="qlabel" for="district">Quận/Huyện bạn đang ở <span class="req">*</span></label>
-              <p class="hint">Bạn có thể điền quận huyện trước khi sáp nhập. Ví dụ: Quận 1, Quận 3, Quận 7…</p>
-              <input type="text" id="district" class="ans" placeholder="Nhập quận/huyện" />
+              <p class="hint">Chọn Tỉnh/Thành phố trước để gợi ý đúng Quận/Huyện, hoặc gõ để tìm/tự nhập quận huyện trước khi sáp nhập. Ví dụ: Quận 1, Quận 3, Quận 7…</p>
+              <select id="district" class="ans" placeholder="Nhập hoặc chọn quận/huyện…"></select>
             </div>
           </div>
         </section>
@@ -938,6 +938,70 @@
         });
       });
 
+      // ===== Tỉnh/Thành phố & Quận/Huyện: vừa gõ tự do, vừa chọn từ danh sách (TomSelect) =====
+      var LOCATIONS = {};
+      var tsTextOpts = {
+        maxOptions: 1000,
+        create: true,
+        persist: false,
+        createFilter: function(s) {
+          return s.trim().length > 0;
+        },
+        render: {
+          no_results: function() {
+            return "<div class=\"no-results\">Không thấy — gõ rồi Enter để tự nhập.</div>";
+          }
+        }
+      };
+      var provinceTS = new TomSelect("#province", Object.assign({ placeholder: "Nhập hoặc chọn tỉnh/thành phố…" }, tsTextOpts));
+      var districtTS = new TomSelect("#district", Object.assign({ placeholder: "Nhập hoặc chọn quận/huyện…" }, tsTextOpts));
+      // Đồng bộ trạng thái lỗi/hợp lệ (evalField chỉ set class lên <select> gốc đã ẩn) sang khung hiển thị thật (.ts-wrapper)
+      function syncTsState(id, ts) {
+        var el = document.getElementById(id);
+        ts.wrapper.classList.toggle('err', el.classList.contains('err'));
+        ts.wrapper.classList.toggle('valid', el.classList.contains('valid'));
+      }
+      function fillDistricts(provinceName) {
+        var prevVal = districtTS.getValue();
+        districtTS.clearOptions();
+        (LOCATIONS[provinceName] || []).forEach(function(d) {
+          districtTS.addOption({ value: d, text: d });
+        });
+        districtTS.refreshOptions(false);
+        // Đổi tỉnh không xoá quận/huyện đã nhập/chọn trước đó, kể cả khi không nằm trong danh sách tỉnh mới
+        if (prevVal) {
+          if (!districtTS.options[prevVal]) districtTS.addOption({ value: prevVal, text: prevVal });
+          districtTS.setValue(prevVal, true);
+        }
+      }
+      provinceTS.on('change', function() {
+        evalField('province', false);
+        syncTsState('province', provinceTS);
+        fillDistricts(provinceTS.getValue());
+      });
+      provinceTS.on('blur', function() {
+        evalField('province', false);
+        syncTsState('province', provinceTS);
+      });
+      districtTS.on('change', function() {
+        evalField('district', false);
+        syncTsState('district', districtTS);
+      });
+      districtTS.on('blur', function() {
+        evalField('district', false);
+        syncTsState('district', districtTS);
+      });
+      fetch('/vn-locations.json').then(function(r) {
+        return r.json();
+      }).then(function(d) {
+        LOCATIONS = d || {};
+        Object.keys(LOCATIONS).forEach(function(p) {
+          provinceTS.addOption({ value: p, text: p });
+        });
+        provinceTS.refreshOptions(false);
+        if (provinceTS.getValue()) fillDistricts(provinceTS.getValue());
+      }).catch(function() {});
+
       // Tự viết hoa chữ cái đầu mỗi từ cho ô Họ Tên (khi rời ô)
       function titleCaseVi(s) {
         return s.replace(/\s+/g, ' ').trim().split(' ').map(function(w) {
@@ -1010,6 +1074,8 @@
       form.addEventListener('change', updateProgress);
       form.addEventListener('input', updateProgress);
       if (storeTS && storeTS.on) storeTS.on('change', updateProgress);
+      provinceTS.on('change', updateProgress);
+      districtTS.on('change', updateProgress);
       updateProgress();
 
       form.addEventListener('submit', function(e) {
@@ -1019,9 +1085,15 @@
 
         Object.keys(validators).forEach(function(id) {
           var good = evalField(id, true);
+          if (id === 'province') syncTsState('province', provinceTS);
+          if (id === 'district') syncTsState('district', districtTS);
           if (!good) {
             ok = false;
-            if (!firstBad) firstBad = document.getElementById(id);
+            if (!firstBad) {
+              if (id === 'province') firstBad = provinceTS.control_input || provinceTS.wrapper;
+              else if (id === 'district') firstBad = districtTS.control_input || districtTS.wrapper;
+              else firstBad = document.getElementById(id);
+            }
           }
         });
 
@@ -1133,6 +1205,11 @@
         document.getElementById('opts-position').classList.remove('err');
         document.getElementById('opts-mode').classList.remove('err');
         brandSel.classList.remove('err');
+        provinceTS.clear();
+        provinceTS.wrapper.classList.remove('err', 'valid');
+        districtTS.clear();
+        districtTS.clearOptions();
+        districtTS.wrapper.classList.remove('err', 'valid');
         fillStores('');
         updateProgress();
         okPanel.style.display = 'none';
