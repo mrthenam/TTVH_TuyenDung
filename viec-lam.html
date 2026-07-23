@@ -633,6 +633,10 @@
       if (ddescEl) markDescHeadings(ddescEl);
       detailEl.classList.add('open');
       detailEl.scrollTop = 0;
+      if (window.innerWidth > 880) {
+        var dy = detailEl.getBoundingClientRect().top + window.pageYOffset - 90;
+        window.scrollTo({ top: Math.max(0, dy), behavior: 'smooth' });
+      }
       var bb = document.getElementById('backBtn');
       if (bb) bb.addEventListener('click', function () { detailEl.classList.remove('open'); });
     }
