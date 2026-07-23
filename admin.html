@@ -193,6 +193,9 @@
   .rtab{border:1px solid var(--line-2);background:var(--card);border-radius:99px;padding:9px 18px;cursor:pointer;font-weight:700;font-size:13.5px;color:var(--txt);font-family:inherit}
   .rtab:hover{background:var(--card-2)}
   .rtab.act{background:var(--grad);color:#fff;border-color:transparent}
+  .rtab .n{margin-left:7px;font-size:11px;font-weight:800;background:rgba(0,0,0,.08);border-radius:999px;padding:1px 8px}
+  .rtab.act .n{background:rgba(255,255,255,.28)}
+  .job-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
   .recruitlist{display:flex;flex-direction:column;gap:16px}
   .reccard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 20px;box-shadow:0 14px 40px -32px rgba(224,52,43,.4)}
   .reccard .rh{display:flex;align-items:center;gap:10px;margin-bottom:12px}
@@ -544,6 +547,7 @@
           <div class="spacer"></div>
           <div class="tbar"><a class="btn" href="viec-lam.html" target="_blank">↗ Mở trang</a><button class="btn primary" id="jobAddBtn">+ Thêm công việc</button></div>
         </div>
+        <div class="job-tabs" id="jobTabs"></div>
         <div id="jobsList" class="jobs-admin"></div>
       </div>
 
@@ -873,45 +877,74 @@ function updateJobAddBtn() {
   btn.style.cursor = allowed ? '' : 'not-allowed';
   btn.title = allowed ? '' : 'Bạn chưa được cấp quyền đăng tin ở khối nào';
 }
+var JOB_GROUPS = [
+  { key: 'Cửa hàng', label: '🏪 Cửa hàng' },
+  { key: 'Văn phòng', label: '🏢 Văn phòng' },
+  { key: 'Khối sản xuất', label: '🏭 Khối sản xuất' }
+];
+var jobDeptSel = ''; // '' = Tất cả, '__other__' = nhóm Khác, hoặc đúng key của JOB_GROUPS
+function jobRowHtml(j) {
+  var editable = canDept(j.dept);
+  var actions = editable
+    ? '<button class="btn" data-edit="' + j.id + '">Sửa</button><button class="btn danger" data-del="' + j.id + '">Xóa</button>'
+    : '<span class="jlock" title="Bạn không có quyền chỉnh sửa khối này">🔒 Chỉ xem</span>';
+  return '<div class="jobrow">' +
+    '<div class="ji"><h4>' + esc(j.title) + '</h4><div class="jm">' +
+    (j.salary ? '<b>' + esc(j.salary) + '</b>' : '') +
+    (j.location ? '<span>📍 ' + esc(j.location) + '</span>' : '') +
+    (j.deadline ? '<span>⏳ ' + esc(jdmy(j.deadline)) + '</span>' : '') +
+    '</div></div>' +
+    (j.dept ? '<span class="jdept">' + esc(j.dept) + '</span>' : '') +
+    '<div class="ja">' + actions + '</div>' +
+    '</div>';
+}
 function loadJobs() {
   updateJobAddBtn();
   api('/api/agent/jobs').then(function (d) {
     JOBS_CACHE = (d && d.rows) || [];
     $('#jobsCount').textContent = JOBS_CACHE.length + ' công việc · hiển thị ở trang Tuyển dụng';
-    if (!JOBS_CACHE.length) { $('#jobsList').innerHTML = '<div style="color:var(--muted);padding:24px">Chưa có công việc nào. Bấm “+ Thêm công việc”.</div>'; return; }
-    function jobRowHtml(j) {
-      var editable = canDept(j.dept);
-      var actions = editable
-        ? '<button class="btn" data-edit="' + j.id + '">Sửa</button><button class="btn danger" data-del="' + j.id + '">Xóa</button>'
-        : '<span class="jlock" title="Bạn không có quyền chỉnh sửa khối này">🔒 Chỉ xem</span>';
-      return '<div class="jobrow">' +
-        '<div class="ji"><h4>' + esc(j.title) + '</h4><div class="jm">' +
-        (j.salary ? '<b>' + esc(j.salary) + '</b>' : '') +
-        (j.location ? '<span>📍 ' + esc(j.location) + '</span>' : '') +
-        (j.deadline ? '<span>⏳ ' + esc(jdmy(j.deadline)) + '</span>' : '') +
-        '</div></div>' +
-        (j.dept ? '<span class="jdept">' + esc(j.dept) + '</span>' : '') +
-        '<div class="ja">' + actions + '</div>' +
-        '</div>';
-    }
-    var JOB_GROUPS = [
-      { key: 'Cửa hàng', label: '🏪 Cửa hàng' },
-      { key: 'Văn phòng', label: '🏢 Văn phòng' },
-      { key: 'Khối sản xuất', label: '🏭 Khối sản xuất' }
-    ];
-    var html = '';
+    renderJobsList();
+  }).catch(function (e) { if (e.message === '401') logout(); });
+}
+function renderJobsList() {
+  if (!JOBS_CACHE.length) {
+    $('#jobTabs').innerHTML = '';
+    $('#jobsList').innerHTML = '<div style="color:var(--muted);padding:24px">Chưa có công việc nào. Bấm “+ Thêm công việc”.</div>';
+    return;
+  }
+  var known = JOB_GROUPS.map(function (g) { return g.key; });
+  var otherRows = JOBS_CACHE.filter(function (j) { return known.indexOf(j.dept) === -1; });
+  // Danh sách khối thực sự có tin (menu con) không tự reset lựa chọn đang xem khi ẩn đi mất
+  if (jobDeptSel && jobDeptSel !== '__other__' && !JOBS_CACHE.some(function (j) { return j.dept === jobDeptSel; })) jobDeptSel = '';
+  if (jobDeptSel === '__other__' && !otherRows.length) jobDeptSel = '';
+  var tabsHtml = '<button class="rtab' + (jobDeptSel === '' ? ' act' : '') + '" data-jd="">Tất cả<span class="n">' + JOBS_CACHE.length + '</span></button>';
+  JOB_GROUPS.forEach(function (g) {
+    var n = JOBS_CACHE.filter(function (j) { return j.dept === g.key; }).length;
+    if (!n) return;
+    tabsHtml += '<button class="rtab' + (jobDeptSel === g.key ? ' act' : '') + '" data-jd="' + esc(g.key) + '">' + g.label + '<span class="n">' + n + '</span></button>';
+  });
+  if (otherRows.length) {
+    tabsHtml += '<button class="rtab' + (jobDeptSel === '__other__' ? ' act' : '') + '" data-jd="__other__">🗂️ Khác<span class="n">' + otherRows.length + '</span></button>';
+  }
+  $('#jobTabs').innerHTML = tabsHtml;
+  [].forEach.call(document.querySelectorAll('#jobTabs .rtab'), function (b) {
+    b.onclick = function () { jobDeptSel = b.getAttribute('data-jd'); renderJobsList(); };
+  });
+
+  var html = '';
+  if (jobDeptSel === '') {
     JOB_GROUPS.forEach(function (g) {
       var rows = JOBS_CACHE.filter(function (j) { return j.dept === g.key; });
       if (!rows.length) return;
       html += '<div class="jgroup-head">' + g.label + '<span class="n">' + rows.length + '</span></div>' + rows.map(jobRowHtml).join('');
     });
-    var known = JOB_GROUPS.map(function (g) { return g.key; });
-    var other = JOBS_CACHE.filter(function (j) { return known.indexOf(j.dept) === -1; });
-    if (other.length) {
-      html += '<div class="jgroup-head">🗂️ Khác<span class="n">' + other.length + '</span></div>' + other.map(jobRowHtml).join('');
-    }
-    $('#jobsList').innerHTML = html;
-  }).catch(function (e) { if (e.message === '401') logout(); });
+    if (otherRows.length) html += '<div class="jgroup-head">🗂️ Khác<span class="n">' + otherRows.length + '</span></div>' + otherRows.map(jobRowHtml).join('');
+  } else if (jobDeptSel === '__other__') {
+    html = otherRows.map(jobRowHtml).join('');
+  } else {
+    html = JOBS_CACHE.filter(function (j) { return j.dept === jobDeptSel; }).map(jobRowHtml).join('');
+  }
+  $('#jobsList').innerHTML = html;
 }
 function fillDeptOptions(selected) {
   // Admin thấy đủ 3 khối; nhân viên chỉ thấy các khối được cấp quyền (giữ lại khối hiện tại của tin nếu đang sửa)
