@@ -164,6 +164,12 @@
   .jgroup-head{display:flex;align-items:center;gap:10px;font-family:var(--head);font-size:16.5px;font-weight:800;color:var(--txt);margin:18px 0 -2px}
   .jgroup-head:first-child{margin-top:0}
   .jgroup-head .n{font-family:inherit;font-size:12px;font-weight:700;color:var(--muted);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:2px 10px}
+  .jpager{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:20px}
+  .jpbtn{min-width:36px;height:36px;padding:0 9px;border:1px solid var(--line-2);background:var(--card);color:var(--txt);border-radius:9px;font-family:inherit;font-weight:700;font-size:13.5px;cursor:pointer}
+  .jpbtn:hover:not(:disabled):not(.act){border-color:var(--red);color:var(--red)}
+  .jpbtn.act{background:var(--grad);color:#fff;border-color:transparent}
+  .jpbtn:disabled{opacity:.4;cursor:default}
+  .jpdots{min-width:20px;text-align:center;color:var(--muted);align-self:center}
   /* khoảnh khắc vinh hoa */
   .galbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
   .galbar input#g_url{flex:1;min-width:240px;border:1px solid var(--line-2);border-radius:11px;padding:10px 14px;font-family:inherit;font-size:13.5px;background:var(--card)}
@@ -549,6 +555,7 @@
         </div>
         <div class="job-tabs" id="jobTabs"></div>
         <div id="jobsList" class="jobs-admin"></div>
+        <div class="jpager" id="jobPager"></div>
       </div>
 
       <!-- LỊCH SỬ CHỈNH SỬA -->
@@ -883,6 +890,44 @@ var JOB_GROUPS = [
   { key: 'Khối sản xuất', label: '🏭 Khối sản xuất' }
 ];
 var jobDeptSel = ''; // '' = Tất cả, '__other__' = nhóm Khác, hoặc đúng key của JOB_GROUPS
+var JOB_PAGE_SIZE = 10;
+var jobPage = 1;
+function jobGroupLabel(j) {
+  var g = null;
+  JOB_GROUPS.forEach(function (gr) { if (gr.key === j.dept) g = gr; });
+  return g ? g.label : '🗂️ Khác';
+}
+// Danh sách số trang gọn lại bằng dấu "…" khi có nhiều trang (giống trang Tuyển dụng công khai)
+function jobPageNums(total, cur) {
+  if (total <= 7) { var a = []; for (var i = 1; i <= total; i++) a.push(i); return a; }
+  var set = {}; [1, 2, total - 1, total, cur - 1, cur, cur + 1].forEach(function (n) { if (n >= 1 && n <= total) set[n] = 1; });
+  var arr = Object.keys(set).map(Number).sort(function (a, b) { return a - b; });
+  var out = [], prev = 0;
+  arr.forEach(function (n) { if (n - prev > 1) out.push('…'); out.push(n); prev = n; });
+  return out;
+}
+function renderJobPager(totalPages) {
+  var el = $('#jobPager');
+  if (totalPages <= 1) { el.innerHTML = ''; return; }
+  var html = '<button class="jpbtn" data-jp="prev"' + (jobPage === 1 ? ' disabled' : '') + '>‹</button>';
+  jobPageNums(totalPages, jobPage).forEach(function (n) {
+    if (n === '…') html += '<span class="jpdots">…</span>';
+    else html += '<button class="jpbtn' + (n === jobPage ? ' act' : '') + '" data-jp="' + n + '">' + n + '</button>';
+  });
+  html += '<button class="jpbtn" data-jp="next"' + (jobPage === totalPages ? ' disabled' : '') + '>›</button>';
+  el.innerHTML = html;
+  [].forEach.call(el.querySelectorAll('.jpbtn'), function (b) {
+    b.onclick = function () {
+      if (b.disabled) return;
+      var v = b.getAttribute('data-jp');
+      if (v === 'prev') jobPage--;
+      else if (v === 'next') jobPage++;
+      else jobPage = +v;
+      renderJobsList();
+      $('#jobsList').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+  });
+}
 function jobRowHtml(j) {
   var editable = canDept(j.dept);
   var actions = editable
@@ -928,23 +973,46 @@ function renderJobsList() {
   }
   $('#jobTabs').innerHTML = tabsHtml;
   [].forEach.call(document.querySelectorAll('#jobTabs .rtab'), function (b) {
-    b.onclick = function () { jobDeptSel = b.getAttribute('data-jd'); renderJobsList(); };
+    b.onclick = function () {
+      var v = b.getAttribute('data-jd');
+      if (v === jobDeptSel) return;
+      jobDeptSel = v; jobPage = 1; renderJobsList();
+    };
   });
 
-  var html = '';
+  // Danh sách theo tab đang chọn (Tất cả = ghép nguyên thứ tự các khối rồi tới Khác, để phân trang xuyên suốt)
+  var rowsToShow;
   if (jobDeptSel === '') {
-    JOB_GROUPS.forEach(function (g) {
-      var rows = JOBS_CACHE.filter(function (j) { return j.dept === g.key; });
-      if (!rows.length) return;
-      html += '<div class="jgroup-head">' + g.label + '<span class="n">' + rows.length + '</span></div>' + rows.map(jobRowHtml).join('');
-    });
-    if (otherRows.length) html += '<div class="jgroup-head">🗂️ Khác<span class="n">' + otherRows.length + '</span></div>' + otherRows.map(jobRowHtml).join('');
+    rowsToShow = [];
+    JOB_GROUPS.forEach(function (g) { rowsToShow = rowsToShow.concat(JOBS_CACHE.filter(function (j) { return j.dept === g.key; })); });
+    rowsToShow = rowsToShow.concat(otherRows);
   } else if (jobDeptSel === '__other__') {
-    html = otherRows.map(jobRowHtml).join('');
+    rowsToShow = otherRows;
   } else {
-    html = JOBS_CACHE.filter(function (j) { return j.dept === jobDeptSel; }).map(jobRowHtml).join('');
+    rowsToShow = JOBS_CACHE.filter(function (j) { return j.dept === jobDeptSel; });
   }
+
+  var totalPages = Math.max(1, Math.ceil(rowsToShow.length / JOB_PAGE_SIZE));
+  if (jobPage > totalPages) jobPage = totalPages;
+  if (jobPage < 1) jobPage = 1;
+  var start = (jobPage - 1) * JOB_PAGE_SIZE;
+  var pageRows = rowsToShow.slice(start, start + JOB_PAGE_SIZE);
+
+  var html = '';
+  pageRows.forEach(function (j, i) {
+    var globalIdx = start + i;
+    if (jobDeptSel === '') {
+      var lbl = jobGroupLabel(j);
+      var prevLbl = globalIdx > 0 ? jobGroupLabel(rowsToShow[globalIdx - 1]) : null;
+      if (lbl !== prevLbl) {
+        var cnt = rowsToShow.filter(function (x) { return jobGroupLabel(x) === lbl; }).length;
+        html += '<div class="jgroup-head">' + lbl + '<span class="n">' + cnt + '</span></div>';
+      }
+    }
+    html += jobRowHtml(j);
+  });
   $('#jobsList').innerHTML = html;
+  renderJobPager(totalPages);
 }
 function fillDeptOptions(selected) {
   // Admin thấy đủ 3 khối; nhân viên chỉ thấy các khối được cấp quyền (giữ lại khối hiện tại của tin nếu đang sửa)
