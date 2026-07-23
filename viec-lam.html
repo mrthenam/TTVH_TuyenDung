@@ -98,7 +98,8 @@
     .jcard .sal { color: var(--green); font-weight: 700; font-size: 14px; margin-top: 4px }
     .jcard .meta { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 8px; font-size: 13px; color: var(--muted) }
     .jcard .meta span { display: inline-flex; align-items: center; gap: 5px }
-    .jcard .dept { display: inline-block; margin-top: 9px; font-size: 11.5px; font-weight: 600; color: var(--red); background: rgba(212, 175, 55, .14); border-radius: 999px; padding: 3px 10px }
+    .jcard .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px }
+    .jcard .dept { display: inline-block; font-size: 11.5px; font-weight: 600; color: var(--red); background: rgba(212, 175, 55, .14); border-radius: 999px; padding: 3px 10px }
     /* phân trang */
     .pager { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 18px }
     .pbtn { min-width: 38px; height: 38px; padding: 0 10px; border: 1px solid var(--line); background: #fff; color: var(--txt); border-radius: 10px; font-family: inherit; font-weight: 700; font-size: 14px; cursor: pointer; transition: border-color .15s, color .15s }
@@ -392,6 +393,24 @@
         ]
       }
     };
+    // Nhãn "Thành phố/Tỉnh" hiển thị trên thẻ tin: ưu tiên nhận diện TP.HCM/Hà Nội qua từ khóa
+    // (đúng cả khi địa chỉ không kết thúc bằng tên thành phố, VD "...,  Quận 6" hay không có dấu phẩy);
+    // các tỉnh khác chưa có danh sách từ khóa riêng -> lấy đoạn cuối cùng của địa điểm (sau dấu phẩy).
+    function cityTag(loc) {
+      if (locMatchRegion(loc, 'TP. Hồ Chí Minh')) return 'TP. Hồ Chí Minh';
+      if (locMatchRegion(loc, 'Hà Nội')) return 'Hà Nội';
+      var segs = String(loc || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+      return segs.length ? segs[segs.length - 1] : '';
+    }
+    // Nhãn "Thương hiệu" (chỉ khối Cửa hàng) — nhận diện qua từ khóa trong tiêu đề tin,
+    // dùng chung danh sách với dropdown lọc Thương hiệu; không khớp thương hiệu nào -> bỏ qua (không hiện thẻ).
+    function brandTag(title) {
+      var hit = null;
+      (SUB_FILTERS['Cửa hàng'].options || []).forEach(function (o) {
+        if (!hit && o.kw && subMatch({ title: title }, 'Cửa hàng', o.v)) hit = o.label;
+      });
+      return hit;
+    }
     function subMatch(j, dept, val) {
       var cfg = SUB_FILTERS[dept];
       if (!cfg || !val) return true;
@@ -462,6 +481,18 @@
       fill(document.getElementById('f_loc'), LOC_REGIONS.map(function (reg) { return reg.label; }));
     }
 
+    // Thứ tự thẻ trên mỗi tin: Thành phố/Tỉnh -> Thương hiệu (chỉ Cửa hàng) -> Khối công việc
+    function jobTags(j) {
+      var tags = [];
+      var city = cityTag(j.location);
+      if (city) tags.push(city);
+      if (j.dept === 'Cửa hàng') {
+        var brand = brandTag(j.title);
+        if (brand) tags.push(brand);
+      }
+      if (j.dept) tags.push(j.dept);
+      return tags.map(function (t) { return '<span class="dept">' + esc(t) + '</span>'; }).join('');
+    }
     function renderList() {
       countEl.textContent = filtered.length + ' công việc';
       if (!filtered.length) { listEl.innerHTML = '<div class="empty">Không có công việc phù hợp.</div>'; if (pagerEl) pagerEl.innerHTML = ''; return; }
@@ -478,7 +509,7 @@
           (j.jobtype ? '<span>🕒 ' + esc(j.jobtype) + '</span>' : '') +
           (j.deadline ? '<span>⏳ Hạn: ' + esc(dmy(j.deadline)) + '</span>' : '') +
           '</div>' +
-          (j.dept ? '<span class="dept">' + esc(j.dept) + '</span>' : '') +
+          '<div class="tags">' + jobTags(j) + '</div>' +
           '</div>';
       }).join('');
       renderPager(totalPages);
