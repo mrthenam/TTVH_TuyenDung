@@ -1036,189 +1036,6 @@
       background: rgba(255, 255, 255, .3)
     }
 
-    /* POPUP THÔNG TIN TUYỂN DỤNG */
-    .jobmodal-ov {
-      position: fixed;
-      inset: 0;
-      background: rgba(42, 24, 16, .55);
-      backdrop-filter: blur(3px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 200;
-      padding: 20px
-    }
-
-    .jobmodal-ov.show {
-      display: flex
-    }
-
-    .jobmodal {
-      background: #fff;
-      max-width: 760px;
-      width: 100%;
-      max-height: 88vh;
-      display: flex;
-      flex-direction: column;
-      border-radius: 18px;
-      overflow: hidden;
-      box-shadow: 0 30px 80px -20px rgba(42, 24, 16, .55)
-    }
-
-    .jm-head {
-      background: var(--grad);
-      color: #fff;
-      padding: 18px 24px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex: none
-    }
-
-    .jm-head h3 {
-      font-family: var(--head);
-      font-size: clamp(18px, 3vw, 23px);
-      font-weight: 800;
-      line-height: 1.2;
-      flex: 1
-    }
-
-    .jm-x {
-      background: rgba(255, 255, 255, .22);
-      border: none;
-      color: #fff;
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      font-size: 22px;
-      line-height: 1;
-      cursor: pointer;
-      flex: none
-    }
-
-    .jm-x:hover {
-      background: rgba(255, 255, 255, .34)
-    }
-
-    .jm-body {
-      padding: 22px 26px 26px;
-      overflow-y: auto;
-      font-size: 15px;
-      line-height: 1.6;
-      color: var(--txt)
-    }
-
-    .jm-body h4 {
-      font-size: 17px;
-      font-weight: 800;
-      color: var(--red);
-      margin: 20px 0 10px;
-      padding-bottom: 6px;
-      border-bottom: 2px solid var(--grad-soft)
-    }
-
-    .jm-body h4:first-child {
-      margin-top: 0
-    }
-
-    .jm-body p {
-      margin: 5px 0
-    }
-
-    .jm-body .lvl {
-      font-weight: 800;
-      font-size: 15.5px;
-      margin-top: 14px
-    }
-
-    .jm-body .sub {
-      font-weight: 700;
-      color: var(--muted);
-      margin-top: 10px
-    }
-
-    .jm-body ul {
-      margin: 6px 0 10px;
-      padding-left: 22px
-    }
-
-    .jm-body li {
-      margin: 4px 0
-    }
-
-    .jm-body a {
-      color: #1a73e8;
-      text-decoration: underline;
-      word-break: break-word
-    }
-
-    .jm-body a.btn {
-      text-decoration: none
-    }
-
-    .jm-body a.btn-primary {
-      color: #fff
-    }
-
-    .jm-body a.btn-ghost {
-      color: var(--txt)
-    }
-
-    .jm-pre {
-      white-space: pre-wrap;
-      word-break: break-word;
-      font-size: 14.5px;
-      line-height: 1.65;
-      color: var(--txt)
-    }
-
-    .jm-pre a {
-      color: #1a73e8;
-      text-decoration: underline
-    }
-
-    /* Nút chọn khu vực trong popup (nội dung chia mục theo dòng "Khu vực ...") */
-    .jm-regions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin: 4px 0 16px;
-      white-space: normal
-    }
-
-    .jm-region {
-      border: none;
-      cursor: pointer;
-      font-family: inherit;
-      font-weight: 700;
-      font-size: 13px;
-      padding: 9px 18px;
-      border-radius: 999px;
-      background: var(--grad);
-      color: #fff;
-      opacity: .55;
-      transition: opacity .15s, box-shadow .15s
-    }
-
-    .jm-region:hover {
-      opacity: .85
-    }
-
-    .jm-region.act {
-      opacity: 1;
-      box-shadow: 0 10px 22px -10px rgba(198, 147, 32, .65)
-    }
-
-    .jm-region.act::after {
-      content: " ✓"
-    }
-
-    @media(max-width:560px) {
-      .jm-body {
-        padding: 18px 18px 22px
-      }
-    }
-
     /* WHY JOIN (cards) */
     .pain-grid {
       display: grid;
@@ -2633,24 +2450,6 @@
     </div>
   </section>
 
-  <!-- POPUP THÔNG TIN TUYỂN DỤNG -->
-  <div class="jobmodal-ov" id="jobModal">
-    <div class="jobmodal">
-      <div class="jm-head">
-        <h3 id="jmTitle">🍗 Tụi mình tìm đồng đội cho Gà rán</h3>
-        <button class="jm-x" id="jobModalX" type="button">×</button>
-      </div>
-      <div class="jm-body">
-        <div id="jmContent" class="jm-pre"></div>
-
-        <div style="text-align:center;margin-top:22px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-          <a href="#ungtuyen" class="btn btn-primary" id="jobApplyBtn">Ứng tuyển ngay →</a>
-          <a href="viec-lam.html?dept=store" class="btn btn-ghost" id="jobDetailBtn">Chi Tiết Tin Tuyển Dụng</a>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- LIGHTBOX XEM TOÀN ẢNH -->
   <div class="img-lightbox" id="imgLightbox">
     <button class="img-lightbox-x" id="imgLightboxX" type="button" aria-label="Đóng">×</button>
@@ -3085,138 +2884,39 @@
       });
     })();
 
-    /* Popup thông tin tuyển dụng (mỗi thương hiệu 1 nút, nội dung lấy từ dashboard) */
+    /* Nút "Xem tuyển dụng" (mỗi thương hiệu/bộ phận 1 nút) -> sang viec-lam.html
+       kèm bộ lọc Khối + Địa điểm + Thương hiệu/Bộ phận tương ứng đã chọn ở trên. */
     (function() {
-      var ov = document.getElementById('jobModal');
-      if (!ov) return;
-      var content = document.getElementById('jmContent'),
-        title = document.getElementById('jmTitle');
-      var RECRUIT = {};
-      fetch('/api/recruitment').then(function(r) {
-        return r.json();
-      }).then(function(d) {
-        (d.rows || []).forEach(function(r) {
-          RECRUIT[r.brand] = r;
-        });
-      }).catch(function() {});
-
-      function esc(s) {
-        return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-      }
-
-      function linkify(t) {
-        return esc(t).replace(/(https?:\/\/[^\s<]+)/g, function(u) {
-          return '<a href="' + u + '" target="_blank" rel="noopener">' + u + '</a>';
-        });
-      }
-
-      // Bỏ dấu để nhận diện dòng "Khu vực ..." không phân biệt hoa thường/dấu
-      function normVi(s) {
-        return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd');
-      }
-
-      // Tách nội dung thành các mục theo dòng tiêu đề "Khu vực ..." (VD: Khu vực Hồ Chí Minh,
-      // Khu vực Hà Nội, Khu vực Đà Nẵng, Khu vực Tỉnh/Thành phố khác). Phần trước mục đầu = mở đầu chung.
-      function splitRegions(c) {
-        var intro = [],
-          regions = [],
-          cur = null;
-        c.split('\n').forEach(function(ln) {
-          var t = ln.trim();
-          if (/^khu vuc\s+\S/.test(normVi(t)) && t.length <= 45) {
-            cur = {
-              name: t.replace(/[:：]\s*$/, ''),
-              lines: []
-            };
-            regions.push(cur);
-            return;
-          }
-          (cur ? cur.lines : intro).push(ln);
-        });
-        return {
-          intro: intro.join('\n'),
-          regions: regions
-        };
-      }
-
-      function renderJobContent(c) {
-        var secs = splitRegions(c);
-        if (!secs.regions.length) {
-          content.innerHTML = linkify(c);
-          return;
-        }
-        var html = '';
-        if (secs.intro.trim()) html += '<div class="jm-pre">' + linkify(secs.intro.trim()) + '</div>';
-        html += '<div class="jm-regions">' + secs.regions.map(function(r, i) {
-          return '<button type="button" class="jm-region" data-i="' + i + '">' + esc(r.name) + '</button>';
-        }).join('') + '</div>';
-        html += '<div class="jm-pre" id="jmRegionBody"></div>';
-        content.innerHTML = html;
-        var body = document.getElementById('jmRegionBody');
-
-        function pick(i) {
-          [].forEach.call(content.querySelectorAll('.jm-region'), function(b, bi) {
-            b.classList.toggle('act', bi === i);
-          });
-          body.innerHTML = linkify(secs.regions[i].lines.join('\n').trim());
-        }
-        [].forEach.call(content.querySelectorAll('.jm-region'), function(b) {
-          b.addEventListener('click', function() {
-            pick(+b.getAttribute('data-i'));
-          });
-        });
-        // Mở sẵn mục khớp với khu vực khách đã chọn ở phần "Cơ hội nghề nghiệp"
-        var wantKey = {
-          hcm: 'ho chi minh',
-          hn: 'ha noi',
-          dn: 'da nang',
-          other: 'khac'
-        } [(window.CAREER_PICK || {}).region] || '';
-        var startIdx = 0;
-        if (wantKey) secs.regions.forEach(function(r, i) {
-          if (startIdx === 0 && normVi(r.name).indexOf(wantKey) >= 0) startIdx = i;
-        });
-        pick(startIdx);
-      }
-
-      function openJob(job, name) {
-        var rec = RECRUIT[job] || {},
-          c = (rec.content || '').trim();
-        title.textContent = rec.title || ('📋 Thông tin tuyển dụng — ' + name);
-        if (c) renderJobContent(c);
-        else content.innerHTML =
-          'Thông tin tuyển dụng của <b>' + esc(name) + '</b> đang được cập nhật.\n\nBạn vui lòng để lại hồ sơ qua form Đăng ký ứng tuyển bên dưới — đội ngũ Nhân sự sẽ liên hệ và tư vấn vị trí phù hợp nhất với bạn nhé! 🧡';
-        ov.querySelector('.jm-body').scrollTop = 0;
-        ov.classList.add('show');
-        document.body.style.overflow = 'hidden';
-      }
-
-      function close() {
-        ov.classList.remove('show');
-        document.body.style.overflow = '';
-      }
+      var STORE_JOBS = ['maycha', 'tamhao', 'gagion', 'trahu'];
       var OFFICE_JOBS = ['marketing', 'hr', 'scm', 'finance', 'other'];
       var SANXUAT_JOBS = ['sanxuat', 'qaqc', 'khovan', 'kythuat'];
+      // Khu vực Đà Nẵng và các tỉnh lân cận -> gộp vào Miền Trung; các tỉnh phía Nam -> Miền Nam
+      // (khớp với 5 khu vực cố định của bộ lọc Địa điểm trên viec-lam.html).
+      var REGION_LOC = { hcm: 'TP. Hồ Chí Minh', hn: 'Hà Nội', dn: 'Miền Trung' };
+      var PROVINCE_LOC = {
+        'Đồng Nai': 'Miền Nam', 'Bình Dương': 'Miền Nam', 'Bà Rịa - Vũng Tàu': 'Miền Nam',
+        'Long An': 'Miền Nam', 'Tiền Giang': 'Miền Nam', 'An Giang': 'Miền Nam', 'Cần Thơ': 'Miền Nam',
+        'Lâm Đồng': 'Miền Trung', 'Huế': 'Miền Trung'
+      };
+      function careerLoc() {
+        var p = window.CAREER_PICK || {};
+        if (p.region === 'other') return p.province ? (PROVINCE_LOC[p.province] || '') : '';
+        return REGION_LOC[p.region] || '';
+      }
+      function careerJobUrl(dept, sub) {
+        var url = 'viec-lam.html?dept=' + dept;
+        if (sub) url += '&sub=' + encodeURIComponent(sub);
+        var loc = careerLoc();
+        if (loc) url += '&loc=' + encodeURIComponent(loc);
+        return url;
+      }
       [].forEach.call(document.querySelectorAll('.btn-job'), function(b) {
         b.addEventListener('click', function() {
           var job = b.getAttribute('data-job');
-          if (OFFICE_JOBS.indexOf(job) >= 0) {
-            window.location.href = 'viec-lam.html?dept=office';
-          } else if (SANXUAT_JOBS.indexOf(job) >= 0) {
-            window.location.href = 'viec-lam.html?dept=sanxuat';
-          } else {
-            openJob(job, b.getAttribute('data-name'));
-          }
+          if (STORE_JOBS.indexOf(job) >= 0) window.location.href = careerJobUrl('store', job);
+          else if (OFFICE_JOBS.indexOf(job) >= 0) window.location.href = careerJobUrl('office', job);
+          else if (SANXUAT_JOBS.indexOf(job) >= 0) window.location.href = careerJobUrl('sanxuat', null);
         });
-      });
-      document.getElementById('jobModalX').addEventListener('click', close);
-      var ab = document.getElementById('jobApplyBtn');
-      if (ab) ab.addEventListener('click', close);
-      ov.addEventListener('click', function(e) {
-        if (e.target === ov) close();
-      });
-      document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') close();
       });
     })();
 
