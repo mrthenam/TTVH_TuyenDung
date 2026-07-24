@@ -706,17 +706,20 @@
       box-shadow: 0 26px 50px -28px rgba(198, 147, 32, .55)
     }
 
+    /* Thẻ thương hiệu/bộ phận: ô logo gọn phía trên, nhường chỗ cho thông tin việc làm bên dưới */
     .show-thumb {
-      height: 200px;
-      min-height: 200px;
+      height: 132px;
+      min-height: 132px;
       display: grid;
       place-items: center;
+      padding: 14px;
+      border-bottom: 1px solid var(--line);
       overflow: hidden
     }
 
     .show-thumb img {
-      max-height: 192px;
-      max-width: 96%;
+      max-height: 96px;
+      max-width: 82%;
       width: auto;
       height: auto;
       object-fit: contain
@@ -726,20 +729,8 @@
       background: #ffffff
     }
 
-    .tile-cream {
-      background: linear-gradient(135deg, #f6e7bd 0%, #efd9a0 100%)
-    }
-
-    .tile-dark {
-      background: #161616
-    }
-
-    .tile-tea {
-      background: #14463a
-    }
-
     .show-card .meta {
-      padding: 16px 16px 10px;
+      padding: 14px 16px 12px;
       flex: 1
     }
 
@@ -753,16 +744,53 @@
       color: var(--muted)
     }
 
+    /* Thông tin việc làm thật trên thẻ (số vị trí + hình thức làm việc) */
+    .jc-count {
+      display: block;
+      margin-top: 7px;
+      font-size: 13.5px;
+      font-weight: 800;
+      color: var(--txt)
+    }
+
+    .show-card .meta .jc-count b {
+      display: inline; /* ghi đè .meta b {display:block} để số nằm cùng dòng với chữ */
+      font-size: inherit;
+      color: var(--red-2)
+    }
+
+    /* Ảnh poster chỉ dùng làm nguồn cho lightbox (dashboard vẫn cập nhật qua id brandimg-*) */
+    .poster-src {
+      display: none !important
+    }
+
+    .jc-types {
+      display: block;
+      margin-top: 3px;
+      font-size: 12.5px;
+      color: var(--muted)
+    }
+
+    .show-card.no-job {
+      opacity: .66
+    }
+
+    .show-card.no-job .jc-count {
+      font-weight: 700;
+      color: var(--muted)
+    }
+
+    /* Nút vàng: chữ nâu đậm trên nền vàng sáng cho đủ tương phản (thay chữ trắng) */
     .btn-job {
-      margin: 0 12px 16px;
+      margin: 0 12px 14px;
       padding: 11px 10px;
       border: none;
       border-radius: 12px;
-      background: var(--grad);
-      color: #fff;
+      background: var(--grad-gold);
+      color: var(--txt);
       font-family: inherit;
       font-weight: 800;
-      font-size: 13px;
+      font-size: 13.5px;
       white-space: nowrap;
       cursor: pointer;
       display: flex;
@@ -770,12 +798,48 @@
       justify-content: center;
       gap: 6px;
       box-shadow: 0 10px 24px -12px rgba(198, 147, 32, .6);
-      transition: transform .15s, box-shadow .15s
+      transition: transform .15s, box-shadow .15s, filter .15s
     }
 
     .btn-job:hover {
       transform: translateY(-2px);
+      filter: brightness(.96);
       box-shadow: 0 16px 30px -12px rgba(198, 147, 32, .7)
+    }
+
+    /* Nút phụ "Xem poster" — nêu rõ chức năng thay cho icon kính lúp khó hiểu */
+    .btn-poster {
+      margin: 0 12px 14px;
+      min-height: 40px;
+      padding: 9px 10px;
+      border: 1px solid var(--line-2);
+      border-radius: 12px;
+      background: transparent;
+      color: var(--muted);
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 12.5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px
+    }
+
+    .btn-poster:hover {
+      border-color: var(--gold);
+      color: var(--red-2)
+    }
+
+    .btn-poster svg {
+      width: 15px;
+      height: 15px;
+      flex: none;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round
     }
 
     @media(max-width:880px) {
@@ -812,35 +876,75 @@
       border: 1px solid var(--line-2);
       background: var(--card);
       border-radius: 99px;
-      padding: 11px 22px;
+      padding: 11px 20px;
       cursor: pointer;
       font-family: inherit;
       font-weight: 800;
       font-size: 14.5px;
       color: var(--txt);
-      white-space: nowrap
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px
     }
 
     .ctab:hover {
       background: var(--card-2)
     }
 
+    /* Đang chọn: nền vàng sáng + chữ nâu đậm (tương phản tốt hơn chữ trắng trên vàng) */
     .ctab.act {
-      background: var(--grad);
-      color: #fff;
+      background: var(--grad-gold);
+      color: var(--txt);
       border-color: transparent;
       box-shadow: 0 12px 26px -12px rgba(198, 147, 32, .6)
     }
 
-    /* Chọn khu vực -> nhóm công việc (bố cục 2 tầng) */
-    .pick-label {
-      text-align: center;
+    /* Icon SVG dùng chung cho nút chọn (thay emoji để hiển thị đồng nhất mọi thiết bị) */
+    .ci {
+      width: 17px;
+      height: 17px;
+      flex: none;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.7;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      color: var(--red-2)
+    }
+
+    .ctab.act .ci {
+      color: inherit
+    }
+
+    /* Chọn khu vực -> nhóm công việc (bố cục 2 tầng, có đánh số bước) */
+    .pick-step {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
       font-size: 12px;
       font-weight: 800;
       letter-spacing: .16em;
       text-transform: uppercase;
       color: var(--muted);
-      margin-bottom: 12px
+      margin-bottom: 14px
+    }
+
+    .pick-step .stepnum {
+      display: inline-grid;
+      place-items: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 9px;
+      background: var(--grad-soft);
+      color: var(--red-2);
+      font-size: 12px;
+      letter-spacing: 0
+    }
+
+    .pick-step.s2 {
+      margin-top: 12px
     }
 
     .career-tabs.rg {
@@ -881,35 +985,45 @@
       color: var(--red)
     }
 
-    .pick-crumb {
-      text-align: center;
-      font-size: 13.5px;
-      font-weight: 600;
-      color: var(--muted);
-      margin: -8px 0 28px
+    /* Dòng kết quả: nêu rõ đang có bao nhiêu vị trí, căn trái thẳng mép thẻ bên dưới */
+    .pick-result {
+      text-align: left;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--txt);
+      margin: 2px 0 18px
     }
 
-    .pick-crumb b {
-      color: var(--red)
+    .pick-result b {
+      color: var(--red-2)
     }
 
     .job-thumb {
-      height: 200px;
-      min-height: 200px;
+      height: 132px;
+      min-height: 132px;
       display: grid;
       place-items: center;
+      padding: 14px;
       background: var(--grad-soft);
+      border-bottom: 1px solid var(--line);
       overflow: hidden
     }
 
-    .job-ic {
-      font-size: 64px;
-      line-height: 1
+    .job-thumb .ji {
+      width: 46px;
+      height: 46px;
+      fill: none;
+      stroke: var(--red-2);
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round
     }
 
     .job-thumb img {
-      max-height: 192px;
-      max-width: 96%;
+      max-height: 96px;
+      max-width: 82%;
       width: auto;
       height: auto;
       object-fit: contain
@@ -922,70 +1036,25 @@
       }
 
       .ctab {
-        padding: 10px 16px;
+        padding: 10px 14px;
         font-size: 13.5px
       }
 
-      .job-thumb {
-        height: 150px;
-        min-height: 150px
+      .job-thumb,
+      .show-thumb {
+        height: 118px;
+        min-height: 118px
       }
 
-      .job-ic {
-        font-size: 52px
+      .job-thumb .ji {
+        width: 40px;
+        height: 40px
       }
 
-      .job-thumb img {
-        max-height: 142px
+      .job-thumb img,
+      .show-thumb img {
+        max-height: 84px
       }
-    }
-
-    /* Ảnh thẻ bấm được -> báo hiệu + xem toàn ảnh */
-    .clickable-thumb {
-      position: relative;
-      cursor: zoom-in
-    }
-
-    .clickable-thumb::before {
-      content: "🔍";
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      z-index: 2;
-      width: 30px;
-      height: 30px;
-      display: grid;
-      place-items: center;
-      font-size: 14px;
-      background: rgba(255, 255, 255, .92);
-      border-radius: 9px;
-      box-shadow: 0 4px 12px -5px rgba(42, 24, 16, .5);
-      transition: transform .2s
-    }
-
-    .clickable-thumb::after {
-      content: "🔍 Nhấn để xem ảnh";
-      position: absolute;
-      inset: 0;
-      z-index: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(42, 24, 16, .42);
-      color: #fff;
-      font-size: 13px;
-      font-weight: 700;
-      opacity: 0;
-      transition: opacity .2s;
-      pointer-events: none
-    }
-
-    .show-card:hover .clickable-thumb::after {
-      opacity: 1
-    }
-
-    .show-card:hover .clickable-thumb::before {
-      transform: scale(1.1)
     }
 
     /* LIGHTBOX xem toàn ảnh */
@@ -2334,15 +2403,15 @@
     <div class="wrap">
       <div class="sec-head center fade">
         <span class="eyebrow">Cơ hội nghề nghiệp</span>
-        <h2 class="title">Khám phá <span class="grad-text">cơ hội nghề nghiệp</span></h2>
+        <h2 class="title">Khám phá <span class="grad-text">việc làm phù hợp với bạn</span></h2>
       </div>
 
-      <div class="pick-label fade">Chọn nơi bạn muốn làm việc và công việc phù hợp với bạn.</div>
+      <div class="pick-step fade"><span class="stepnum">01</span> Chọn khu vực</div>
       <div class="career-tabs rg fade" id="regionTabs">
-        <button type="button" class="ctab act" data-region="hcm">📍 TP. Hồ Chí Minh</button>
-        <button type="button" class="ctab" data-region="hn">📍 Hà Nội</button>
-        <button type="button" class="ctab" data-region="dn">📍 Đà Nẵng</button>
-        <button type="button" class="ctab" data-region="other" id="regionOtherBtn">📍 Tỉnh/Thành phố khác</button>
+        <button type="button" class="ctab act" data-region="hcm"><svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21c-4.2-4-6.3-7-6.3-9.6a6.3 6.3 0 0 1 12.6 0C18.3 14 16.2 17 12 21z" /><circle cx="12" cy="11" r="2.4" /></svg>TP. Hồ Chí Minh</button>
+        <button type="button" class="ctab" data-region="hn"><svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21c-4.2-4-6.3-7-6.3-9.6a6.3 6.3 0 0 1 12.6 0C18.3 14 16.2 17 12 21z" /><circle cx="12" cy="11" r="2.4" /></svg>Hà Nội</button>
+        <button type="button" class="ctab" data-region="dn"><svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21c-4.2-4-6.3-7-6.3-9.6a6.3 6.3 0 0 1 12.6 0C18.3 14 16.2 17 12 21z" /><circle cx="12" cy="11" r="2.4" /></svg>Đà Nẵng</button>
+        <button type="button" class="ctab" data-region="other" id="regionOtherBtn"><svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21c-4.2-4-6.3-7-6.3-9.6a6.3 6.3 0 0 1 12.6 0C18.3 14 16.2 17 12 21z" /><circle cx="12" cy="11" r="2.4" /></svg><span id="regionOtherTxt">Tỉnh/Thành phố khác</span></button>
       </div>
       <div class="province-list fade" id="provinceList">
         <button type="button" class="pv">Đồng Nai</button>
@@ -2358,35 +2427,44 @@
       </div>
 
 
+      <div class="pick-step s2 fade"><span class="stepnum">02</span> Chọn nhóm công việc</div>
       <div class="career-tabs fade">
-        <button type="button" class="ctab act" data-tab="store">🏪 Cửa Hàng</button>
-        <button type="button" class="ctab" data-tab="office">🏢 Văn Phòng</button>
-        <button type="button" class="ctab" data-tab="prod">🏭 Khối Sản Xuất</button>
+        <button type="button" class="ctab act" data-tab="store"><svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l1.4-4.2A1 1 0 0 1 5.35 4h13.3a1 1 0 0 1 .95.8L21 9" /><path d="M5 9v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9" /><path d="M9.5 20v-5h5v5" /></svg>Cửa Hàng</button>
+        <button type="button" class="ctab" data-tab="office"><svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v15" /><path d="M15 9h4a1 1 0 0 1 1 1v10" /><path d="M3 20h18" /><path d="M7.5 8h4M7.5 12h4M7.5 16h4" /></svg>Văn Phòng</button>
+        <button type="button" class="ctab" data-tab="prod"><svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20V11l5.5 3.5V11L14 14.5V9l6 3.7V20z" /><path d="M2 20h20" /></svg>Khối Sản Xuất</button>
       </div>
-      <div class="pick-crumb fade" id="pickCrumb"></div>
+      <div class="pick-result fade" id="pickCrumb"></div>
 
-      <!-- TAB: CỬA HÀNG -->
+      <!-- TAB: CỬA HÀNG (số vị trí / hình thức lấy từ dữ liệu tin thật, xem careerCards() bên dưới) -->
       <div class="career-panel fade" id="panel-store">
         <div class="showcase-grid">
-          <div class="show-card">
-            <div class="show-thumb tile-light"><img id="brandimg-maycha" src="images/ảnh tuyển dụng/ảnh tuyển dụng maycha.jpg" alt="MayCha" /></div>
-            <div class="meta"><b>Trà Sữa MayCha</b><span>Trà sữa — “Hạnh phúc trong từng lần hút”</span></div>
-            <button type="button" class="btn-job" data-job="maycha" data-name="MayCha">Xem tuyển dụng MayCha →</button>
+          <div class="show-card" data-card="maycha">
+            <div class="show-thumb tile-light"><img src="images/logo-maycha.png" alt="Trà Sữa MayCha" /></div>
+            <div class="meta"><b>Trà Sữa MayCha</b><span class="jc-count"></span><span class="jc-types"></span></div>
+            <button type="button" class="btn-job" data-job="maycha" data-name="MayCha">Xem việc làm →</button>
+            <button type="button" class="btn-poster" data-poster="maycha"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V5a1 1 0 0 1 1-1h4M20 9V5a1 1 0 0 0-1-1h-4M4 15v4a1 1 0 0 0 1 1h4M20 15v4a1 1 0 0 1-1 1h-4" /></svg>Xem poster</button>
+            <img id="brandimg-maycha" class="poster-src" src="images/ảnh tuyển dụng/ảnh tuyển dụng maycha.jpg" alt="Poster tuyển dụng MayCha" hidden />
           </div>
-          <div class="show-card">
-            <div class="show-thumb tile-cream"><img id="brandimg-tamhao" src="images/ảnh tuyển dụng/ảnh tuyển dụng ba cô gái.jpg" alt="Hồng Trà Sữa Tam Hảo" /></div>
-            <div class="meta"><b>Hồng Trà Sữa Tam Hảo</b><span>Trà ngon · giá hợp lý · phục vụ chân thành</span></div>
-            <button type="button" class="btn-job" data-job="tamhao" data-name="Hồng Trà Sữa Tam Hảo">Xem tuyển dụng Tam Hảo →</button>
+          <div class="show-card" data-card="tamhao">
+            <div class="show-thumb tile-light"><img src="images/logo-tamhao.png" alt="Hồng Trà Sữa Tam Hảo" /></div>
+            <div class="meta"><b>Hồng Trà Sữa Tam Hảo</b><span class="jc-count"></span><span class="jc-types"></span></div>
+            <button type="button" class="btn-job" data-job="tamhao" data-name="Hồng Trà Sữa Tam Hảo">Xem việc làm →</button>
+            <button type="button" class="btn-poster" data-poster="tamhao"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V5a1 1 0 0 1 1-1h4M20 9V5a1 1 0 0 0-1-1h-4M4 15v4a1 1 0 0 0 1 1h4M20 15v4a1 1 0 0 1-1 1h-4" /></svg>Xem poster</button>
+            <img id="brandimg-tamhao" class="poster-src" src="images/ảnh tuyển dụng/ảnh tuyển dụng ba cô gái.jpg" alt="Poster tuyển dụng Hồng Trà Sữa Tam Hảo" hidden />
           </div>
-          <div class="show-card">
-            <div class="show-thumb tile-light"><img id="brandimg-gagion" src="images/ảnh tuyển dụng/ảnh tuyển dụng gà rán.jpg" alt="Gà Giòn Sốt Ba Cô Gái" /></div>
-            <div class="meta"><b>Gà Giòn Sốt Ba Cô Gái</b><span>Gà giòn rụm · sốt đặc trưng · combo hời</span></div>
-            <button type="button" class="btn-job" data-job="gagion" data-name="Gà Giòn Sốt Ba Cô Gái">Xem tuyển dụng Gà Giòn Sốt →</button>
+          <div class="show-card" data-card="gagion">
+            <div class="show-thumb tile-light"><img src="images/logo-gagion.png" alt="Gà Giòn Sốt Ba Cô Gái" /></div>
+            <div class="meta"><b>Gà Giòn Sốt Ba Cô Gái</b><span class="jc-count"></span><span class="jc-types"></span></div>
+            <button type="button" class="btn-job" data-job="gagion" data-name="Gà Giòn Sốt Ba Cô Gái">Xem việc làm →</button>
+            <button type="button" class="btn-poster" data-poster="gagion"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V5a1 1 0 0 1 1-1h4M20 9V5a1 1 0 0 0-1-1h-4M4 15v4a1 1 0 0 0 1 1h4M20 15v4a1 1 0 0 1-1 1h-4" /></svg>Xem poster</button>
+            <img id="brandimg-gagion" class="poster-src" src="images/ảnh tuyển dụng/ảnh tuyển dụng gà rán.jpg" alt="Poster tuyển dụng Gà Giòn Sốt Ba Cô Gái" hidden />
           </div>
-          <div class="show-card">
-            <div class="show-thumb tile-tea"><img id="brandimg-trahu" src="images/ảnh tuyển dụng/ảnh tuyển dụng trà hú.jpg" alt="Trà Hú" /></div>
-            <div class="meta"><b>Trà Hú — Đậm Hú Hồn</b><span>Trà sữa Đậm Vị · Đậm Vibe · Đậm Gắn Kết</span></div>
-            <button type="button" class="btn-job" data-job="trahu" data-name="Trà Hú">Xem tuyển dụng Trà Hú →</button>
+          <div class="show-card" data-card="trahu">
+            <div class="show-thumb tile-light"><img src="images/logo-trahu.png" alt="Trà Hú — Đậm Hú Hồn" /></div>
+            <div class="meta"><b>Trà Hú — Đậm Hú Hồn</b><span class="jc-count"></span><span class="jc-types"></span></div>
+            <button type="button" class="btn-job" data-job="trahu" data-name="Trà Hú">Xem việc làm →</button>
+            <button type="button" class="btn-poster" data-poster="trahu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V5a1 1 0 0 1 1-1h4M20 9V5a1 1 0 0 0-1-1h-4M4 15v4a1 1 0 0 0 1 1h4M20 15v4a1 1 0 0 1-1 1h-4" /></svg>Xem poster</button>
+            <img id="brandimg-trahu" class="poster-src" src="images/ảnh tuyển dụng/ảnh tuyển dụng trà hú.jpg" alt="Poster tuyển dụng Trà Hú" hidden />
           </div>
         </div>
       </div>
@@ -2394,30 +2472,30 @@
       <!-- TAB: VĂN PHÒNG -->
       <div class="career-panel fade" id="panel-office" style="display:none">
         <div class="showcase-grid office5">
-          <div class="show-card">
-            <div class="job-thumb"><img src="images/ảnh tuyển dụng/ảnh tuyển dụng văn phòng.jpg" alt="Khối Văn Phòng" /></div>
-            <div class="meta"><b>Marketing</b><span>Truyền thông · Content · Quảng cáo</span></div>
-            <button type="button" class="btn-job" data-job="marketing" data-name="Marketing">Xem tuyển dụng →</button>
+          <div class="show-card" data-card="marketing">
+            <div class="job-thumb"><svg class="ji" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 10v4a1 1 0 0 0 1 1H7l6.5 4V5L7 9H4.5a1 1 0 0 0-1 1z" /><path d="M17.5 8.5a5 5 0 0 1 0 7" /></svg></div>
+            <div class="meta"><b>Marketing</b><span class="jc-count"></span><span class="jc-types"></span></div>
+            <button type="button" class="btn-job" data-job="marketing" data-name="Marketing">Xem việc làm →</button>
           </div>
-          <div class="show-card">
-            <div class="job-thumb"><img src="images/ảnh tuyển dụng/ảnh tuyển dụng HR.jpg" alt="Khối Văn Phòng" /></div>
-            <div class="meta"><b>Nhân sự (HR)</b><span>Tuyển dụng · Đào tạo · C&amp;B</span></div>
-            <button type="button" class="btn-job" data-job="hr" data-name="Nhân sự (HR)">Xem tuyển dụng →</button>
+          <div class="show-card" data-card="hr">
+            <div class="job-thumb"><svg class="ji" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9.5" cy="8" r="3.2" /><path d="M3.5 20a6 6 0 0 1 12 0" /><path d="M16.5 5.2a3.2 3.2 0 0 1 0 5.9" /><path d="M17.5 14.4a6 6 0 0 1 3 5.6" /></svg></div>
+            <div class="meta"><b>Nhân sự (HR)</b><span class="jc-count"></span><span class="jc-types"></span></div>
+            <button type="button" class="btn-job" data-job="hr" data-name="Nhân sự (HR)">Xem việc làm →</button>
           </div>
-          <div class="show-card">
-            <div class="job-thumb"><img src="images/ảnh tuyển dụng/ảnh tuyển dụng văn phòng.jpg" alt="Khối Văn Phòng" /></div>
-            <div class="meta"><b>Quản lý cung ứng (SCM)</b><span>Mua hàng · Kho vận · Logistics</span></div>
-            <button type="button" class="btn-job" data-job="scm" data-name="Quản lý cung ứng (SCM)">Xem tuyển dụng →</button>
+          <div class="show-card" data-card="scm">
+            <div class="job-thumb"><svg class="ji" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5h10.5v10H3z" /><path d="M13.5 10h3.8l2.7 3v3.5h-6.5z" /><circle cx="7" cy="18" r="1.8" /><circle cx="16.5" cy="18" r="1.8" /></svg></div>
+            <div class="meta"><b>Quản lý cung ứng (SCM)</b><span class="jc-count"></span><span class="jc-types"></span></div>
+            <button type="button" class="btn-job" data-job="scm" data-name="Quản lý cung ứng (SCM)">Xem việc làm →</button>
           </div>
-          <div class="show-card">
-            <div class="job-thumb"><img src="images/ảnh tuyển dụng/ảnh tuyển dụng kế toán.jpg" alt="Khối Văn Phòng" /></div>
-            <div class="meta"><b>Tài chính – Kế toán</b><span>Kế toán · Tài chính · Kiểm soát</span></div>
-            <button type="button" class="btn-job" data-job="finance" data-name="Tài chính – Kế toán">Xem tuyển dụng →</button>
+          <div class="show-card" data-card="finance">
+            <div class="job-thumb"><svg class="ji" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7.5v10a2 2 0 0 0 2 2h13a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-13a2 2 0 0 1 0-4H18" /><circle cx="16" cy="13.5" r="1.2" /></svg></div>
+            <div class="meta"><b>Tài chính – Kế toán</b><span class="jc-count"></span><span class="jc-types"></span></div>
+            <button type="button" class="btn-job" data-job="finance" data-name="Tài chính – Kế toán">Xem việc làm →</button>
           </div>
-          <div class="show-card">
-            <div class="job-thumb"><img src="images/ảnh tuyển dụng/ảnh tuyển dụng văn phòng.jpg" alt="Khối Văn Phòng" /></div>
-            <div class="meta"><b>Các công việc khác</b><span>Hành chính · Pháp lý · Vị trí khác</span></div>
-            <button type="button" class="btn-job" data-job="other" data-name="Các công việc khác">Xem tuyển dụng →</button>
+          <div class="show-card" data-card="other">
+            <div class="job-thumb"><svg class="ji" viewBox="0 0 24 24" aria-hidden="true"><circle cx="7" cy="7" r="2" /><circle cx="17" cy="7" r="2" /><circle cx="7" cy="17" r="2" /><circle cx="17" cy="17" r="2" /></svg></div>
+            <div class="meta"><b>Các công việc khác</b><span class="jc-count"></span><span class="jc-types"></span></div>
+            <button type="button" class="btn-job" data-job="other" data-name="Các công việc khác">Xem việc làm →</button>
           </div>
         </div>
       </div>
@@ -2425,25 +2503,25 @@
       <!-- TAB: KHỐI SẢN XUẤT -->
       <div class="career-panel fade" id="panel-prod" style="display:none">
         <div class="showcase-grid">
-          <div class="show-card">
-            <div class="job-thumb"><span class="job-ic">🏭</span></div>
-            <div class="meta"><b>Sản xuất / Vận hành</b><span>Sản xuất · Vận hành dây chuyền</span></div>
-            <button type="button" class="btn-job" data-job="sanxuat" data-name="Sản xuất / Vận hành">Xem td Sản Xuất - Vận Hành→</button>
+          <div class="show-card" data-card="sanxuat">
+            <div class="job-thumb"><svg class="ji" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20V11l5.5 3.5V11L14 14.5V9l6 3.7V20z" /><path d="M2 20h20" /></svg></div>
+            <div class="meta"><b>Sản xuất / Vận hành</b><span class="jc-count"></span><span class="jc-types"></span></div>
+            <button type="button" class="btn-job" data-job="sanxuat" data-name="Sản xuất / Vận hành">Xem việc làm →</button>
           </div>
-          <div class="show-card">
-            <div class="job-thumb"><span class="job-ic">🔬</span></div>
-            <div class="meta"><b>QA / QC</b><span>Kiểm soát chất lượng · ATVSTP</span></div>
-            <button type="button" class="btn-job" data-job="qaqc" data-name="QA / QC">Xem tuyển dụng QA/QC→</button>
+          <div class="show-card" data-card="qaqc">
+            <div class="job-thumb"><svg class="ji" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 3h4" /><path d="M11 3v6.2L5.7 18A2 2 0 0 0 7.4 21h9.2a2 2 0 0 0 1.7-3L13 9.2V3" /><path d="M8 15h8" /></svg></div>
+            <div class="meta"><b>QA / QC</b><span class="jc-count"></span><span class="jc-types"></span></div>
+            <button type="button" class="btn-job" data-job="qaqc" data-name="QA / QC">Xem việc làm →</button>
           </div>
-          <div class="show-card">
-            <div class="job-thumb"><span class="job-ic">📦</span></div>
-            <div class="meta"><b>Kho vận</b><span>Kho · Logistics · Giao vận</span></div>
-            <button type="button" class="btn-job" data-job="khovan" data-name="Kho vận">Xem tuyển dụng Kho Vận →</button>
+          <div class="show-card" data-card="khovan">
+            <div class="job-thumb"><svg class="ji" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 4.2v9.6L12 21l-8-4.2V7.2z" /><path d="M4 7.2l8 4.2 8-4.2" /><path d="M12 11.4V21" /></svg></div>
+            <div class="meta"><b>Kho vận</b><span class="jc-count"></span><span class="jc-types"></span></div>
+            <button type="button" class="btn-job" data-job="khovan" data-name="Kho vận">Xem việc làm →</button>
           </div>
-          <div class="show-card">
-            <div class="job-thumb"><span class="job-ic">🔧</span></div>
-            <div class="meta"><b>Kỹ thuật / Bảo trì</b><span>Kỹ thuật · Bảo trì thiết bị</span></div>
-            <button type="button" class="btn-job" data-job="kythuat" data-name="Kỹ thuật / Bảo trì">Xem td Kỹ Thuật - Bảo Trì→</button>
+          <div class="show-card" data-card="kythuat">
+            <div class="job-thumb"><svg class="ji" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 3.5a5 5 0 0 0-5.9 6.4L3.5 16a2 2 0 1 0 2.8 2.8l6.1-6.1a5 5 0 0 0 6.4-5.9L16 9.6 13.4 9 12.8 6.4z" /></svg></div>
+            <div class="meta"><b>Kỹ thuật / Bảo trì</b><span class="jc-count"></span><span class="jc-types"></span></div>
+            <button type="button" class="btn-job" data-job="kythuat" data-name="Kỹ thuật / Bảo trì">Xem việc làm →</button>
           </div>
         </div>
       </div>
@@ -2745,6 +2823,7 @@
 
   <div class="sticky-cta"><a href="#ungtuyen" class="btn btn-primary">ỨNG TUYỂN NGAY</a></div>
 
+  <script src="job-filters.js"></script>
   <script>
     /* FAQ accordion */
     document.querySelectorAll('.faq button').forEach(function(btn) {
@@ -2790,16 +2869,105 @@
         return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
       }
 
+      /* ===== Số vị trí thật trên từng thẻ =====
+         Dùng chung quy tắc lọc với trang Việc làm (job-filters.js) để con số hiển thị ở đây
+         luôn khớp với danh sách khi bấm "Xem việc làm". */
+      var JF = window.JobFilters;
+      var CAREER_JOBS = null; // null = chưa tải xong
+      // Khu vực đã chọn -> nhãn khu vực của bộ lọc Địa điểm (5 mục cố định trên viec-lam.html)
+      var REGION_LOC = { hcm: 'TP. Hồ Chí Minh', hn: 'Hà Nội', dn: 'Miền Trung' };
+      var PROVINCE_LOC = {
+        'Đồng Nai': 'Miền Nam', 'Bình Dương': 'Miền Nam', 'Bà Rịa - Vũng Tàu': 'Miền Nam',
+        'Long An': 'Miền Nam', 'Tiền Giang': 'Miền Nam', 'An Giang': 'Miền Nam', 'Cần Thơ': 'Miền Nam',
+        'Lâm Đồng': 'Miền Trung', 'Huế': 'Miền Trung'
+      };
+      // Thẻ trong mỗi tab -> khối công việc (?dept=) tương ứng
+      var GROUP_DEPT = { store: 'store', office: 'office', prod: 'sanxuat' };
+      var CARD_GROUP = {};
+      ['maycha', 'tamhao', 'gagion', 'trahu'].forEach(function(k) { CARD_GROUP[k] = 'store'; });
+      ['marketing', 'hr', 'scm', 'finance', 'other'].forEach(function(k) { CARD_GROUP[k] = 'office'; });
+      ['sanxuat', 'qaqc', 'khovan', 'kythuat'].forEach(function(k) { CARD_GROUP[k] = 'prod'; });
+
+      function careerLoc() {
+        var p = window.CAREER_PICK || {};
+        if (p.region === 'other') return p.province ? (PROVINCE_LOC[p.province] || '') : '';
+        return REGION_LOC[p.region] || '';
+      }
+
+      function careerJobUrl(dept, sub) {
+        var url = 'viec-lam.html?dept=' + dept;
+        if (sub) url += '&sub=' + encodeURIComponent(sub);
+        var loc = careerLoc();
+        if (loc) url += '&loc=' + encodeURIComponent(loc);
+        return url;
+      }
+
+      // Các tin khớp Khối + Bộ phận/Thương hiệu + Khu vực đang chọn
+      function jobsFor(group, sub) {
+        if (!CAREER_JOBS) return null;
+        var deptLabel = JF.DEPT_MAP[GROUP_DEPT[group]];
+        var loc = careerLoc();
+        return CAREER_JOBS.filter(function(j) { return JF.jobMatches(j, deptLabel, sub, loc); });
+      }
+
+      // Gom hình thức làm việc, gộp các cách viết hoa/thường khác nhau ("Toàn Thời Gian" = "Toàn thời gian")
+      function typeList(jobs) {
+        var seen = {}, out = [];
+        jobs.forEach(function(j) {
+          var t = String(j.jobtype || '').trim();
+          if (!t) return;
+          var k = t.toLowerCase();
+          if (!seen[k]) { seen[k] = 1; out.push(t); }
+        });
+        return out;
+      }
+
+      function renderCards() {
+        [].forEach.call(document.querySelectorAll('.show-card[data-card]'), function(card) {
+          var sub = card.getAttribute('data-card');
+          var jobs = jobsFor(CARD_GROUP[sub], sub);
+          var cEl = card.querySelector('.jc-count'),
+            tEl = card.querySelector('.jc-types'),
+            btn = card.querySelector('.btn-job');
+          if (!jobs) { // chưa tải xong dữ liệu
+            cEl.textContent = 'Đang cập nhật vị trí…';
+            tEl.textContent = '';
+            return;
+          }
+          card.classList.toggle('no-job', jobs.length === 0);
+          if (jobs.length) {
+            cEl.innerHTML = '<b>' + jobs.length + '</b> vị trí đang tuyển';
+            tEl.textContent = typeList(jobs).join(' · ');
+            btn.textContent = 'Xem ' + jobs.length + ' vị trí →';
+          } else {
+            cEl.textContent = 'Chưa có vị trí tại khu vực này';
+            tEl.textContent = '';
+            btn.textContent = 'Xem tất cả việc làm →';
+          }
+        });
+      }
+
+      // Dòng kết quả: "36 vị trí Cửa hàng đang tuyển tại TP. Hồ Chí Minh"
       function renderCrumb() {
         if (!crumbEl) return;
         var p = window.CAREER_PICK;
-        var parts = [REGION_LABELS[p.region]];
-        if (p.region === 'other' && p.province) parts.push(p.province);
-        parts.push(GROUP_LABELS[p.group]);
-        crumbEl.innerHTML = 'Bạn đang xem: ' + parts.map(function(x) {
-          return '<b>' + escC(x) + '</b>';
-        }).join(' › ');
+        var place = (p.region === 'other' && p.province) ? p.province : REGION_LABELS[p.region];
+        var group = GROUP_LABELS[p.group];
+        var jobs = jobsFor(p.group, null);
+        var head = jobs ? ('<b>' + jobs.length + '</b> vị trí ' + escC(group)) : (escC(group) + ' — đang cập nhật');
+        crumbEl.innerHTML = head + ' đang tuyển tại ' + escC(place);
+        renderCards();
       }
+
+      fetch('/api/jobs').then(function(r) {
+        return r.json();
+      }).then(function(d) {
+        CAREER_JOBS = (d && d.rows) || [];
+        renderCrumb();
+      }).catch(function() {
+        CAREER_JOBS = [];
+        renderCrumb();
+      });
 
       // Nhóm công việc
       [].forEach.call(groupTabs, function(b) {
@@ -2821,6 +2989,7 @@
       // danh sách tỉnh ngay bên dưới (không dùng dropdown nhỏ)
       var regionTabs = document.querySelectorAll('#regionTabs .ctab');
       var otherBtn = document.getElementById('regionOtherBtn');
+      var otherTxt = document.getElementById('regionOtherTxt'); // chỉ đổi phần chữ để giữ lại icon SVG
       var provList = document.getElementById('provinceList');
       [].forEach.call(regionTabs, function(b) {
         b.addEventListener('click', function() {
@@ -2833,7 +3002,7 @@
             provList.classList.toggle('show');
           } else {
             window.CAREER_PICK.province = '';
-            otherBtn.textContent = '📍 Tỉnh/Thành phố khác';
+            otherTxt.textContent = 'Tỉnh/Thành phố khác';
             provList.classList.remove('show');
           }
           renderCrumb();
@@ -2843,12 +3012,23 @@
         b.addEventListener('click', function() {
           var any = b.getAttribute('data-any') === '1';
           window.CAREER_PICK.province = any ? '' : b.textContent.trim();
-          otherBtn.textContent = any ? '📍 Tỉnh/Thành phố khác ✓' : ('📍 ' + b.textContent.trim() + ' ✓');
+          otherTxt.textContent = any ? 'Tỉnh/Thành phố khác ✓' : (b.textContent.trim() + ' ✓');
           provList.classList.remove('show');
           renderCrumb();
         });
       });
       renderCrumb();
+
+      /* Nút "Xem việc làm" trên từng thẻ -> sang viec-lam.html kèm bộ lọc
+         Khối + Địa điểm + Thương hiệu/Bộ phận đang chọn */
+      [].forEach.call(document.querySelectorAll('.btn-job'), function(b) {
+        b.addEventListener('click', function() {
+          var sub = b.getAttribute('data-job');
+          var group = CARD_GROUP[sub];
+          if (!group) return;
+          window.location.href = careerJobUrl(GROUP_DEPT[group], sub);
+        });
+      });
 
       /* Pill "Toàn thời gian & Bán thời gian / Khối Văn Phòng / Khối Kho & Xưởng Sản Xuất" -> mở đúng tab tương ứng */
       [].forEach.call(document.querySelectorAll('.pill-link'), function(b) {
@@ -2884,43 +3064,7 @@
       });
     })();
 
-    /* Nút "Xem tuyển dụng" (mỗi thương hiệu/bộ phận 1 nút) -> sang viec-lam.html
-       kèm bộ lọc Khối + Địa điểm + Thương hiệu/Bộ phận tương ứng đã chọn ở trên. */
-    (function() {
-      var STORE_JOBS = ['maycha', 'tamhao', 'gagion', 'trahu'];
-      var OFFICE_JOBS = ['marketing', 'hr', 'scm', 'finance', 'other'];
-      var SANXUAT_JOBS = ['sanxuat', 'qaqc', 'khovan', 'kythuat'];
-      // Khu vực Đà Nẵng và các tỉnh lân cận -> gộp vào Miền Trung; các tỉnh phía Nam -> Miền Nam
-      // (khớp với 5 khu vực cố định của bộ lọc Địa điểm trên viec-lam.html).
-      var REGION_LOC = { hcm: 'TP. Hồ Chí Minh', hn: 'Hà Nội', dn: 'Miền Trung' };
-      var PROVINCE_LOC = {
-        'Đồng Nai': 'Miền Nam', 'Bình Dương': 'Miền Nam', 'Bà Rịa - Vũng Tàu': 'Miền Nam',
-        'Long An': 'Miền Nam', 'Tiền Giang': 'Miền Nam', 'An Giang': 'Miền Nam', 'Cần Thơ': 'Miền Nam',
-        'Lâm Đồng': 'Miền Trung', 'Huế': 'Miền Trung'
-      };
-      function careerLoc() {
-        var p = window.CAREER_PICK || {};
-        if (p.region === 'other') return p.province ? (PROVINCE_LOC[p.province] || '') : '';
-        return REGION_LOC[p.region] || '';
-      }
-      function careerJobUrl(dept, sub) {
-        var url = 'viec-lam.html?dept=' + dept;
-        if (sub) url += '&sub=' + encodeURIComponent(sub);
-        var loc = careerLoc();
-        if (loc) url += '&loc=' + encodeURIComponent(loc);
-        return url;
-      }
-      [].forEach.call(document.querySelectorAll('.btn-job'), function(b) {
-        b.addEventListener('click', function() {
-          var job = b.getAttribute('data-job');
-          if (STORE_JOBS.indexOf(job) >= 0) window.location.href = careerJobUrl('store', job);
-          else if (OFFICE_JOBS.indexOf(job) >= 0) window.location.href = careerJobUrl('office', job);
-          else if (SANXUAT_JOBS.indexOf(job) >= 0) window.location.href = careerJobUrl('sanxuat', null);
-        });
-      });
-    })();
-
-    /* Lightbox: bấm vào ảnh thẻ thương hiệu/khối -> xem toàn ảnh */
+    /* Lightbox: xem poster tuyển dụng phóng to */
     (function() {
       var lb = document.getElementById('imgLightbox');
       if (!lb) return;
@@ -2938,22 +3082,13 @@
         document.body.style.overflow = '';
         lbImg.src = '';
       }
-      // Chỉ những thumb CÓ ảnh mới bấm được (khối sản xuất dùng icon -> bỏ qua)
-      [].forEach.call(document.querySelectorAll('.show-thumb, .job-thumb'), function(th) {
-        var img = th.querySelector('img');
+      // Nút "Xem poster" trên thẻ thương hiệu -> mở poster (ảnh chỉnh trong dashboard "Ảnh thương hiệu")
+      [].forEach.call(document.querySelectorAll('.btn-poster'), function(b) {
+        var img = document.getElementById('brandimg-' + b.getAttribute('data-poster'));
         if (!img) return;
-        th.classList.add('clickable-thumb');
-        th.setAttribute('role', 'button');
-        th.setAttribute('tabindex', '0');
-        th.setAttribute('aria-label', 'Xem ảnh tuyển dụng' + (img.alt ? ': ' + img.alt : ''));
-        th.addEventListener('click', function() {
+        b.title = 'Xem poster tuyển dụng';
+        b.addEventListener('click', function() {
           openLb(img.currentSrc || img.src, img.alt);
-        });
-        th.addEventListener('keydown', function(e) {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            openLb(img.currentSrc || img.src, img.alt);
-          }
         });
       });
       document.getElementById('imgLightboxX').addEventListener('click', closeLb);
