@@ -128,6 +128,18 @@
   .iconbtn.edit{color:var(--amber)}.iconbtn.edit:hover{background:rgba(255,122,26,.1)}
   .iconbtn.del{color:var(--red)}.iconbtn.del:hover{background:rgba(224,52,43,.1)}
   .norows{padding:34px;color:var(--muted);text-align:center}
+  /* Popup thông tin đầy đủ khi rê chuột vào 1 dòng đăng ký đào tạo */
+  .trainpop{position:fixed;z-index:1000;width:330px;max-width:calc(100vw - 24px);background:var(--card);border:1px solid var(--line-2);border-radius:14px;box-shadow:0 26px 64px -20px rgba(54,28,18,.55);opacity:0;transform:translateY(6px);pointer-events:none;transition:opacity .14s ease,transform .14s ease}
+  .trainpop.show{opacity:1;transform:none;pointer-events:auto}
+  .trainpop .tp-hd{font-weight:800;font-size:15px;color:var(--txt);padding:13px 16px;border-bottom:1px solid var(--line);background:var(--card-2);border-radius:14px 14px 0 0}
+  .trainpop .tp-body{padding:8px 16px;max-height:52vh;overflow:auto}
+  .trainpop .tp-row{display:flex;gap:10px;padding:6px 0;font-size:13px;border-bottom:1px dashed var(--line)}
+  .trainpop .tp-row:last-child{border-bottom:none}
+  .trainpop .tp-k{flex:0 0 92px;color:var(--muted);font-weight:700}
+  .trainpop .tp-v{flex:1;color:var(--txt);word-break:break-word}
+  .trainpop .tp-v a{color:var(--amber);text-decoration:none}
+  .trainpop .tp-act{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--line)}
+  .trainpop .tp-act .iconbtn{flex:1;text-align:center;padding:9px 10px;font-size:13px}
   /* nhân viên */
   .staffgrid{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start;flex:1;min-height:0}
   .addbox{width:320px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 22px;box-shadow:0 18px 50px -34px rgba(224,52,43,.4);display:flex;flex-direction:column;gap:12px}
@@ -1735,7 +1747,7 @@ function renderTraining() {
   if (!rows.length) { $('#ttable').innerHTML = '<tbody><tr><td class="norows">' + (trainRows.length ? 'Không có kết quả phù hợp.' : 'Chưa có đăng ký đào tạo nào. Bấm “Thêm đăng ký”.') + '</td></tr></tbody>'; return; }
   var html = '<thead><tr><th>#</th><th>Thời gian gửi</th><th>Họ tên</th><th>SĐT</th><th>Email</th><th>Tỉnh thành</th><th>Quận huyện</th><th>Vị trí</th><th>Hình thức</th><th>Ngày dự kiến</th><th>Cửa hàng</th><th>Thao tác</th></tr></thead><tbody>';
   rows.forEach(function (r, i) {
-    html += '<tr><td class="idx">' + (i + 1) + '</td><td>' + esc(fmtTs(r.ts)) + '</td><td>' + esc(r.name) + '</td><td>' + esc(r.phone) + '</td><td>' + esc(r.email) + '</td><td class="wr">' + esc(r.province) + '</td><td class="wr">' + esc(r.district) + '</td><td class="wr">' + esc(normPos(r.position)) + '</td><td class="wr">' + esc(r.mode) + '</td><td>' + esc(fmtDate(r.sess_date)) + '</td><td class="wr">' + esc(r.store) + '</td>'
+    html += '<tr data-row="' + esc(r.id) + '"><td class="idx">' + (i + 1) + '</td><td>' + esc(fmtTs(r.ts)) + '</td><td>' + esc(r.name) + '</td><td>' + esc(r.phone) + '</td><td>' + esc(r.email) + '</td><td class="wr">' + esc(r.province) + '</td><td class="wr">' + esc(r.district) + '</td><td class="wr">' + esc(normPos(r.position)) + '</td><td class="wr">' + esc(r.mode) + '</td><td>' + esc(fmtDate(r.sess_date)) + '</td><td class="wr">' + esc(r.store) + '</td>'
       + '<td><div class="rowact"><button class="iconbtn edit" data-edit="' + r.id + '">✎ Sửa</button><button class="iconbtn del" data-del="' + r.id + '">🗑 Xóa</button></div></td></tr>';
   });
   html += '</tbody>';
@@ -1745,6 +1757,61 @@ function renderTraining() {
 }
 $('#tsearch').addEventListener('input', renderTraining);
 $('#treload').addEventListener('click', function () { loadTraining(autoSyncSheet, true); });
+
+/* ===== Popup thông tin đầy đủ khi rê chuột vào 1 dòng đăng ký ===== */
+(function () {
+  var pop = document.createElement('div');
+  pop.className = 'trainpop'; pop.id = 'trainPop';
+  document.body.appendChild(pop);
+  var hideTimer = null, curId = null;
+
+  function row(k, v, html) { return '<div class="tp-row"><span class="tp-k">' + k + '</span><span class="tp-v">' + (html || esc(v || '—')) + '</span></div>'; }
+  function popHtml(r) {
+    var tel = r.phone ? '<a href="tel:' + esc(r.phone) + '">' + esc(r.phone) + '</a>' : '—';
+    var mail = r.email ? '<a href="mailto:' + esc(r.email) + '">' + esc(r.email) + '</a>' : '—';
+    return '<div class="tp-hd">' + esc(r.name || '(chưa có tên)') + '</div>'
+      + '<div class="tp-body">'
+      + row('Thời gian gửi', fmtTs(r.ts))
+      + row('SĐT', null, tel)
+      + row('Email', null, mail)
+      + row('Tỉnh thành', r.province)
+      + row('Quận huyện', r.district)
+      + row('Vị trí', normPos(r.position))
+      + row('Hình thức', r.mode)
+      + row('Ngày dự kiến', fmtDate(r.sess_date))
+      + row('Cửa hàng', r.store)
+      + '</div>'
+      + '<div class="tp-act"><button class="iconbtn edit" id="tpEdit">✎ Sửa</button><button class="iconbtn del" id="tpDel">🗑 Xóa</button></div>';
+  }
+  function show(id, x, y) {
+    var r = trainRows.filter(function (z) { return String(z.id) === String(id); })[0]; if (!r) return;
+    curId = id; pop.innerHTML = popHtml(r); pop.classList.add('show');
+    var pw = pop.offsetWidth, ph = pop.offsetHeight;
+    var left = x + 18, top = y + 12;
+    if (left + pw > window.innerWidth - 12) left = x - pw - 18;
+    if (left < 12) left = 12;
+    if (top + ph > window.innerHeight - 12) top = window.innerHeight - ph - 12;
+    if (top < 12) top = 12;
+    pop.style.left = left + 'px'; pop.style.top = top + 'px';
+    document.getElementById('tpEdit').onclick = function () { hide(true); openEdit(id); };
+    document.getElementById('tpDel').onclick = function () { hide(true); delRow(id); };
+  }
+  function hide(now) {
+    clearTimeout(hideTimer);
+    if (now) { pop.classList.remove('show'); curId = null; return; }
+    hideTimer = setTimeout(function () { pop.classList.remove('show'); curId = null; }, 200);
+  }
+  pop.addEventListener('mouseenter', function () { clearTimeout(hideTimer); });
+  pop.addEventListener('mouseleave', function () { hide(); });
+  // Delegation: bảng được vẽ lại nhiều lần nên gắn 1 lần trên #ttable
+  $('#ttable').addEventListener('mouseover', function (e) {
+    var tr = e.target.closest('tr[data-row]'); if (!tr) return;
+    var id = tr.getAttribute('data-row');
+    clearTimeout(hideTimer);
+    if (curId !== id) show(id, e.clientX, e.clientY);
+  });
+  $('#ttable').addEventListener('mouseleave', function () { hide(); });
+})();
 
 /* ===== XUẤT / XEM EXCEL ===== */
 var TR_HEAD = ['Id', 'Thời gian bắt đầu', 'Thời gian hoàn thành', 'Họ Tên', 'Số Điện Thoại', 'Email Cá Nhân', 'Tỉnh Thành Bạn Đang Ở', 'Quận Huyện Bạn Đang Ở', 'Vị Trí Trúng Tuyển', 'Hình Thức Tham Gia Đào Tạo', 'Ngày Dự Kiến Bạn Có Thể Tham Gia Đào Tạo', 'Cửa Hàng Bạn Làm Việc'];
