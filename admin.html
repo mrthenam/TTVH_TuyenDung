@@ -1763,7 +1763,8 @@ $('#treload').addEventListener('click', function () { loadTraining(autoSyncSheet
   var pop = document.createElement('div');
   pop.className = 'trainpop'; pop.id = 'trainPop';
   document.body.appendChild(pop);
-  var hideTimer = null, curId = null;
+  var hideTimer = null, showTimer = null, curId = null, pendingId = null;
+  var SHOW_DELAY = 700; // trễ ~0.7s trước khi hiện, để lướt qua dòng khác (khi đưa chuột xuống popup) không bật popup dòng đó
 
   function row(k, v, html) { return '<div class="tp-row"><span class="tp-k">' + k + '</span><span class="tp-v">' + (html || esc(v || '—')) + '</span></div>'; }
   function popHtml(r) {
@@ -1785,7 +1786,7 @@ $('#treload').addEventListener('click', function () { loadTraining(autoSyncSheet
   }
   function show(id, x, y) {
     var r = trainRows.filter(function (z) { return String(z.id) === String(id); })[0]; if (!r) return;
-    curId = id; pop.innerHTML = popHtml(r); pop.classList.add('show');
+    curId = id; pendingId = null; pop.innerHTML = popHtml(r); pop.classList.add('show');
     var pw = pop.offsetWidth, ph = pop.offsetHeight;
     var left = x + 18, top = y + 12;
     if (left + pw > window.innerWidth - 12) left = x - pw - 18;
@@ -1796,21 +1797,28 @@ $('#treload').addEventListener('click', function () { loadTraining(autoSyncSheet
     document.getElementById('tpEdit').onclick = function () { hide(true); openEdit(id); };
     document.getElementById('tpDel').onclick = function () { hide(true); delRow(id); };
   }
+  function cancelPending() { clearTimeout(showTimer); pendingId = null; }
   function hide(now) {
     clearTimeout(hideTimer);
-    if (now) { pop.classList.remove('show'); curId = null; return; }
+    if (now) { cancelPending(); pop.classList.remove('show'); curId = null; return; }
     hideTimer = setTimeout(function () { pop.classList.remove('show'); curId = null; }, 200);
   }
-  pop.addEventListener('mouseenter', function () { clearTimeout(hideTimer); });
+  // Vào popup: hủy mọi popup đang chờ hiện (do lướt qua dòng khác) và giữ popup hiện tại
+  pop.addEventListener('mouseenter', function () { clearTimeout(hideTimer); cancelPending(); });
   pop.addEventListener('mouseleave', function () { hide(); });
   // Delegation: bảng được vẽ lại nhiều lần nên gắn 1 lần trên #ttable
   $('#ttable').addEventListener('mouseover', function (e) {
     var tr = e.target.closest('tr[data-row]'); if (!tr) return;
     var id = tr.getAttribute('data-row');
     clearTimeout(hideTimer);
-    if (curId !== id) show(id, e.clientX, e.clientY);
+    if (curId === id) { cancelPending(); return; }   // đang hiện đúng dòng này
+    if (pendingId === id) return;                    // đã hẹn hiện dòng này, đừng reset đồng hồ
+    pendingId = id;
+    var x = e.clientX, y = e.clientY;
+    clearTimeout(showTimer);
+    showTimer = setTimeout(function () { show(id, x, y); }, SHOW_DELAY);
   });
-  $('#ttable').addEventListener('mouseleave', function () { hide(); });
+  $('#ttable').addEventListener('mouseleave', function () { cancelPending(); hide(); });
 })();
 
 /* ===== XUẤT / XEM EXCEL ===== */
