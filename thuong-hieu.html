@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/jpeg" href="images/logo-ttvh.jpg">
+  <link rel="apple-touch-icon" href="images/logo-ttvh.jpg">
+  <title>Hệ thống thương hiệu — Thịnh Thế Vinh Hoa</title>
+  <meta name="description" content="Bốn cá tính, một gia đình — hệ sinh thái F&B Thịnh Thế Vinh Hoa: Trà Sữa MayCha, Hồng Trà Sữa Tam Hảo, Gà Giòn Sốt Ba Cô Gái và Trà Hú – Đậm Hú Hồn." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #fff8f0;
+      --bg-soft: #fff1e1;
+      --card: #ffffff;
+      --card-2: #fff6ec;
+      --line: rgba(54, 28, 18, .10);
+      --line-2: rgba(54, 28, 18, .18);
+      --txt: #2a1810;
+      --muted: #8b7060;
+      --red: #c69320;
+      --red-2: #a87c16;
+      --gold: #d4af37;
+      --amber: #e6c34d;
+      --green: #2faa5e;
+      --grad: linear-gradient(135deg, #e6c34d 0%, #c69320 100%);
+      --grad-gold: linear-gradient(135deg, #f0d068 0%, #d4af37 100%);
+      --grad-soft: linear-gradient(135deg, rgba(212, 175, 55, .22), rgba(198, 147, 32, .09));
+      --radius: 18px;
+      --shadow: 0 24px 60px -22px rgba(198, 147, 32, .38);
+      --maxw: 1120px;
+      --head: 'Playfair Display', Georgia, 'Times New Roman', serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    html {
+      scroll-behavior: smooth
+    }
+
+    body {
+      font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--txt);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none
+    }
+
+    img {
+      max-width: 100%;
+      display: block
+    }
+
+    .wrap {
+      max-width: var(--maxw);
+      margin: 0 auto;
+      padding: 0 20px
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--red);
+      background: var(--grad-soft);
+      border: 1px solid rgba(198, 147, 32, .22);
+      padding: 7px 16px;
+      border-radius: 999px;
+      margin-bottom: 18px;
+    }
+
+    h1.title {
+      font-family: var(--head);
+      font-size: clamp(30px, 5vw, 52px);
+      font-weight: 800;
+      line-height: 1.12;
+      letter-spacing: -.01em
+    }
+
+    .lead {
+      color: var(--muted);
+      font-size: clamp(15px, 2vw, 18px);
+      max-width: 680px
+    }
+
+    .grad-text {
+      background: var(--grad);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-family: inherit;
+      font-weight: 800;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      padding: 16px 30px;
+      border-radius: 14px;
+      transition: transform .18s ease, box-shadow .18s ease, background .2s;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--grad);
+      color: #fff;
+      box-shadow: 0 14px 34px -10px rgba(198, 147, 32, .55);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 22px 44px -12px rgba(198, 147, 32, .7);
+    }
+
+    .btn-ghost {
+      background: #fff;
+      color: var(--txt);
+      border: 1px solid var(--line-2)
+    }
+
+    .btn-ghost:hover {
+      background: var(--card-2);
+      transform: translateY(-3px)
+    }
+
+    /* HEADER */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(14px);
+      background: rgba(255, 248, 240, .82);
+      border-bottom: 1px solid var(--line)
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 70px;
+      flex-wrap: wrap;
+      gap: 10px
+    }
+
+    .nav-cta {
+      display: flex;
+      align-items: center;
+      gap: 16px
+    }
+
+    .nav-cta .navlink {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--muted);
+      white-space: nowrap
+    }
+
+    .nav-cta .navlink:hover {
+      color: var(--red)
+    }
+
+    .nav-cta .navlink.active {
+      color: var(--red-2);
+      position: relative
+    }
+
+    .nav-cta .navlink.active::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -6px;
+      height: 2px;
+      border-radius: 2px;
+      background: var(--grad)
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 900
+    }
+
+    .brand .logo-img {
+      height: 50px;
+      width: auto;
+      border-radius: 10px;
+      display: block
+    }
+
+    .brand .nm {
+      font-family: var(--head);
+      font-weight: 800;
+      font-size: 17px;
+      line-height: 1.1;
+      letter-spacing: .01em
+    }
+
+    .brand small {
+      display: block;
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 700;
+      letter-spacing: .04em
+    }
+
+    .nav .btn {
+      padding: 11px 22px;
+      font-size: 14px
+    }
+
+    @media(max-width:640px) {
+      .brand small {
+        display: none
+      }
+
+      .brand .nm {
+        font-size: 14px
+      }
+
+      .nav .btn {
+        padding: 9px 15px;
+        font-size: 13px
+      }
+
+      .nav-cta {
+        gap: 12px
+      }
+
+      .nav-cta .navlink {
+        font-size: 13px
+      }
+    }
+
+    @media(max-width:560px) {
+      .nav {
+        height: auto;
+        justify-content: center;
+        padding: 10px 20px;
+        gap: 8px
+      }
+
+      .brand {
+        flex: 1 1 auto
+      }
+
+      .nav-cta {
+        flex: 1 1 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px 14px
+      }
+    }
+
+    @media(max-width:360px) {
+      .nav-cta .navlink {
+        font-size: 12px
+      }
+
+      .nav .btn {
+        padding: 9px 12px
+      }
+    }
+
+    /* HERO */
+    .bh {
+      text-align: center;
+      padding: 68px 0 34px;
+      background:
+        radial-gradient(60% 100% at 50% 0%, rgba(212, 175, 55, .14), transparent 70%),
+        var(--bg)
+    }
+
+    .bh .lead {
+      margin: 14px auto 0
+    }
+
+    .bh-stats {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 26px
+    }
+
+    .bh-stats .chip {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 9px 18px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--muted);
+      box-shadow: 0 12px 30px -24px rgba(54, 28, 18, .5)
+    }
+
+    .bh-stats .chip b {
+      color: var(--red-2);
+      font-weight: 800
+    }
+
+    /* BRAND ROWS — trang giới thiệu 4 thương hiệu */
+    .brands {
+      padding: 26px 0 72px
+    }
+
+    .brow {
+      display: grid;
+      grid-template-columns: 440px 1fr;
+      gap: 40px;
+      align-items: center;
+      padding: 34px 0
+    }
+
+    .brow+.brow {
+      border-top: 1px solid var(--line)
+    }
+
+    .brow-logo {
+      height: 240px;
+      border-radius: var(--radius);
+      background: var(--card);
+      border: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      box-shadow: 0 24px 54px -34px rgba(54, 28, 18, .45);
+      position: relative;
+      overflow: hidden
+    }
+
+    .brow-logo::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: var(--bsoft, var(--grad-soft));
+      opacity: .5
+    }
+
+    .brow-logo img {
+      max-height: 150px;
+      max-width: 74%;
+      object-fit: contain;
+      position: relative
+    }
+
+    .brow:nth-child(even) .brow-logo {
+      order: 2
+    }
+
+    .brow-tag {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--bs, var(--red));
+      margin-bottom: 10px
+    }
+
+    .brow-name {
+      font-family: var(--head);
+      font-size: clamp(22px, 3vw, 30px);
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 12px
+    }
+
+    .brow-desc {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.75;
+      margin-bottom: 16px
+    }
+
+    .brow-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px
+    }
+
+    .brow-chips span {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--txt);
+      background: var(--card-2);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 14px
+    }
+
+    .brow-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      font-size: 14.5px;
+      color: #fff;
+      background: var(--bs, var(--red));
+      border-radius: 12px;
+      padding: 12px 22px;
+      box-shadow: 0 14px 30px -16px var(--bs, rgba(198, 147, 32, .6));
+      transition: transform .18s, box-shadow .18s
+    }
+
+    .brow-link .ar {
+      transition: transform .2s
+    }
+
+    .brow-link:hover {
+      transform: translateY(-2px)
+    }
+
+    .brow-link:hover .ar {
+      transform: translateX(5px)
+    }
+
+    @media(max-width:820px) {
+      .brow {
+        grid-template-columns: 1fr;
+        gap: 22px;
+        padding: 30px 0
+      }
+
+      .brow-logo {
+        height: 190px;
+        order: -1 !important
+      }
+    }
+
+    /* CTA CUỐI TRANG */
+    .brand-cta {
+      text-align: center;
+      background: #efe4d4;
+      padding: 58px 0
+    }
+
+    .brand-cta h2 {
+      font-family: var(--head);
+      font-size: clamp(24px, 3.4vw, 36px);
+      font-weight: 800;
+      margin-bottom: 12px
+    }
+
+    .brand-cta p {
+      color: var(--muted);
+      max-width: 560px;
+      margin: 0 auto 26px
+    }
+
+    .brand-cta .actions {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap
+    }
+
+    /* FOOTER */
+    footer {
+      background: #7a1515;
+      padding: 52px 0 28px;
+      color: #f5ede0;
+    }
+
+    .ft-grid {
+      display: grid;
+      grid-template-columns: 1.7fr 1fr 1fr;
+      gap: 52px;
+      align-items: start;
+    }
+
+    .ft-brand-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .ft-brand-row img {
+      width: 54px;
+      height: 54px;
+      border-radius: 12px;
+      object-fit: cover;
+      background: #fff;
+      flex: none;
+    }
+
+    .ft-brand-name {
+      font-family: var(--head);
+      font-weight: 800;
+      font-size: 17px;
+      color: #f5ede0;
+      line-height: 1.2;
+    }
+
+    .ft-desc {
+      font-size: 14px;
+      color: rgba(245, 237, 224, .78);
+      line-height: 1.65;
+      margin-bottom: 14px;
+    }
+
+    .ft-desc em {
+      font-style: italic;
+    }
+
+    .ft-info {
+      font-size: 13.5px;
+      color: rgba(245, 237, 224, .78);
+      margin-bottom: 7px;
+      line-height: 1.55;
+    }
+
+    .ft-info a {
+      color: #f5ede0;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .ft-info a:hover {
+      color: var(--gold);
+    }
+
+    .ft-map {
+      margin-top: 16px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid rgba(245, 237, 224, .18);
+    }
+
+    .ft-map iframe {
+      display: block;
+    }
+
+    .ft-map-link {
+      display: inline-block;
+      margin-top: 9px;
+      font-size: 13px;
+      color: rgba(245, 237, 224, .65);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .ft-map-link:hover {
+      color: var(--gold);
+    }
+
+    .ft-col h4 {
+      font-family: var(--head);
+      color: var(--gold);
+      font-size: 15.5px;
+      font-weight: 700;
+      margin-bottom: 18px;
+      letter-spacing: .03em;
+    }
+
+    .ft-col ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .ft-col ul li {
+      margin-bottom: 11px;
+    }
+
+    .ft-col ul li a {
+      font-size: 14px;
+      color: rgba(245, 237, 224, .78);
+      transition: color .15s;
+    }
+
+    .ft-col ul li a:hover {
+      color: var(--gold);
+    }
+
+    .ft-col ul li a.ft-bold {
+      font-weight: 700;
+      color: #f5ede0;
+    }
+
+    .ft-contact li {
+      font-size: 13.5px;
+      color: rgba(245, 237, 224, .78);
+      margin-bottom: 10px;
+      line-height: 1.55;
+    }
+
+    .ft-col ul.ft-contact li a {
+      font-size: 13.5px;
+      color: #f5ede0;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      white-space: nowrap;
+    }
+
+    .ft-contact li a:hover {
+      color: var(--gold);
+    }
+
+    .ft-bottom {
+      margin-top: 38px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(245, 237, 224, .15);
+      text-align: center;
+      font-size: 12.5px;
+      color: rgba(245, 237, 224, .45);
+    }
+
+    @media(max-width:860px) {
+      .ft-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+      }
+    }
+
+    @media(max-width:540px) {
+      .ft-grid {
+        grid-template-columns: 1fr;
+        gap: 28px;
+      }
+    }
+
+    .fade {
+      opacity: 0;
+      transform: translateY(26px);
+      transition: opacity .6s ease, transform .6s ease
+    }
+
+    .fade.in {
+      opacity: 1;
+      transform: none
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="wrap nav">
+      <a href="index.html" class="brand">
+        <img src="images/logo-ttvh.jpg" alt="Thịnh Thế Vinh Hoa" class="logo-img" />
+        <div class="nm">Thịnh Thế Vinh Hoa<small>Vững thời - Sáng vận - Đẹp danh</small></div>
+      </a>
+      <div class="nav-cta">
+        <a href="thuong-hieu.html" class="navlink active">Thương hiệu</a>
+        <a href="viec-lam.html" class="navlink">Tuyển dụng</a>
+        <a href="dao-tao.html" class="navlink">Đăng ký đào tạo</a>
+        <a href="index.html#ungtuyen" class="btn btn-primary">Ứng tuyển ngay</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="bh">
+    <div class="wrap">
+      <span class="eyebrow fade">Hệ thống thương hiệu</span>
+      <h1 class="title fade">Bốn cá tính, <span class="grad-text">một gia đình.</span></h1>
+      <p class="lead fade">Thịnh Thế Vinh Hoa là hệ sinh thái F&amp;B đa thương hiệu — mỗi thương hiệu một cá tính riêng, cùng chung một tinh thần phục vụ tận tâm. Nhấn vào từng thương hiệu để ghé thăm Fanpage chính thức.</p>
+      <div class="bh-stats fade">
+        <span class="chip"><b>4</b> thương hiệu F&amp;B</span>
+        <span class="chip"><b>200+</b> chi nhánh toàn quốc</span>
+        <span class="chip">Vững thời · Sáng vận · Đẹp danh</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 THƯƠNG HIỆU -->
+  <section class="brands">
+    <div class="wrap">
+
+      <div class="brow fade" style="--bs:#c0392b;--bsoft:linear-gradient(135deg,rgba(192,57,43,.14),rgba(192,57,43,.04))">
+        <div class="brow-logo"><img src="images/logo-maycha.png" alt="Trà Sữa MayCha" /></div>
+        <div class="brow-text">
+          <span class="brow-tag">Trà sữa MayCha</span>
+          <h2 class="brow-name">Trà Sữa MayCha</h2>
+          <p class="brow-desc">Trà Sữa MayCha là một trong những thương hiệu trà sữa “top of mind” của giới trẻ với những sản phẩm chất lượng, sáng tạo và giá cả hợp lý. Với phương châm “Hạnh phúc trong từng lần hút”, MayCha luôn không ngừng phát triển để trao tận tay khách hàng sản phẩm ngon nhất cũng như những giá trị hạnh phúc khi thưởng thức trà sữa tại MayCha.</p>
+          <div class="brow-chips"><span>Trà sữa</span><span>“Hạnh phúc trong từng lần hút”</span><span>Top of mind giới trẻ</span></div>
+          <a class="brow-link" href="https://www.facebook.com/maycha38" target="_blank" rel="noopener">Xem Fanpage <span class="ar">→</span></a>
+        </div>
+      </div>
+
+      <div class="brow fade" style="--bs:#b8322a;--bsoft:linear-gradient(135deg,rgba(184,50,42,.14),rgba(184,50,42,.04))">
+        <div class="brow-logo"><img src="images/logo-tamhao.png" alt="Hồng Trà Sữa Tam Hảo" /></div>
+        <div class="brow-text">
+          <span class="brow-tag">Hồng trà sữa Tam Hảo</span>
+          <h2 class="brow-name">Hồng Trà Sữa Tam Hảo</h2>
+          <p class="brow-desc">Hồng trà sữa truyền thống, vị đậm đà, ấm áp như chính cái tên “Tam Hảo”. Cái tên Hồng Trà Tam Hảo bắt nguồn từ cụm “Tam Hảo” (三好), nghĩa là ba điều tốt đẹp, rút gọn từ khẩu hiệu quen thuộc: “Hảo trà – Hảo giá – Hảo tâm”. Cách đặt tên này thể hiện mong muốn mang đến ly trà ngon, mức giá dễ chịu và tinh thần phục vụ tận tâm.</p>
+          <div class="brow-chips"><span>Hồng trà truyền thống</span><span>Hảo trà – Hảo giá – Hảo tâm</span><span>Vị đậm đà</span></div>
+          <a class="brow-link" href="https://www.facebook.com/hongtrasuatamhao" target="_blank" rel="noopener">Xem Fanpage <span class="ar">→</span></a>
+        </div>
+      </div>
+
+      <div class="brow fade" style="--bs:#c69320;--bsoft:linear-gradient(135deg,rgba(198,147,32,.16),rgba(198,147,32,.05))">
+        <div class="brow-logo"><img src="images/logo-gagion.png" alt="Gà Giòn Sốt Ba Cô Gái" /></div>
+        <div class="brow-text">
+          <span class="brow-tag">Gà giòn sốt ba cô gái</span>
+          <h2 class="brow-name">Gà Giòn Sốt Ba Cô Gái</h2>
+          <p class="brow-desc">Gà Giòn Sốt Ba Cô Gái Tam Hảo là thương hiệu ẩm thực nổi bật với món gà rán sốt lắc giòn rụm và đậm vị. Nổi tiếng với các combo da gà, sụn gà sốt Mala độc bản kết hợp cùng đồ uống giải khát. Gà rán giòn rụm chan sốt đặc biệt “Ba Cô Gái” — món mặn chủ lực của hệ sinh thái.</p>
+          <div class="brow-chips"><span>Gà giòn rụm</span><span>Sốt Mala độc bản</span><span>Combo hời</span></div>
+          <a class="brow-link" href="https://www.facebook.com/gagionsot.bacogai" target="_blank" rel="noopener">Xem Fanpage <span class="ar">→</span></a>
+        </div>
+      </div>
+
+      <div class="brow fade" style="--bs:#2faa5e;--bsoft:linear-gradient(135deg,rgba(47,170,94,.14),rgba(47,170,94,.04))">
+        <div class="brow-logo"><img src="images/logo-trahu.png" alt="Trà Hú – Đậm Hú Hồn" /></div>
+        <div class="brow-text">
+          <span class="brow-tag">Trà Hú</span>
+          <h2 class="brow-name">Trà Hú – Đậm Hú Hồn</h2>
+          <p class="brow-desc">Trà Hú (tên đầy đủ: Trà Hú – Đậm Hú Hồn) là thương hiệu trà sữa mang phong cách trẻ trung với không gian mang hơi hướng hoài niệm và các loại đồ uống đậm vị. Chuỗi đặc biệt nổi bật với trải nghiệm “tự build ly trà” (mix tối đa 8 loại topping) và các dòng trà sữa đậm bản sắc.</p>
+          <div class="brow-chips"><span>Đậm Vị · Đậm Vibe · Đậm Gắn Kết</span><span>Tự build ly trà</span><span>Phong cách hoài niệm</span></div>
+          <a class="brow-link" href="https://www.facebook.com/trahu.damhuhon" target="_blank" rel="noopener">Xem Fanpage <span class="ar">→</span></a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="brand-cta">
+    <div class="wrap fade">
+      <h2>Muốn trở thành một phần của đại gia đình?</h2>
+      <p>Khám phá cơ hội nghề nghiệp tại cả 4 thương hiệu — từ cửa hàng, văn phòng đến khối sản xuất.</p>
+      <div class="actions">
+        <a href="viec-lam.html" class="btn btn-primary">Xem vị trí đang tuyển →</a>
+        <a href="index.html" class="btn btn-ghost">Về trang chủ</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="wrap">
+      <div class="ft-grid">
+
+        <!-- Cột trái: thông tin công ty -->
+        <div class="ft-left">
+          <div class="ft-brand-row">
+            <img src="images/logo-ttvh.jpg" alt="Thịnh Thế Vinh Hoa" />
+            <span class="ft-brand-name">Thịnh Thế Vinh Hoa</span>
+          </div>
+          <p class="ft-desc">Hệ sinh thái F&amp;B đa thương hiệu. <em>Vững thời · Sáng vận · Đẹp danh.</em></p>
+          <p class="ft-info"><strong>Địa chỉ:</strong> Số 35, đường Huỳnh Tịnh Của, phường Xuân Hòa, TP. Hồ Chí Minh, Việt Nam</p>
+          <p class="ft-info">Hotline: <a href="tel:02871080719">028 7108 0719</a></p>
+          <p class="ft-info">Email tuyển dụng: <a href="mailto:hr@maycha.com.vn">hr@maycha.com.vn</a></p>
+          <div class="ft-map">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.293149394956!2d106.68516161111077!3d10.78884498931628!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f067971f0d3%3A0x13631e6186a01d0!2zQ8OUTkcgVFkgQ-G7lEggUEjhuqZOIFRISeG7ikpIIFRIw6ogVklOSCBIT0E!5e0!3m2!1sen!2s!4v1782892127719!5m2!1sen!2s" width="100%" height="180" style="border:0" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+          </div>
+          <a class="ft-map-link" href="https://maps.app.goo.gl/dTTZVLgiX1ffkj1F7" target="_blank" rel="noopener">Mở trong Google Maps →</a>
+        </div>
+
+        <!-- Cột giữa: thương hiệu -->
+        <div class="ft-col">
+          <h4>Thương hiệu</h4>
+          <ul>
+            <li><a href="https://www.facebook.com/maycha38" class="ft-bold" target="_blank" rel="noopener">Trà Sữa Maycha</a></li>
+            <li><a href="https://www.facebook.com/hongtrasuatamhao" target="_blank" rel="noopener">Hồng Trà Sữa Tam Hảo</a></li>
+            <li><a href="https://www.facebook.com/gagionsot.bacogai" target="_blank" rel="noopener">Gà Giòn Sốt Ba Cô Gái</a></li>
+            <li><a href="https://www.facebook.com/trahu.damhuhon" target="_blank" rel="noopener">Trà Hú – Đậm Hú Hồn</a></li>
+            <li><a href="viec-lam.html">Cơ hội nghề nghiệp</a></li>
+          </ul>
+        </div>
+
+        <!-- Cột phải: liên hệ -->
+        <div class="ft-col">
+          <h4>Liên hệ</h4>
+          <ul class="ft-contact">
+            <li>Trà Sữa MayCha: <a href="tel:0983008254">0983 008 254</a></li>
+            <li>Hồng Trà Sữa Tam Hảo: <a href="tel:0983008931">0983 008 931</a></li>
+            <li>Hồng Trà Sữa Tam Hảo (Hà Nội): <a href="tel:0983008361">0983 008 361</a></li>
+            <li>Khối Kho &amp; Xưởng Sản Xuất: <a href="tel:0983435553">0983 435 553</a></li>
+          </ul>
+        </div>
+
+      </div>
+      <div class="ft-bottom">© 2026 Thịnh Thế Vinh Hoa F&amp;B Group · Tất cả các quyền được bảo lưu.</div>
+    </div>
+  </footer>
+
+  <script>
+    /* Reveal on scroll */
+    (function() {
+      var obs = new IntersectionObserver(function(en) {
+        en.forEach(function(e) {
+          if (e.isIntersecting) {
+            e.target.classList.add('in');
+            obs.unobserve(e.target);
+          }
+        });
+      }, {
+        threshold: .12
+      });
+      document.querySelectorAll('.fade').forEach(function(el) {
+        obs.observe(el);
+      });
+    })();
+  </script>
+  <script src="chat.js"></script>
+</body>
+
+</html>
