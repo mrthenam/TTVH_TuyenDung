@@ -31,6 +31,43 @@
     return reg.kw.some(function (k) { return n.indexOf(k) >= 0; });
   }
 
+  // Tỉnh/thành cụ thể cho mục "Tỉnh/Thành phố khác" trên trang chủ.
+  // Khớp CHÍNH XÁC theo tên tỉnh (không dùng khu vực "Miền Nam" vì Miền Nam bao gồm cả TP.HCM).
+  var PROVINCES = [
+    { name: 'Đồng Nai', kw: ['dong nai', 'bien hoa'] },
+    { name: 'Bình Dương', kw: ['binh duong', 'di an', 'thuan an', 'thu dau mot'] },
+    { name: 'Bà Rịa - Vũng Tàu', kw: ['ba ria', 'vung tau'] },
+    { name: 'Long An', kw: ['long an'] },
+    { name: 'Tiền Giang', kw: ['tien giang', 'my tho'] },
+    { name: 'An Giang', kw: ['an giang', 'long xuyen', 'chau doc'] },
+    { name: 'Cần Thơ', kw: ['can tho'] },
+    { name: 'Lâm Đồng', kw: ['lam dong', 'da lat', 'bao loc'] },
+    { name: 'Huế', kw: ['hue', 'thua thien'] }
+  ];
+  function locMatchProvince(loc, provName) {
+    var p = null;
+    PROVINCES.forEach(function (x) { if (x.name === provName) p = x; });
+    if (!p) return true;
+    var n = ' ' + normVi(loc) + ' ';
+    return p.kw.some(function (k) { return n.indexOf(k) >= 0; });
+  }
+
+  // "Tỉnh/Thành phố khác" = KHÔNG thuộc 3 khu vực đã có nút riêng (TP.HCM, Hà Nội, Đà Nẵng).
+  var BIG_CITY_KW = LOC_HCM.concat(LOC_HN).concat(['da nang']);
+  function locMatchOther(loc) {
+    var n = ' ' + normVi(loc) + ' ';
+    return !BIG_CITY_KW.some(function (k) { return n.indexOf(k) >= 0; });
+  }
+
+  // Khớp địa điểm theo "spec": {region:'...'} | {province:'...'} | {other:true} | null (không lọc)
+  function locMatch(loc, spec) {
+    if (!spec) return true;
+    if (spec.other) return locMatchOther(loc);
+    if (spec.province) return locMatchProvince(loc, spec.province);
+    if (spec.region) return locMatchRegion(loc, spec.region);
+    return true;
+  }
+
   // Bộ lọc phụ theo Khối: Cửa hàng -> Thương hiệu; Văn phòng / Khối sản xuất -> Bộ phận.
   // Tin không có cột brand/bộ phận nên nhận diện bằng TỪ KHÓA (không dấu) trong tiêu đề tin.
   var SUB_FILTERS = {
@@ -76,11 +113,12 @@
     return !cfg.options.some(hit); // "Các công việc khác" = không khớp nhóm nào ở trên
   }
 
-  // Một tin có khớp đồng thời Khối + Bộ phận/Thương hiệu + Khu vực không?
-  function jobMatches(j, deptLabel, sub, locLabel) {
+  // Một tin có khớp đồng thời Khối + Bộ phận/Thương hiệu + Địa điểm không?
+  // locSpec: {region}|{province}|{other}|null (xem locMatch)
+  function jobMatches(j, deptLabel, sub, locSpec) {
     if (deptLabel && j.dept !== deptLabel) return false;
     if (sub && !subMatch(j, deptLabel, sub)) return false;
-    if (locLabel && !locMatchRegion(j.location, locLabel)) return false;
+    if (locSpec && !locMatch(j.location, locSpec)) return false;
     return true;
   }
 
@@ -88,7 +126,11 @@
     normVi: normVi,
     DEPT_MAP: DEPT_MAP,
     LOC_REGIONS: LOC_REGIONS,
+    PROVINCES: PROVINCES,
     locMatchRegion: locMatchRegion,
+    locMatchProvince: locMatchProvince,
+    locMatchOther: locMatchOther,
+    locMatch: locMatch,
     SUB_FILTERS: SUB_FILTERS,
     subMatch: subMatch,
     jobMatches: jobMatches

@@ -2743,13 +2743,8 @@
          luôn khớp với danh sách khi bấm "Xem việc làm". */
       var JF = window.JobFilters;
       var CAREER_JOBS = null; // null = chưa tải xong
-      // Khu vực đã chọn -> nhãn khu vực của bộ lọc Địa điểm (5 mục cố định trên viec-lam.html)
+      // Khu vực có nút riêng -> nhãn khu vực của bộ lọc Địa điểm (5 mục cố định trên viec-lam.html)
       var REGION_LOC = { hcm: 'TP. Hồ Chí Minh', hn: 'Hà Nội', dn: 'Miền Trung' };
-      var PROVINCE_LOC = {
-        'Đồng Nai': 'Miền Nam', 'Bình Dương': 'Miền Nam', 'Bà Rịa - Vũng Tàu': 'Miền Nam',
-        'Long An': 'Miền Nam', 'Tiền Giang': 'Miền Nam', 'An Giang': 'Miền Nam', 'Cần Thơ': 'Miền Nam',
-        'Lâm Đồng': 'Miền Trung', 'Huế': 'Miền Trung'
-      };
       // Thẻ trong mỗi tab -> khối công việc (?dept=) tương ứng
       var GROUP_DEPT = { store: 'store', office: 'office', prod: 'sanxuat' };
       var CARD_GROUP = {};
@@ -2757,26 +2752,37 @@
       ['marketing', 'hr', 'scm', 'finance', 'other'].forEach(function(k) { CARD_GROUP[k] = 'office'; });
       ['sanxuat', 'qaqc', 'khovan', 'kythuat'].forEach(function(k) { CARD_GROUP[k] = 'prod'; });
 
-      function careerLoc() {
+      // Điều kiện lọc địa điểm theo lựa chọn hiện tại (khớp đúng với viec-lam.html):
+      //  - "Tỉnh/Thành phố khác" + chọn tỉnh cụ thể -> lọc đúng tỉnh đó
+      //  - "Tỉnh/Thành phố khác" chưa chọn tỉnh    -> mọi tỉnh ngoài TP.HCM/Hà Nội/Đà Nẵng
+      //  - Các khu vực còn lại                      -> theo khu vực tương ứng
+      function careerLocSpec() {
         var p = window.CAREER_PICK || {};
-        if (p.region === 'other') return p.province ? (PROVINCE_LOC[p.province] || '') : '';
-        return REGION_LOC[p.region] || '';
+        if (p.region === 'other') return p.province ? { province: p.province } : { other: true };
+        var lbl = REGION_LOC[p.region];
+        return lbl ? { region: lbl } : null;
       }
 
       function careerJobUrl(dept, sub) {
         var url = 'viec-lam.html?dept=' + dept;
         if (sub) url += '&sub=' + encodeURIComponent(sub);
-        var loc = careerLoc();
-        if (loc) url += '&loc=' + encodeURIComponent(loc);
+        var p = window.CAREER_PICK || {};
+        if (p.region === 'other') {
+          if (p.province) url += '&prov=' + encodeURIComponent(p.province);
+          else url += '&locother=1';
+        } else {
+          var lbl = REGION_LOC[p.region];
+          if (lbl) url += '&loc=' + encodeURIComponent(lbl);
+        }
         return url;
       }
 
-      // Các tin khớp Khối + Bộ phận/Thương hiệu + Khu vực đang chọn
+      // Các tin khớp Khối + Bộ phận/Thương hiệu + Địa điểm đang chọn
       function jobsFor(group, sub) {
         if (!CAREER_JOBS) return null;
         var deptLabel = JF.DEPT_MAP[GROUP_DEPT[group]];
-        var loc = careerLoc();
-        return CAREER_JOBS.filter(function(j) { return JF.jobMatches(j, deptLabel, sub, loc); });
+        var spec = careerLocSpec();
+        return CAREER_JOBS.filter(function(j) { return JF.jobMatches(j, deptLabel, sub, spec); });
       }
 
       // Gom hình thức làm việc, gộp các cách viết hoa/thường khác nhau ("Toàn Thời Gian" = "Toàn thời gian")

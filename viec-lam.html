@@ -414,6 +414,15 @@
     var JF = window.JobFilters;
     var normVi = JF.normVi, LOC_REGIONS = JF.LOC_REGIONS, locMatchRegion = JF.locMatchRegion;
     var SUB_FILTERS = JF.SUB_FILTERS, subMatch = JF.subMatch;
+    // Giá trị dropdown Địa điểm -> điều kiện lọc. Ngoài 5 khu vực cố định (giá trị = nhãn khu vực),
+    // còn có option động từ trang chủ: "@prov:<tỉnh>" (đúng 1 tỉnh) và "@other" (mọi tỉnh ngoài
+    // TP.HCM/Hà Nội/Đà Nẵng).
+    function locSpecFromVal(v) {
+      if (!v) return null;
+      if (v === '@other') return { other: true };
+      if (v.indexOf('@prov:') === 0) return { province: v.slice(6) };
+      return { region: v };
+    }
     // Nhãn "Thành phố/Tỉnh" hiển thị trên thẻ tin: ưu tiên nhận diện TP.HCM/Hà Nội qua từ khóa
     // (đúng cả khi địa chỉ không kết thúc bằng tên thành phố, VD "...,  Quận 6" hay không có dấu phẩy);
     // các tỉnh khác chưa có danh sách từ khóa riêng -> lấy đoạn cuối cùng của địa điểm (sau dấu phẩy).
@@ -444,11 +453,12 @@
     function applyFilter() {
       var fDept = fVal('f_dept'), fType = fVal('f_type'), fLoc = fVal('f_loc'), fSal = fVal('f_sal');
       var fSub = document.getElementById('f_sub').style.display === 'none' ? '' : fVal('f_sub');
+      var locSpec = locSpecFromVal(fLoc);
       filtered = JOBS.filter(function (j) {
         if (fDept && j.dept !== fDept) return false;
         if (fSub && !subMatch(j, fDept, fSub)) return false;
         if (fType && (j.jobtype || '').trim().toLowerCase() !== fType.toLowerCase()) return false;
-        if (fLoc && !locMatchRegion(j.location, fLoc)) return false;
+        if (locSpec && !JF.locMatch(j.location, locSpec)) return false;
         if (fSal && !salMatch(j.salary, fSal)) return false;
         if (curQ && (j.title || '').toLowerCase().indexOf(curQ) < 0) return false;
         return true;
@@ -611,7 +621,8 @@
     });
 
     /* Chọn sẵn bộ lọc theo tham số URL từ trang chủ (mục Cơ hội nghề nghiệp):
-       ?dept=office|sanxuat|store & sub=<thương hiệu/bộ phận> & loc=<khu vực> */
+       ?dept=office|sanxuat|store & sub=<thương hiệu/bộ phận>
+       & loc=<khu vực> HOẶC prov=<tỉnh cụ thể> HOẶC locother=1 (Tỉnh/Thành phố khác) */
     var urlParams = new URLSearchParams(location.search);
     (function () {
       var DEPT_MAP = JF.DEPT_MAP;
@@ -624,12 +635,23 @@
       }
     })();
 
+    // Thêm 1 option động vào dropdown Địa điểm rồi chọn nó (dùng cho tỉnh cụ thể / "Tỉnh khác")
+    function addLocOption(value, label) {
+      var sel = document.getElementById('f_loc');
+      var o = document.createElement('option');
+      o.value = value; o.textContent = label;
+      sel.appendChild(o);
+      sel.value = value;
+    }
+
     fetch('/api/jobs').then(function (r) { return r.json(); }).then(function (d) {
       JOBS = (d && d.rows) || [];
       document.querySelector('#jobChip b').textContent = JOBS.length;
       buildFilterOptions();
-      var pLoc = urlParams.get('loc');
-      if (pLoc) document.getElementById('f_loc').value = pLoc;
+      var pLoc = urlParams.get('loc'), pProv = urlParams.get('prov');
+      if (pProv) addLocOption('@prov:' + pProv, 'Tỉnh ' + pProv);
+      else if (urlParams.get('locother')) addLocOption('@other', 'Tỉnh/Thành phố khác');
+      else if (pLoc) document.getElementById('f_loc').value = pLoc;
       applyFilter();
       if (JOBS.length && window.innerWidth > 880) selectJob(filtered[0] ? filtered[0].id : JOBS[0].id);
       else detailEl.innerHTML = '<div class="empty">Chọn một công việc để xem mô tả chi tiết.</div>';
