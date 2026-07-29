@@ -65,8 +65,8 @@
         "MayCha": { "code": "CTV01881806266801", "name": "[MAYCHA - Hiring Web] Tuyển dụng nhân viên mới" },
         "Hồng Trà Sữa Tam Hảo": { "code": "CTV01881806266805", "name": "[TAMHAO - Hiring Web] Tuyển dụng nhân viên mới" },
         "Gà Giòn Sốt Ba Cô Gái": { "code": "CTV01881806266803", "name": "[GARAN - Hiring Web] Tuyển dụng nhân viên mới" },
-        "Khối Văn Phòng": { "code": "", "name": "[VANPHONG - Hiring Web] Tuyển dụng khối văn phòng" },
-        "Khối Kho & Xưởng Sản Xuất": { "code": "", "name": "[SANXUAT - Hiring Web] Tuyển dụng khối kho & xưởng sản xuất" }
+        "Khối Văn Phòng": { "code": "CTV01881707267084", "name": "[BO - Hiring Web] Tuyển dụng nhân viên văn phòng" },
+        "Khối Kho & Xưởng Sản Xuất": { "code": "CTV01881707267085", "name": "[DCCK - Hiring Web] Tuyển dụng nhân viên kho" }
       },
       "_note_codePrefix": "Tiền tố cho mã ứng viên tự sinh (code bắt buộc & duy nhất).",
       "codePrefix": "HSUV_WEB"

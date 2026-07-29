@@ -379,15 +379,20 @@ async function getBrandCampaignMap() {
   rows.forEach((r) => { m[r.brand] = { code: r.code, name: r.name }; });
   return m;
 }
-// Seed từ config: chỉ thêm các key CÒN THIẾU, không đụng vào các key đã có sẵn — obj: { brand: {code, name} }
+// Seed từ config: thêm key CÒN THIẾU; ngoài ra nếu key đã có nhưng mã RỖNG mà config có mã hợp lệ
+// thì điền vào (chữa trường hợp DB seed cũ để trống mã -> hồ sơ rơi vào "Chưa ứng tuyển").
+// Không đụng tới key đã có mã (tôn trọng chỉnh sửa của quản trị) — obj: { brand: {code, name} }
 async function seedBrandCampaigns(obj) {
   if (!obj) return;
   const existing = await listBrandCampaigns();
-  const cur = new Set(existing.map((r) => r.brand));
+  const byBrand = {}; existing.forEach((r) => { byBrand[r.brand] = r; });
   for (const b in obj) {
-    if (cur.has(b)) continue;
     const v = obj[b];
-    await setBrandCampaign(b, typeof v === 'string' ? v : v.code, typeof v === 'string' ? '' : v.name);
+    const code = typeof v === 'string' ? v : v.code;
+    const name = typeof v === 'string' ? '' : v.name;
+    const ex = byBrand[b];
+    if (!ex) await setBrandCampaign(b, code, name);              // thiếu -> thêm mới
+    else if (!ex.code && code) await setBrandCampaign(b, code, name || ex.name); // có nhưng rỗng -> điền mã từ config
   }
 }
 
