@@ -677,7 +677,17 @@
         <div class="fld" id="j_subdept_fld" style="display:none"><label>Bộ phận</label>
           <select id="j_subdept"><option value="">— Chọn —</option></select>
         </div>
-        <div class="fld"><label>Hình thức</label><input id="j_jobtype" type="text" placeholder="VD: Toàn thời gian" /></div>
+        <div class="fld"><label>Hình thức</label>
+          <select id="j_jobtype">
+            <option value="">— Chọn —</option>
+            <option>Toàn thời gian</option>
+            <option>Bán thời gian</option>
+            <option>Toàn thời gian &amp; Bán thời gian</option>
+            <option>Thời vụ</option>
+            <option>Cộng tác viên</option>
+            <option>Thực tập</option>
+          </select>
+        </div>
         <div class="fld"><label>Hạn nộp</label><input id="j_deadline" type="date" /></div>
         <div class="fld full"><label>Địa điểm làm việc <span style="font-weight:500">(gõ xong bấm Enter để thêm — thêm được nhiều địa điểm)</span></label>
           <div class="tagbox" id="j_loc_box">
@@ -1081,7 +1091,7 @@ function openJobModal(j) {
   $('#j_salary').value = j.salary || '';
   fillDeptOptions(j.dept || '');
   fillSubdeptOptions(j.dept || '', j.subdept || '');
-  $('#j_jobtype').value = j.jobtype || '';
+  setSelectValue('#j_jobtype', j.jobtype || '');
   $('#j_deadline').value = (j.deadline || '').slice(0, 10);
   jlocSet(j.location || '');
   $('#j_description').innerHTML = jobDescToHtml(j.description || '');
