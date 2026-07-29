@@ -509,6 +509,9 @@
       if (j.dept === 'Cửa hàng') {
         var brand = brandTag(j.title);
         if (brand) tags.push(brand);
+      } else {
+        var sub = JF.subLabel(j); // nhãn Bộ phận (Văn phòng / Khối sản xuất)
+        if (sub) tags.push(sub);
       }
       if (j.dept) tags.push(j.dept);
       return tags.map(function (t) { return '<span class="dept">' + esc(t) + '</span>'; }).join('');
@@ -581,6 +584,7 @@
         (j.jobtype ? '<div class="mi"><div class="k">Hình thức</div><div class="v">' + esc(j.jobtype) + '</div></div>' : '') +
         (j.deadline ? '<div class="mi"><div class="k">Hạn nộp</div><div class="v">' + esc(dmy(j.deadline)) + '</div></div>' : '') +
         (j.dept ? '<div class="mi"><div class="k">Khối</div><div class="v">' + esc(j.dept) + '</div></div>' : '') +
+        (function () { var s = JF.subLabel(j); return s ? '<div class="mi"><div class="k">Bộ phận</div><div class="v">' + esc(s) + '</div></div>' : ''; })() +
         '</div>' +
         '<div class="dactions">' +
         '<a href="index.html#ungtuyen" class="btn btn-primary">Ứng tuyển ngay →</a>' +

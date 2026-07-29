@@ -85,8 +85,8 @@
       options: [
         { v: 'marketing', label: 'Marketing', kw: ['marketing', 'marcom', 'media', 'tiktok', 'social', 'content', 'truyen thong', 'quang cao', 'trade'] },
         { v: 'hr', label: 'Nhân sự (HR)', kw: ['nhan su', 'tuyen dung', 'dao tao', 'hr ', '(hr)', 'c&b'] },
-        { v: 'scm', label: 'Quản lý cung ứng (SCM)', kw: ['cung ung', 'scm', 'mua hang', 'kho van', 'logistics', 'purchasing', 'supply'] },
-        { v: 'finance', label: 'Tài chính – Kế toán', kw: ['ke toan', 'tai chinh', 'finance', 'kiem soat', 'audit'] },
+        { v: 'scm', label: 'Quản lý cung ứng (SCM)', kw: ['cung ung', 'scm', 'mua hang', 'thu mua', 'kho van', 'logistics', 'purchasing', 'procurement', 'planning', 'supply'] },
+        { v: 'finance', label: 'Tài chính – Kế toán', kw: ['ke toan', 'tai chinh', 'finance', 'accounting', 'kiem soat', 'audit'] },
         { v: 'other', label: 'Các công việc khác', kw: null }
       ]
     },
@@ -104,6 +104,9 @@
   function subMatch(j, dept, val) {
     var cfg = SUB_FILTERS[dept];
     if (!cfg || !val) return true;
+    // Ưu tiên nhãn Bộ phận đã gán thủ công (chính xác tuyệt đối); chỉ khi tin CHƯA gán
+    // mới đoán theo từ khóa trong tiêu đề (dữ liệu cũ).
+    if (j.subdept) return String(j.subdept) === String(val);
     var t = ' ' + normVi(j.title) + ' ';
     function hit(opt) { return !!opt.kw && opt.kw.some(function (k) { return t.indexOf(k) >= 0; }); }
     var opt = null;
@@ -111,6 +114,16 @@
     if (!opt) return true;
     if (opt.kw) return hit(opt);
     return !cfg.options.some(hit); // "Các công việc khác" = không khớp nhóm nào ở trên
+  }
+  // Nhãn Bộ phận để hiển thị trên thẻ tin (Văn phòng / Khối sản xuất). Ưu tiên nhãn đã gán,
+  // nếu chưa gán thì đoán theo từ khóa tiêu đề. Cửa hàng đã có nhãn Thương hiệu riêng -> bỏ qua.
+  function subLabel(j) {
+    var cfg = SUB_FILTERS[j.dept];
+    if (!cfg || j.dept === 'Cửa hàng') return '';
+    var val = j.subdept;
+    if (!val) { cfg.options.forEach(function (o) { if (!val && subMatch(j, j.dept, o.v)) val = o.v; }); }
+    var opt = null; cfg.options.forEach(function (o) { if (o.v === val) opt = o; });
+    return opt ? opt.label : '';
   }
 
   // Một tin có khớp đồng thời Khối + Bộ phận/Thương hiệu + Địa điểm không?
@@ -133,6 +146,7 @@
     locMatch: locMatch,
     SUB_FILTERS: SUB_FILTERS,
     subMatch: subMatch,
+    subLabel: subLabel,
     jobMatches: jobMatches
   };
 })(window);

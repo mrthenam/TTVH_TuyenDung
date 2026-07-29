@@ -162,6 +162,7 @@
   .jobrow .jm{font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 14px}
   .jobrow .jm b{color:var(--green);font-weight:700}
   .jobrow .jdept{font-size:11.5px;font-weight:700;color:var(--red);background:rgba(212,175,55,.15);border-radius:999px;padding:3px 10px;flex:none}
+  .jobrow .jdept.jsub{color:var(--muted);background:rgba(54,28,18,.07)}
   .jobrow .ja{display:flex;gap:8px;flex:none}
   .jobrow .jlock{font-size:12px;color:var(--muted);white-space:nowrap;flex:none}
   /* phân quyền nhân viên */
@@ -673,6 +674,9 @@
             <option>Khối sản xuất</option>
           </select>
         </div>
+        <div class="fld" id="j_subdept_fld" style="display:none"><label>Bộ phận</label>
+          <select id="j_subdept"><option value="">— Chọn —</option></select>
+        </div>
         <div class="fld"><label>Hình thức</label><input id="j_jobtype" type="text" placeholder="VD: Toàn thời gian" /></div>
         <div class="fld"><label>Hạn nộp</label><input id="j_deadline" type="date" /></div>
         <div class="fld full"><label>Địa điểm làm việc <span style="font-weight:500">(gõ xong bấm Enter để thêm — thêm được nhiều địa điểm)</span></label>
@@ -731,6 +735,7 @@
 <div class="toast" id="toast"></div>
 
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="job-filters.js"></script>
 <script>
 var TOKEN = localStorage.getItem('ttvh_agent_token') || '';
 var sel = null, listTimer = null, msgTimer = null, editingId = null, SHEET_VIEW_URL = '', GOOGLE_CLIENT_ID = '';
@@ -952,6 +957,7 @@ function jobRowHtml(j) {
     (j.deadline ? '<span>⏳ ' + esc(jdmy(j.deadline)) + '</span>' : '') +
     '</div></div>' +
     (j.dept ? '<span class="jdept">' + esc(j.dept) + '</span>' : '') +
+    (function () { var s = window.JobFilters && JobFilters.subLabel(j); return s ? '<span class="jdept jsub">' + esc(s) + '</span>' : ''; })() +
     '<div class="ja">' + actions + '</div>' +
     '</div>';
 }
@@ -1036,6 +1042,17 @@ function fillDeptOptions(selected) {
   });
   $('#j_dept').innerHTML = opts;
 }
+// Bộ phận cụ thể theo Khối (chỉ Văn phòng & Khối sản xuất — Cửa hàng nhận diện Thương hiệu qua tiêu đề)
+function fillSubdeptOptions(dept, selected) {
+  var fld = $('#j_subdept_fld'), sel = $('#j_subdept');
+  var cfg = window.JobFilters && JobFilters.SUB_FILTERS[dept];
+  if (!cfg || dept === 'Cửa hàng') { fld.style.display = 'none'; sel.innerHTML = '<option value=""></option>'; sel.value = ''; return; }
+  fld.style.display = '';
+  sel.innerHTML = '<option value="">— Chọn ' + esc(cfg.label) + ' —</option>'
+    + cfg.options.map(function (o) { return '<option value="' + esc(o.v) + '"' + (o.v === selected ? ' selected' : '') + '>' + esc(o.label) + '</option>'; }).join('');
+  sel.value = selected || '';
+}
+$('#j_dept').addEventListener('change', function () { fillSubdeptOptions(this.value, ''); });
 // Chuyển mô tả (text cũ có tiêu đề mục + dấu •, hoặc HTML mới) sang HTML để nạp vào trình soạn thảo
 var JOB_DESC_HEADINGS = ['Mô tả công việc', 'Yêu cầu ứng viên', 'Quyền lợi được hưởng', 'Quyền lợi', 'Chi tiết công việc:', 'Địa điểm làm việc', 'Thời gian làm việc'];
 function jobDescToHtml(txt) {
@@ -1063,6 +1080,7 @@ function openJobModal(j) {
   $('#j_title').value = j.title || '';
   $('#j_salary').value = j.salary || '';
   fillDeptOptions(j.dept || '');
+  fillSubdeptOptions(j.dept || '', j.subdept || '');
   $('#j_jobtype').value = j.jobtype || '';
   $('#j_deadline').value = (j.deadline || '').slice(0, 10);
   jlocSet(j.location || '');
@@ -1148,6 +1166,7 @@ $('#jmSave').addEventListener('click', function () {
     title: $('#j_title').value.trim(),
     salary: $('#j_salary').value.trim(),
     dept: $('#j_dept').value.trim(),
+    subdept: $('#j_subdept_fld').style.display === 'none' ? '' : $('#j_subdept').value,
     jobtype: $('#j_jobtype').value.trim(),
     deadline: $('#j_deadline').value.trim(),
     location: jlocGet(),

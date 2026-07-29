@@ -277,6 +277,7 @@ async function handleChat(req, res, url, loadConfig) {
           deadline: (b.deadline || '').toString().trim(),
           jobtype: (b.jobtype || '').toString().trim(),
           dept: db.normDept(b.dept),
+          subdept: (b.subdept || '').toString().trim(),
           description: (b.description || '').toString()
         };
         if (!j.title) return sendJson(res, 400, { error: 'Thiếu tên công việc' });

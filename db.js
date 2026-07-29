@@ -74,6 +74,8 @@ async function init() {
     await pool.query(`CREATE TABLE IF NOT EXISTS jobs(
       id bigserial PRIMARY KEY, title text, salary text, location text, deadline text,
       jobtype text, dept text, description text, sort_order int)`);
+    // Bộ phận cụ thể (Marketing/HR/SCM… cho Văn phòng; Kho vận/Sản xuất/QA-QC… cho Khối sản xuất)
+    await pool.query(`ALTER TABLE jobs ADD COLUMN IF NOT EXISTS subdept text`);
     await pool.query(`CREATE TABLE IF NOT EXISTS sessions(
       token text PRIMARY KEY, username text, display_name text, ts bigint)`);
     console.log(' [db] Đã kết nối PostgreSQL — lưu chat bền vững.');
@@ -451,8 +453,8 @@ async function seedGallery(urls) {
 }
 
 // ----- Việc làm (tuyển dụng) -----
-const JOB_COLS = ['title', 'salary', 'location', 'deadline', 'jobtype', 'dept', 'description'];
-function jobOut(x) { return { id: Number(x.id), title: x.title || '', salary: x.salary || '', location: x.location || '', deadline: x.deadline || '', jobtype: x.jobtype || '', dept: x.dept || '', description: x.description || '', sort_order: x.sort_order }; }
+const JOB_COLS = ['title', 'salary', 'location', 'deadline', 'jobtype', 'dept', 'subdept', 'description'];
+function jobOut(x) { return { id: Number(x.id), title: x.title || '', salary: x.salary || '', location: x.location || '', deadline: x.deadline || '', jobtype: x.jobtype || '', dept: x.dept || '', subdept: x.subdept || '', description: x.description || '', sort_order: x.sort_order }; }
 async function listJobs() {
   if (HAS_PG) { const r = await pool.query('SELECT * FROM jobs ORDER BY sort_order ASC, id ASC'); return r.rows.map(jobOut); }
   return [...memJobs].sort((a, b) => (a.sort_order - b.sort_order) || (a.id - b.id)).map(jobOut);
@@ -466,22 +468,22 @@ async function addJob(j) {
   if (HAS_PG) {
     const m = await pool.query('SELECT COALESCE(MAX(sort_order),-1)+1 AS n FROM jobs');
     const r = await pool.query(
-      `INSERT INTO jobs(title,salary,location,deadline,jobtype,dept,description,sort_order)
-       VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id`,
-      [j.title || '', j.salary || '', j.location || '', j.deadline || '', j.jobtype || '', j.dept || '', j.description || '', m.rows[0].n]);
+      `INSERT INTO jobs(title,salary,location,deadline,jobtype,dept,subdept,description,sort_order)
+       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id`,
+      [j.title || '', j.salary || '', j.location || '', j.deadline || '', j.jobtype || '', j.dept || '', j.subdept || '', j.description || '', m.rows[0].n]);
     return Number(r.rows[0].id);
   }
   const id = memJobs.reduce((a, x) => Math.max(a, x.id), 0) + 1;
   const so = memJobs.reduce((a, x) => Math.max(a, x.sort_order), -1) + 1;
-  memJobs.push({ id, title: j.title || '', salary: j.salary || '', location: j.location || '', deadline: j.deadline || '', jobtype: j.jobtype || '', dept: j.dept || '', description: j.description || '', sort_order: so });
+  memJobs.push({ id, title: j.title || '', salary: j.salary || '', location: j.location || '', deadline: j.deadline || '', jobtype: j.jobtype || '', dept: j.dept || '', subdept: j.subdept || '', description: j.description || '', sort_order: so });
   return id;
 }
 async function updateJob(id, j) {
   j = j || {};
   if (HAS_PG) {
     const r = await pool.query(
-      `UPDATE jobs SET title=$2,salary=$3,location=$4,deadline=$5,jobtype=$6,dept=$7,description=$8 WHERE id=$1`,
-      [id, j.title || '', j.salary || '', j.location || '', j.deadline || '', j.jobtype || '', j.dept || '', j.description || '']);
+      `UPDATE jobs SET title=$2,salary=$3,location=$4,deadline=$5,jobtype=$6,dept=$7,subdept=$8,description=$9 WHERE id=$1`,
+      [id, j.title || '', j.salary || '', j.location || '', j.deadline || '', j.jobtype || '', j.dept || '', j.subdept || '', j.description || '']);
     return r.rowCount;
   }
   const x = memJobs.find(m => String(m.id) === String(id)); if (!x) return 0;
