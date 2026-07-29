@@ -518,7 +518,15 @@
     }
     function renderList() {
       countEl.textContent = filtered.length + ' công việc';
-      if (!filtered.length) { listEl.innerHTML = '<div class="empty">Không có công việc phù hợp.</div>'; if (pagerEl) pagerEl.innerHTML = ''; return; }
+      if (!filtered.length) {
+        listEl.innerHTML = '<div class="empty">Không có công việc phù hợp.</div>';
+        if (pagerEl) pagerEl.innerHTML = '';
+        // Không còn tin nào khớp -> xóa luôn nội dung tin cũ ở panel bên phải
+        selId = null;
+        detailEl.classList.remove('open');
+        detailEl.innerHTML = '<div class="empty">Không có công việc phù hợp với bộ lọc.</div>';
+        return;
+      }
       var totalPages = Math.ceil(filtered.length / PAGE_SIZE);
       if (curPage > totalPages) curPage = totalPages;
       if (curPage < 1) curPage = 1;
