@@ -665,7 +665,9 @@
       else if (urlParams.get('locother')) addLocOption('@other', 'Tỉnh/Thành phố khác');
       else if (pLoc) document.getElementById('f_loc').value = pLoc;
       applyFilter();
-      if (JOBS.length && window.innerWidth > 880) selectJob(filtered[0] ? filtered[0].id : JOBS[0].id);
+      // Có tin khớp -> desktop tự mở tin đầu; không khớp -> renderList() đã để panel trạng thái rỗng
+      if (!filtered.length) { /* giữ trạng thái rỗng của renderList() */ }
+      else if (window.innerWidth > 880) selectJob(filtered[0].id);
       else detailEl.innerHTML = '<div class="empty">Chọn một công việc để xem mô tả chi tiết.</div>';
     }).catch(function () {
       detailEl.innerHTML = '<div class="empty">Không tải được danh sách công việc.</div>';
