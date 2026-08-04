@@ -611,6 +611,7 @@ const server = http.createServer(async (req, res) => {
     try {
       const id = await db.addTraining(form);
       db.addTrainingLog({
+        ref_id: id,
         name: form.name,
         phone: form.phone,
         action: "create",
@@ -679,6 +680,7 @@ const server = http.createServer(async (req, res) => {
     }
   }
   // Danh sách đăng ký đào tạo cho nhân viên (cần token đăng nhập agent)
+  // ?trash=1 -> lấy các hồ sơ đã xóa mềm (thùng rác)
   if (url.pathname === "/api/training" && req.method === "GET") {
     const token =
       (req.headers["authorization"] || "").replace(/^Bearer\s+/i, "") ||
@@ -686,7 +688,170 @@ const server = http.createServer(async (req, res) => {
     if (!(await db.getSession(token)))
       return sendJson(res, 401, { error: "Cần đăng nhập nhân viên." });
     try {
-      return sendJson(res, 200, { ok: true, rows: await db.listTraining() });
+      const trash = url.searchParams.get("trash") === "1";
+      return sendJson(res, 200, {
+        ok: true,
+        rows: await db.listTraining({ trash }),
+        statuses: db.TRAIN_STATUS,
+      });
+    } catch (e) {
+      return sendJson(res, 500, { error: e.message });
+    }
+  }
+
+  // Thao tác hàng loạt trên nhiều hồ sơ đào tạo (cần token đăng nhập agent)
+  // body: { ids: [...], action: 'status'|'sess_date'|'delete'|'restore'|'purge'|'email', value }
+  if (url.pathname === "/api/training/bulk" && req.method === "POST") {
+    const token =
+      (req.headers["authorization"] || "").replace(/^Bearer\s+/i, "") ||
+      url.searchParams.get("token");
+    const sess = await db.getSession(token);
+    if (!sess) return sendJson(res, 401, { error: "Cần đăng nhập nhân viên." });
+    const b = (await readBody(req)) || {};
+    const ids = Array.isArray(b.ids) ? b.ids : [];
+    const action = String(b.action || "");
+    if (!ids.length) return sendJson(res, 400, { error: "Chưa chọn hồ sơ nào." });
+    const actor = sess.displayName || sess.username || "";
+    let done = 0,
+      failed = 0;
+    const skipped = [];
+    try {
+      for (const id of ids) {
+        const old = await db.getTrainingById(id);
+        if (!old) {
+          failed++;
+          continue;
+        }
+        const logBase = {
+          ref_id: id,
+          name: old.name,
+          phone: old.phone,
+          actor,
+        };
+        if (action === "status") {
+          const st = db.normStatus(b.value);
+          if ((await db.updateTraining(id, { status: st })) > 0) {
+            done++;
+            db.addTrainingLog(
+              Object.assign({}, logBase, {
+                action: "update",
+                detail: "đổi trạng thái → " + db.TRAIN_STATUS[st],
+              }),
+            ).catch(() => {});
+          } else failed++;
+        } else if (action === "sess_date") {
+          const d = String(b.value || "");
+          if ((await db.updateTraining(id, { sess_date: d })) > 0) {
+            done++;
+            db.addTrainingLog(
+              Object.assign({}, logBase, {
+                action: "reschedule",
+                detail: "đổi lịch đào tạo sang ngày " + sheet.isoToDmy(d),
+              }),
+            ).catch(() => {});
+          } else failed++;
+        } else if (action === "delete") {
+          if ((await db.deleteTraining(id)) > 0) {
+            done++;
+            db.addTrainingLog(
+              Object.assign({}, logBase, {
+                action: "delete",
+                detail: "Chuyển đăng ký vào thùng rác",
+              }),
+            ).catch(() => {});
+          } else failed++;
+        } else if (action === "restore") {
+          if ((await db.restoreTraining(id)) > 0) {
+            done++;
+            db.addTrainingLog(
+              Object.assign({}, logBase, {
+                action: "restore",
+                detail: "Khôi phục đăng ký từ thùng rác",
+              }),
+            ).catch(() => {});
+          } else failed++;
+        } else if (action === "purge") {
+          if ((await db.deleteTraining(id, true)) > 0) {
+            done++;
+            db.addTrainingLog(
+              Object.assign({}, logBase, {
+                ref_id: null,
+                action: "purge",
+                detail: "Xóa vĩnh viễn đăng ký khỏi hệ thống",
+              }),
+            ).catch(() => {});
+          } else failed++;
+        } else if (action === "email") {
+          const r = await mailer.sendTrainingEmailNow(loadConfig(), old);
+          if (r && r.ok) {
+            done++;
+            db.addTrainingLog(
+              Object.assign({}, logBase, {
+                action: "email",
+                detail: "Gửi lại email thông tin đào tạo tới " + (old.email || ""),
+              }),
+            ).catch(() => {});
+          } else {
+            failed++;
+            skipped.push(
+              (old.name || "?") + ": " + ((r && (r.skipped || r.error)) || "lỗi"),
+            );
+          }
+        } else {
+          return sendJson(res, 400, { error: "Hành động không hợp lệ." });
+        }
+      }
+      return sendJson(res, 200, { ok: true, done, failed, skipped });
+    } catch (e) {
+      return sendJson(res, 500, { error: e.message });
+    }
+  }
+
+  // Khôi phục 1 hồ sơ từ thùng rác
+  if (
+    /^\/api\/training\/[^/]+\/restore$/.test(url.pathname) &&
+    req.method === "POST"
+  ) {
+    const token =
+      (req.headers["authorization"] || "").replace(/^Bearer\s+/i, "") ||
+      url.searchParams.get("token");
+    const sess = await db.getSession(token);
+    if (!sess) return sendJson(res, 401, { error: "Cần đăng nhập nhân viên." });
+    const id = decodeURIComponent(url.pathname.split("/")[3]);
+    try {
+      const old = await db.getTrainingById(id);
+      const n = await db.restoreTraining(id);
+      if (n > 0)
+        db.addTrainingLog({
+          ref_id: id,
+          name: old && old.name,
+          phone: old && old.phone,
+          action: "restore",
+          detail: "Khôi phục đăng ký từ thùng rác",
+          actor: sess.displayName || sess.username || "",
+        }).catch(() => {});
+      return sendJson(res, 200, { ok: n > 0, restored: n });
+    } catch (e) {
+      return sendJson(res, 500, { error: e.message });
+    }
+  }
+
+  // Lịch sử chỉnh sửa của riêng 1 hồ sơ
+  if (
+    /^\/api\/training\/[^/]+\/log$/.test(url.pathname) &&
+    req.method === "GET"
+  ) {
+    const token =
+      (req.headers["authorization"] || "").replace(/^Bearer\s+/i, "") ||
+      url.searchParams.get("token");
+    if (!(await db.getSession(token)))
+      return sendJson(res, 401, { error: "Cần đăng nhập nhân viên." });
+    const id = decodeURIComponent(url.pathname.split("/")[3]);
+    try {
+      return sendJson(res, 200, {
+        ok: true,
+        rows: await db.listTrainingLog(100, id),
+      });
     } catch (e) {
       return sendJson(res, 500, { error: e.message });
     }
@@ -699,19 +864,27 @@ const server = http.createServer(async (req, res) => {
     const token =
       (req.headers["authorization"] || "").replace(/^Bearer\s+/i, "") ||
       url.searchParams.get("token");
-    if (!(await db.getSession(token)))
+    const sess = await db.getSession(token);
+    if (!sess)
       return sendJson(res, 401, { error: "Cần đăng nhập nhân viên." });
+    const actor = sess.displayName || sess.username || "";
     const id = decodeURIComponent(url.pathname.slice("/api/training/".length));
     if (req.method === "DELETE") {
+      // Mặc định là xóa mềm (vào thùng rác); ?purge=1 mới xóa hẳn khỏi DB
+      const purge = url.searchParams.get("purge") === "1";
       try {
         const old = await db.getTrainingById(id);
-        const n = await db.deleteTraining(id);
+        const n = await db.deleteTraining(id, purge);
         if (n > 0)
           db.addTrainingLog({
+            ref_id: purge ? null : id,
             name: old && old.name,
             phone: old && old.phone,
-            action: "delete",
-            detail: "Xóa đăng ký đào tạo",
+            actor,
+            action: purge ? "purge" : "delete",
+            detail: purge
+              ? "Xóa vĩnh viễn đăng ký khỏi hệ thống"
+              : "Chuyển đăng ký vào thùng rác",
           }).catch(() => {});
         return sendJson(res, 200, { ok: n > 0, deleted: n });
       } catch (e) {
@@ -744,15 +917,39 @@ const server = http.createServer(async (req, res) => {
             changes.push(
               "đổi lịch đào tạo sang ngày " + sheet.isoToDmy(form.sess_date),
             );
+          if (
+            "status" in form &&
+            db.normStatus(old.status) !== db.normStatus(form.status)
+          )
+            changes.push(
+              "đổi trạng thái: " +
+                db.TRAIN_STATUS[db.normStatus(old.status)] +
+                " → " +
+                db.TRAIN_STATUS[db.normStatus(form.status)],
+            );
           for (const k in labels) {
             if (k in form && (old[k] || "") !== (form[k] || ""))
-              changes.push("đổi " + labels[k] + " → " + form[k]);
+              changes.push(
+                "đổi " +
+                  labels[k] +
+                  ": " +
+                  (old[k] || "(trống)") +
+                  " → " +
+                  (form[k] || "(trống)"),
+              );
           }
         }
         db.addTrainingLog({
+          ref_id: id,
           name: form.name || (old && old.name),
           phone: form.phone || (old && old.phone),
-          action: "update",
+          actor,
+          action:
+            "sess_date" in form &&
+            old &&
+            (old.sess_date || "") !== (form.sess_date || "")
+              ? "reschedule"
+              : "update",
           detail: changes.length ? changes.join("; ") : "Cập nhật thông tin",
         }).catch(() => {});
       }

@@ -112,7 +112,8 @@ async function handleTrainingFlow(sid, text, cfg) {
   if (st.step === 'ask_date') {
     const d = parseDmy(text);
     if (!d) return 'Bạn vui lòng nhập **ngày mong muốn** theo định dạng ngày/tháng/năm, ví dụ 21/12/2026.\n\n' + NOTE_DATE;
-    try { await db.updateTraining(st.recordId, { sess_date: d.iso }); }
+    // Ứng viên tự đổi lịch -> chuyển sang trạng thái "Xin đổi lịch" để HR thấy ngay trên bảng quản trị
+    try { await db.updateTraining(st.recordId, { sess_date: d.iso, status: 'reschedule' }); }
     catch (e) { return 'Xin lỗi, mình chưa cập nhật được lúc này. Bạn vui lòng thử lại sau ít phút hoặc liên hệ HR giúp mình nhé.'; }
     // Cập nhật cột "Ngày Dự Kiến..." trong Excel SharePoint qua webhook (không chặn)
     sheet.pushToSheet(cfg, { action: 'update', phone: st.phone || '', name: st.name || '', sess_date: d.display, sess_date_iso: d.iso }).catch(() => {});
@@ -121,7 +122,7 @@ async function handleTrainingFlow(sid, text, cfg) {
       event: 'training_reschedule', name: st.name || '', phone: st.phone || '', newDate: d.display,
       text: '🔔 Ứng viên ĐỔI LỊCH ĐÀO TẠO\n• Họ tên: ' + (st.name || '(trống)') + '\n• SĐT: ' + (st.phone || '') + '\n• Ngày đào tạo mới: ' + d.display
     }).catch(() => {});
-    db.addTrainingLog({ name: st.name || '', phone: st.phone || '', action: 'reschedule', detail: 'Thay đổi lịch đào tạo sang ngày ' + d.display }).catch(() => {});
+    db.addTrainingLog({ ref_id: st.recordId, name: st.name || '', phone: st.phone || '', actor: 'Ứng viên (chatbot)', action: 'reschedule', detail: 'Thay đổi lịch đào tạo sang ngày ' + d.display }).catch(() => {});
     const name = st.name; flowState.delete(sid);
     return 'Mình đã cập nhật ngày đào tạo của bạn' + (name ? ' (' + name + ')' : '') + ' sang **' + d.display + '** thành công ✅.\nBộ phận Đào tạo sẽ liên hệ xác nhận lại với bạn. Cảm ơn bạn rất nhiều!';
   }

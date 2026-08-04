@@ -10,6 +10,13 @@ Landing page tuyển dụng + bảng dữ liệu + Kanban phân loại ứng vi�
 - `config.example.json` — Mẫu cấu hình. **`config.json` thật (chứa token) không được đưa lên git.**
 - `images/` — Logo các thương hiệu (MayCha, Tam Hảo, Gà Giòn Ba Cô Gái, Trà Hú) + ảnh.
 
+## Màn hình "Đăng ký lịch đào tạo" (admin)
+- **Trạng thái hồ sơ**: Mới đăng ký → Chờ xác nhận → Đã xác nhận → Đã gửi thông tin đào tạo → Đã tham gia; kèm Vắng mặt / Xin đổi lịch / Hủy. Ứng viên tự đổi lịch qua chatbot sẽ tự chuyển sang *Xin đổi lịch*.
+- **Bộ lọc nâng cao** (ngày đăng ký, ngày đào tạo, tỉnh/huyện, vị trí, Full-time/Part-time, Online/Trực tiếp, cửa hàng, trạng thái) + chip hiển thị điều kiện đang lọc.
+- **Thao tác hàng loạt**: đổi trạng thái, đổi lịch, gửi email, xuất Excel, xóa.
+- **Xóa mềm**: hồ sơ xóa đi vào *thùng rác* (Bộ lọc → Xem thùng rác) và khôi phục lại được; chỉ "Xóa vĩnh viễn" mới gỡ khỏi DB.
+- **Lịch sử thao tác** ghi rõ người thực hiện, thời điểm và nội dung thay đổi — xem chung ở tab *Lịch sử chỉnh sửa* hoặc riêng từng hồ sơ ở nút **Xem**.
+
 ## Cài đặt & chạy
 1. Copy file mẫu thành cấu hình thật:
    ```bash

@@ -282,4 +282,23 @@ async function maybeSendTrainingEmail(cfg, form) {
   } catch (e) { console.error(' [mail] Exception ngoài dự kiến:', e && e.stack); return { ok: false, error: (e && e.message) || 'lỗi không xác định' }; }
 }
 
-module.exports = { EMAIL_DEFAULTS, getEmailCfg, sendMail, maybeSendTrainingEmail, mailStatus, applyTemplate };
+// Gửi email đào tạo do nhân viên bấm tay trong trang quản trị.
+// Khác maybeSendTrainingEmail: KHÔNG phụ thuộc công tắc "gửi tự động" (vì đây là hành động chủ động),
+// nhưng vẫn tôn trọng chế độ test để tránh gửi nhầm ra ngoài khi đang thử nghiệm.
+async function sendTrainingEmailNow(cfg, form) {
+  try {
+    const s = await getEmailCfg();
+    const to = (form.email || '').trim();
+    if (!to || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) return { ok: false, skipped: 'no-email' };
+    if (s.testMode) {
+      const allow = (s.testList || []).map((x) => String(x).trim().toLowerCase());
+      if (allow.indexOf(to.toLowerCase()) === -1) return { ok: false, skipped: 'not-in-testlist' };
+    }
+    const vars = { ten: (form.name || '').trim() || 'các bạn Nhân Viên Mới' };
+    return await sendMail(cfg, {
+      to, subject: applyTemplate(s.subject, vars), bodyText: applyTemplate(s.body, vars), fromName: s.fromName
+    });
+  } catch (e) { return { ok: false, error: (e && e.message) || 'lỗi không xác định' }; }
+}
+
+module.exports = { EMAIL_DEFAULTS, getEmailCfg, sendMail, maybeSendTrainingEmail, sendTrainingEmailNow, mailStatus, applyTemplate };

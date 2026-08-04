@@ -62,11 +62,20 @@ async function init() {
     await pool.query(`ALTER TABLE training ADD COLUMN IF NOT EXISTS province text`);
     await pool.query(`ALTER TABLE training ADD COLUMN IF NOT EXISTS district text`);
     await pool.query(`ALTER TABLE training ADD COLUMN IF NOT EXISTS updated_at bigint`);
+    // Trạng thái xử lý hồ sơ (new/pending/confirmed/...) — xem TRAIN_STATUS
+    await pool.query(`ALTER TABLE training ADD COLUMN IF NOT EXISTS status text`);
+    // Xóa mềm: hồ sơ vào "thùng rác", vẫn khôi phục được
+    await pool.query(`ALTER TABLE training ADD COLUMN IF NOT EXISTS deleted_at bigint`);
+    await pool.query(`UPDATE training SET status='new' WHERE status IS NULL OR status=''`);
     await pool.query(`CREATE TABLE IF NOT EXISTS brand_campaigns(
       brand text PRIMARY KEY, code text, name text, updated_at bigint)`);
     await pool.query(`CREATE TABLE IF NOT EXISTS settings(k text PRIMARY KEY, v text)`);
     await pool.query(`CREATE TABLE IF NOT EXISTS training_log(
       id bigserial PRIMARY KEY, name text, phone text, action text, detail text, ts bigint)`);
+    // ref_id: gắn nhật ký vào đúng hồ sơ để xem lịch sử từng người; actor: ai thao tác
+    await pool.query(`ALTER TABLE training_log ADD COLUMN IF NOT EXISTS ref_id bigint`);
+    await pool.query(`ALTER TABLE training_log ADD COLUMN IF NOT EXISTS actor text`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_trainlog_ref ON training_log(ref_id, ts)`);
     await pool.query(`CREATE TABLE IF NOT EXISTS recruitment_info(
       brand text PRIMARY KEY, name text, title text, content text, updated_at bigint)`);
     await pool.query(`CREATE TABLE IF NOT EXISTS gallery(
@@ -284,33 +293,57 @@ function setTyping(id) { typing.set(id, Date.now()); }
 function isTyping(id) { return (Date.now() - (typing.get(id) || 0)) < 8000; }
 
 // ----- đăng ký đào tạo -----
+// Các trạng thái xử lý hồ sơ (key lưu DB -> nhãn hiển thị)
+const TRAIN_STATUS = {
+  new: 'Mới đăng ký',
+  pending: 'Chờ xác nhận',
+  confirmed: 'Đã xác nhận',
+  sent: 'Đã gửi thông tin đào tạo',
+  attended: 'Đã tham gia',
+  absent: 'Vắng mặt',
+  reschedule: 'Xin đổi lịch',
+  cancelled: 'Hủy'
+};
+function normStatus(s) { return Object.prototype.hasOwnProperty.call(TRAIN_STATUS, s) ? s : 'new'; }
+
 async function addTraining(r) {
   const ts = Date.now();
   const row = {
     name: r.name || '', phone: r.phone || '', email: r.email || '',
     province: r.province || '', district: r.district || '', brand: r.brand || '',
     position: r.position || '', store: r.store || '', course: r.course || '',
-    sess_date: r.sess_date || '', sess_time: r.sess_time || '', mode: r.mode || '', note: r.note || ''
+    sess_date: r.sess_date || '', sess_time: r.sess_time || '', mode: r.mode || '', note: r.note || '',
+    status: normStatus(r.status)
   };
   if (HAS_PG) {
     const r2 = await pool.query(
-      `INSERT INTO training(name,phone,email,province,district,brand,position,store,course,sess_date,sess_time,mode,note,ts,updated_at)
-       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) RETURNING id`,
-      [row.name, row.phone, row.email, row.province, row.district, row.brand, row.position, row.store, row.course, row.sess_date, row.sess_time, row.mode, row.note, ts, ts]);
+      `INSERT INTO training(name,phone,email,province,district,brand,position,store,course,sess_date,sess_time,mode,note,status,ts,updated_at)
+       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING id`,
+      [row.name, row.phone, row.email, row.province, row.district, row.brand, row.position, row.store, row.course, row.sess_date, row.sess_time, row.mode, row.note, row.status, ts, ts]);
     return r2.rows[0].id;
   }
   const id = memTraining.length + 1;
-  memTraining.push(Object.assign({ id, ts, updated_at: ts }, row));
+  memTraining.push(Object.assign({ id, ts, updated_at: ts, deleted_at: null }, row));
   return id;
 }
-async function listTraining() {
+// opts.trash = true -> chỉ lấy hồ sơ trong thùng rác (đã xóa mềm)
+async function listTraining(opts) {
+  const trash = !!(opts && opts.trash);
   if (HAS_PG) {
-    const r = await pool.query('SELECT * FROM training ORDER BY ts DESC LIMIT 500');
-    return r.rows.map(x => Object.assign({}, x, { ts: Number(x.ts), updated_at: Number(x.updated_at || x.ts) }));
+    const r = await pool.query(
+      'SELECT * FROM training WHERE deleted_at IS ' + (trash ? 'NOT NULL' : 'NULL') + ' ORDER BY ts DESC LIMIT 2000');
+    return r.rows.map(x => Object.assign({}, x, {
+      ts: Number(x.ts), updated_at: Number(x.updated_at || x.ts),
+      deleted_at: x.deleted_at == null ? null : Number(x.deleted_at),
+      status: normStatus(x.status)
+    }));
   }
-  return [...memTraining].sort((a, b) => b.ts - a.ts);
+  return memTraining
+    .filter(x => (trash ? !!x.deleted_at : !x.deleted_at))
+    .map(x => Object.assign({}, x, { status: normStatus(x.status) }))
+    .sort((a, b) => b.ts - a.ts);
 }
-const TRAIN_COLS = ['name', 'phone', 'email', 'province', 'district', 'brand', 'position', 'store', 'course', 'sess_date', 'sess_time', 'mode', 'note'];
+const TRAIN_COLS = ['name', 'phone', 'email', 'province', 'district', 'brand', 'position', 'store', 'course', 'sess_date', 'sess_time', 'mode', 'note', 'status'];
 async function updateTraining(id, r) {
   const now = Date.now();
   if (HAS_PG) {
@@ -327,11 +360,34 @@ async function updateTraining(id, r) {
   row.updated_at = now;
   return 1;
 }
-async function deleteTraining(id) {
-  if (HAS_PG) { const r = await pool.query('DELETE FROM training WHERE id=$1', [id]); return r.rowCount; }
-  const idx = memTraining.findIndex(x => String(x.id) === String(id));
-  if (idx >= 0) { memTraining.splice(idx, 1); return 1; }
-  return 0;
+// Xóa mềm: đưa vào thùng rác (mặc định). Chỉ xóa hẳn khỏi DB khi purge=true.
+async function deleteTraining(id, purge) {
+  if (purge) {
+    if (HAS_PG) { const r = await pool.query('DELETE FROM training WHERE id=$1', [id]); return r.rowCount; }
+    const idx = memTraining.findIndex(x => String(x.id) === String(id));
+    if (idx >= 0) { memTraining.splice(idx, 1); return 1; }
+    return 0;
+  }
+  const now = Date.now();
+  if (HAS_PG) {
+    const r = await pool.query('UPDATE training SET deleted_at=$2 WHERE id=$1 AND deleted_at IS NULL', [id, now]);
+    return r.rowCount;
+  }
+  const row = memTraining.find(x => String(x.id) === String(id));
+  if (!row || row.deleted_at) return 0;
+  row.deleted_at = now;
+  return 1;
+}
+// Khôi phục hồ sơ từ thùng rác
+async function restoreTraining(id) {
+  if (HAS_PG) {
+    const r = await pool.query('UPDATE training SET deleted_at=NULL WHERE id=$1 AND deleted_at IS NOT NULL', [id]);
+    return r.rowCount;
+  }
+  const row = memTraining.find(x => String(x.id) === String(id));
+  if (!row || !row.deleted_at) return 0;
+  row.deleted_at = null;
+  return 1;
 }
 async function getTrainingById(id) {
   if (HAS_PG) { const r = await pool.query('SELECT * FROM training WHERE id=$1', [id]); return r.rows[0] || null; }
@@ -340,16 +396,27 @@ async function getTrainingById(id) {
 // ----- lịch sử chỉnh sửa -----
 async function addTrainingLog(e) {
   const ts = Date.now();
-  const row = { name: e.name || '', phone: e.phone || '', action: e.action || '', detail: e.detail || '' };
+  const row = {
+    name: e.name || '', phone: e.phone || '', action: e.action || '', detail: e.detail || '',
+    ref_id: e.ref_id == null || e.ref_id === '' ? null : Number(e.ref_id), actor: e.actor || ''
+  };
   if (HAS_PG) {
-    const r = await pool.query('INSERT INTO training_log(name,phone,action,detail,ts) VALUES($1,$2,$3,$4,$5) RETURNING id',
-      [row.name, row.phone, row.action, row.detail, ts]);
+    const r = await pool.query('INSERT INTO training_log(name,phone,action,detail,ref_id,actor,ts) VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING id',
+      [row.name, row.phone, row.action, row.detail, row.ref_id, row.actor, ts]);
     return r.rows[0].id;
   }
   const id = memLog.length + 1; memLog.push(Object.assign({ id, ts }, row)); return id;
 }
-async function listTrainingLog(limit) {
+// refId: chỉ lấy nhật ký của 1 hồ sơ (dùng cho "Xem lịch sử" từng người)
+async function listTrainingLog(limit, refId) {
   limit = limit || 100;
+  if (refId != null && refId !== '') {
+    if (HAS_PG) {
+      const r = await pool.query('SELECT * FROM training_log WHERE ref_id=$1 ORDER BY ts DESC LIMIT $2', [Number(refId), limit]);
+      return r.rows.map(x => Object.assign({}, x, { ts: Number(x.ts) }));
+    }
+    return memLog.filter(x => String(x.ref_id) === String(refId)).sort((a, b) => b.ts - a.ts).slice(0, limit);
+  }
   if (HAS_PG) { const r = await pool.query('SELECT * FROM training_log ORDER BY ts DESC LIMIT $1', [limit]); return r.rows.map(x => Object.assign({}, x, { ts: Number(x.ts) })); }
   return [...memLog].sort((a, b) => b.ts - a.ts).slice(0, limit);
 }
@@ -529,7 +596,8 @@ module.exports = {
   createSession, getSession,
   ensureConv, addMessage, getMessages, setHumanMode, getConv, listConversations,
   setTyping, isTyping,
-  addTraining, listTraining, updateTraining, deleteTraining, getTrainingById,
+  addTraining, listTraining, updateTraining, deleteTraining, restoreTraining, getTrainingById,
+  TRAIN_STATUS, normStatus,
   addTrainingLog, listTrainingLog,
   listBrandCampaigns, setBrandCampaign, deleteBrandCampaign, getBrandCampaignMap, seedBrandCampaigns,
   listRecruitment, setRecruitment, seedRecruitment,
