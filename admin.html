@@ -1987,7 +1987,7 @@ function sttBadge(s) { s = sttKey(s); return '<span class="stt s-' + s + '">' + 
 
 /* ----- Bộ lọc / phân trang / chọn nhiều ----- */
 var TF = { from: '', to: '', dfrom: '', dto: '', status: '', province: '', district: '', position: '', worktype: '', channel: '', mode: '', store: '' };
-var TQ = '';            // lọc nhanh từ ô thống kê: '' | today | pending | week | reschedule
+var TQ = '';            // lọc nhanh từ ô thống kê: '' | today | week | reschedule
 var TRASH = false;      // đang xem thùng rác?
 var TSEL = {};          // id đang chọn
 var TPAGE = 1, TPSIZE = 50;
@@ -2065,7 +2065,6 @@ function filteredTraining() {
     if (TF.mode && (r.mode || '') !== TF.mode) return false;
     if (TF.store && (r.store || '') !== TF.store) return false;
     if (t0 && Number(r.ts) < t0) return false;
-    if (TQ === 'pending' && sttKey(r.status) !== 'pending') return false;
     if (TQ === 'reschedule' && sttKey(r.status) !== 'reschedule') return false;
     if (wk && !(r.sess_date && r.sess_date >= wk[0] && r.sess_date <= wk[1])) return false;
     return true;
@@ -2079,7 +2078,6 @@ function renderMetrics() {
   var items = [
     { k: '', v: trainRows.length, t: TRASH ? 'Trong thùng rác' : 'Tổng đăng ký' },
     { k: 'today', v: n(function (r) { return Number(r.ts) >= t0; }), t: 'Mới hôm nay' },
-    { k: 'pending', v: n(function (r) { return sttKey(r.status) === 'pending'; }), t: 'Chờ xác nhận' },
     { k: 'week', v: n(function (r) { return r.sess_date && r.sess_date >= wk[0] && r.sess_date <= wk[1]; }), t: 'Đào tạo tuần này' },
     { k: 'reschedule', v: n(function (r) { return sttKey(r.status) === 'reschedule'; }), t: 'Xin đổi lịch' }
   ];
