@@ -516,12 +516,15 @@ async function createCandidate(form, cfg, res) {
     payload[brandTarget] = BRAND_VALUE_MAP[payload[brandTarget]];
   }
 
-  // cf49 (Vị trí ứng tuyển) là dropdown ĐÓNG mới chỉ có option của khối Cửa hàng.
-  // Hồ sơ Văn Phòng / Kho & Xưởng: ghi thêm Khối + Vị trí vào Ghi chú để HR không mất
-  // thông tin khi 1Office bỏ trống cf49 (cf49 vẫn gửi kèm — khi 1Office bổ sung option
-  // khớp thì trường này tự có dữ liệu, không cần sửa code).
-  if (form.position && form.jobgroup && form.jobgroup !== "Cửa hàng") {
-    const line = "[" + form.jobgroup + "] Vị trí ứng tuyển: " + form.position;
+  // cf49 (Vị trí ứng tuyển) là dropdown ĐÓNG trên 1Office: giá trị gửi lên phải khớp
+  // TUYỆT ĐỐI một option có sẵn, lệch là 1Office lặng lẽ bỏ trống (không báo lỗi).
+  // Thực tế đã gặp: hồ sơ khối Cửa hàng chọn vị trí có ký tự ">" ("... có > 6 tháng
+  // kinh nghiệm") vẫn bị bỏ trống. Vì vậy LUÔN ghi kèm Khối + Vị trí vào Ghi chú cho
+  // MỌI khối để HR không bao giờ mất thông tin, dù cf49 có được 1Office nhận hay không.
+  // (cf49 vẫn gửi bình thường — khi khớp option thì trường vẫn tự có dữ liệu.)
+  if (form.position) {
+    const line =
+      "[" + (form.jobgroup || "—") + "] Vị trí ứng tuyển: " + form.position;
     payload.note = payload.note ? payload.note + "\n" + line : line;
   }
 
@@ -552,15 +555,33 @@ async function createCandidate(form, cfg, res) {
   if (existing) {
     const updateEndpoint =
       c.updateEndpoint || c.endpoint.replace(/\/insert(?=$|\?|#)/, "/update");
+    // 1Office bắt buộc có "Vị trí" (position_id) khi cập nhật — hồ sơ nộp từ web thường
+    // để trống nên update trả lỗi "Vị trí không tồn tại trên hệ thống". Truyền lại
+    // position_id của chính hồ sơ cũ để không bị chặn.
+    const keep = {};
+    if (existing.position_id) keep.position_id = existing.position_id;
     r = await oneOfficeSend(
       updateEndpoint,
-      Object.assign({}, payload, { code: existing.code }),
+      Object.assign({}, payload, keep, { code: existing.code }),
       cfg,
       token,
     );
     if (r.ok)
       return sendJson(res, 200, { ok: true, updated: true, result: r.result });
-    return sendJson(res, 200, { ok: false, error: r.error });
+    // Hồ sơ đã tồn tại nhưng 1Office từ chối cập nhật: KHÔNG báo lỗi kỹ thuật cho ứng
+    // viên (hồ sơ của họ vẫn nằm trong hệ thống), chỉ ghi log để HR/kỹ thuật nắm.
+    console.warn(
+      "[apply] Không cập nhật được hồ sơ cũ " +
+        existing.code +
+        ": " +
+        r.error,
+    );
+    return sendJson(res, 200, {
+      ok: true,
+      updated: true,
+      duplicated: true,
+      note: "Hồ sơ đã có sẵn trong hệ thống, nhân sự sẽ liên hệ theo thông tin cũ.",
+    });
   }
   r = await oneOfficeSend(
     c.endpoint,
