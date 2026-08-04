@@ -61,8 +61,8 @@
   .navbtn .ic{font-size:18px;width:22px;text-align:center}
   .navbtn:hover{background:var(--card-2)}
   .navbtn.act{background:var(--grad);color:#fff;box-shadow:0 10px 24px -12px rgba(198,147,32,.6)}
-  .navbtn .cnt{margin-left:auto;font-size:11px;font-weight:800;background:rgba(224,52,43,.12);color:var(--red);padding:2px 9px;border-radius:99px}
-  .navbtn.act .cnt{background:rgba(255,255,255,.25);color:#fff}
+  .navbtn .cnt{margin-left:auto;min-width:20px;font-size:11px;font-weight:800;background:var(--red);color:#fff;padding:2px 8px;border-radius:99px;text-align:center}
+  .navbtn.act .cnt{background:#fff;color:var(--red-2)}
   aside.side .foot{margin-top:auto;padding:10px;color:var(--muted);font-size:11px;text-align:center}
 
   .content{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--bg)}
@@ -175,11 +175,11 @@
   .s-cancelled{color:var(--red-2);background:rgba(224,52,43,.11)}
 
   /* Thống kê nhanh (mini dashboard) */
-  .metrics{display:flex;gap:10px;flex-wrap:wrap}
-  .metric{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 16px;min-width:112px;cursor:pointer;font-family:inherit;text-align:left;transition:border-color .15s,background .15s}
+  .metrics{display:flex;gap:8px;flex-wrap:wrap}
+  .metric{display:flex;align-items:baseline;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:99px;padding:6px 14px;cursor:pointer;font-family:inherit;text-align:left;transition:border-color .15s,background .15s}
   .metric:hover{border-color:var(--line-2);background:var(--card-2)}
-  .metric b{display:block;font-size:20px;font-weight:800;line-height:1.2;color:var(--txt)}
-  .metric span{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-top:1px}
+  .metric b{font-size:15px;font-weight:800;line-height:1;color:var(--txt)}
+  .metric span{font-size:12px;font-weight:600;color:var(--muted)}
   .metric.act{border-color:var(--red);background:var(--grad-soft)}
   .metric.act b{color:var(--red-2)}
 
