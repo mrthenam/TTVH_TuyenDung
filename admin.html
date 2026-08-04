@@ -463,7 +463,7 @@
     <aside class="side">
       <div class="lbl">Vận hành</div>
       <button class="navbtn act" id="tabChat"><span class="ic">💬</span><span class="t">Chat khách hàng</span></button>
-      <button class="navbtn" id="tabTrain"><span class="ic">📋</span><span class="t">Đăng ký đào tạo</span><span class="cnt" id="navTrainCnt">0</span></button>
+      <button class="navbtn" id="tabTrain"><span class="ic">📋</span><span class="t">Đăng ký đào tạo</span></button>
       <button class="navbtn" id="tabStaff"><span class="ic">👥</span><span class="t">Nhân viên</span><span class="cnt" id="navStaffCnt">0</span></button>
 
       <div class="lbl">Tuyển dụng</div>
@@ -2020,7 +2020,6 @@ function trainingSig() { return JSON.stringify(trainRows.map(function (r) { retu
 function loadTraining(after, force) {
   return api('/api/training' + (TRASH ? '?trash=1' : '')).then(function (d) {
     trainRows = d.rows || [];
-    if (!TRASH) $('#navTrainCnt').textContent = trainRows.length;
     healPositions();
     var sig = trainingSig();
     if (force || sig !== lastRenderSig) { renderTraining(); lastRenderSig = sig; }
