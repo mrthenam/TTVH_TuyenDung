@@ -17,6 +17,13 @@ Landing page tuyển dụng + bảng dữ liệu + Kanban phân loại ứng vi�
 - **Xóa mềm**: hồ sơ xóa đi vào *thùng rác* (Bộ lọc → Xem thùng rác) và khôi phục lại được; chỉ "Xóa vĩnh viễn" mới gỡ khỏi DB.
 - **Lịch sử thao tác** ghi rõ người thực hiện, thời điểm và nội dung thay đổi — xem chung ở tab *Lịch sử chỉnh sửa* hoặc riêng từng hồ sơ ở nút **Xem**.
 
+## Chatbot — kịch bản & trợ lý AI
+Thứ tự trả lời: **kịch bản có sẵn → trợ lý AI → câu trả lời mặc định**.
+- **Kịch bản** (tab *Kịch bản chatbot*): khớp từ khóa → trả lời mẫu, luôn được ưu tiên.
+- **Trợ lý AI (Gemini)** — mặc định TẮT, bật trong cùng tab. AI chỉ được dùng thông tin trong kịch bản (+ ô "Thông tin bổ sung được duyệt"), **không được bịa** lương/chế độ/địa chỉ/link. Khi AI không đủ thông tin chắc chắn, nó trả về mã `KHONG_RO` và hệ thống tự chuyển sang câu mặc định.
+- **Câu trả lời mặc định**: dùng khi không khớp kịch bản và AI không trả lời chắc chắn (hoặc AI đang tắt / sai key / quá thời gian).
+- API key đặt trong dashboard (lưu ở DB, không bao giờ gửi lại về trình duyệt) hoặc qua env `GEMINI_API_KEY`. Nút **Thử** cho biết câu hỏi sẽ được trả lời từ nguồn nào.
+
 ## Cài đặt & chạy
 1. Copy file mẫu thành cấu hình thật:
    ```bash

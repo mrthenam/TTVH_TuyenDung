@@ -165,16 +165,82 @@ function matchKB(kb, text, threshold) {
   return bestScore >= (threshold || 0.5) ? { answer: best.a, score: bestScore } : null;
 }
 
-async function callGemini(cfg, messages) {
-  const cb = cfg.chatbot || {};
-  const key = cb.geminiApiKey; const model = cb.geminiModel || 'gemini-2.0-flash';
-  if (!key || /PASTE|YOUR_/i.test(key)) return null;
-  const sys = cb.systemPrompt ||
-    'Bạn là trợ lý tuyển dụng thân thiện của Thịnh Thế Vinh Hoa F&B Group (MayCha, Hồng Trà Sữa Tam Hảo, Gà Giòn Sốt Ba Cô Gái, Trà Hú). ' +
-    'Trả lời NGẮN GỌN, lịch sự, bằng tiếng Việt, chỉ về tuyển dụng/việc làm. ' +
-    'KHÔNG bịa lương/chính sách cụ thể; nếu không chắc, mời khách điền form "Đăng ký ứng tuyển" trên trang hoặc liên hệ HR hr@maycha.com.vn.';
+/* ======================= TRỢ LÝ AI (GEMINI) =======================
+ * AI đứng TRUNG GIAN giữa kịch bản và câu trả lời mặc định:
+ *   khớp kịch bản -> trả lời mẫu | không khớp -> AI (chỉ được dựa trên kịch bản)
+ *   -> AI không chắc chắn -> câu trả lời mặc định.
+ * Cấu hình lưu ở bảng settings (key 'aicfg') để quản trị đổi ngay trên dashboard,
+ * không cần deploy lại. API key vẫn có thể đặt qua env GEMINI_API_KEY.
+ */
+const AI_DEFAULTS = {
+  enabled: false,
+  apiKey: '',
+  model: 'gemini-2.0-flash',
+  temperature: 0.3,   // thấp để bám sát kịch bản, hạn chế bịa
+  maxWords: 120,
+  persona: 'Bạn là trợ lý tuyển dụng thân thiện của Thịnh Thế Vinh Hoa F&B Group (MayCha, Hồng Trà Sữa Tam Hảo, Gà Giòn Sốt Ba Cô Gái, Trà Hú).',
+  extraContext: ''
+};
+let AICache = null;
+async function getAiCfg() {
+  if (AICache) return AICache;
+  let saved = {};
+  try { const v = await db.getSetting('aicfg'); if (v) saved = JSON.parse(v) || {}; } catch (e) { /* lỗi DB/parse -> dùng mặc định */ }
+  AICache = Object.assign({}, AI_DEFAULTS, saved);
+  return AICache;
+}
+// Khóa dùng để gọi API: ưu tiên khóa nhập trong dashboard, sau đó tới env/config.json
+function aiKey(ai, cfg) {
+  const k = ((ai && ai.apiKey) || ((cfg && cfg.chatbot) || {}).geminiApiKey || '').trim();
+  return /PASTE|YOUR_/i.test(k) ? '' : k;
+}
+function maskKey(k) { return !k ? '' : k.length <= 8 ? '••••' : k.slice(0, 4) + '••••••••' + k.slice(-4); }
+
+// Mã AI phải trả về khi không đủ thông tin để trả lời chắc chắn
+const AI_UNSURE = 'KHONG_RO';
+// AI đôi khi "lách" bằng câu mơ hồ thay vì trả đúng mã trên -> chặn thêm bằng từ khóa (đã bỏ dấu)
+const UNSURE_HINTS = ['khong ro', 'khong biet', 'khong chac', 'khong co thong tin', 'khong du thong tin',
+  'khong the tra loi', 'khong tim thay thong tin', 'chua co thong tin', 'khong nam trong kich ban'];
+function isUnsure(t) {
+  if (!t || !t.trim()) return true;
+  if (t.toUpperCase().indexOf(AI_UNSURE) >= 0) return true;
+  const n = norm(t);
+  return UNSURE_HINTS.some((h) => n.indexOf(h) >= 0);
+}
+
+// Toàn bộ kịch bản đã duyệt = nguồn thông tin DUY NHẤT mà AI được phép dùng
+function kbContext(kb) {
+  return (kb.qa || []).map((it, i) =>
+    '[' + (i + 1) + '] Khách hỏi về: ' + (it.q || []).join(' | ') + '\n    Trả lời chuẩn: ' + it.a).join('\n');
+}
+function buildSystemPrompt(ai, kb) {
+  return [
+    ai.persona || AI_DEFAULTS.persona,
+    '',
+    'QUY TẮC BẮT BUỘC:',
+    '1. CHỈ trả lời dựa trên "KỊCH BẢN ĐÃ DUYỆT" bên dưới — đây là nguồn thông tin duy nhất được phép dùng.',
+    '2. Nếu câu hỏi của khách khớp ý một mục trong kịch bản (dù diễn đạt khác đi): trả lời ĐÚNG nội dung mục đó. Được diễn đạt lại cho tự nhiên, nhưng phải GIỮ NGUYÊN mọi con số, mức lương, email và đường link.',
+    '3. TUYỆT ĐỐI KHÔNG bịa lương, thưởng, chế độ, địa chỉ, số điện thoại, đường link hay bất kỳ thông tin nào không có trong kịch bản.',
+    '4. Nếu kịch bản không đủ thông tin để trả lời chắc chắn, hoặc câu hỏi nằm ngoài chủ đề tuyển dụng/việc làm: chỉ trả về duy nhất chuỗi ' + AI_UNSURE + ' — không thêm bất kỳ chữ nào khác.',
+    '5. Trả lời bằng tiếng Việt, ngắn gọn (tối đa ' + (ai.maxWords || AI_DEFAULTS.maxWords) + ' từ), lịch sự, xưng "mình" và gọi khách là "bạn".',
+    ai.extraContext ? '\nTHÔNG TIN BỔ SUNG ĐÃ DUYỆT (dùng được như kịch bản):\n' + ai.extraContext : '',
+    '',
+    '=== KỊCH BẢN ĐÃ DUYỆT ===',
+    kbContext(kb)
+  ].filter(Boolean).join('\n');
+}
+
+async function callGemini(cfg, ai, kb, messages) {
+  const key = aiKey(ai, cfg);
+  const model = (ai.model || '').trim() || ((cfg && cfg.chatbot) || {}).geminiModel || AI_DEFAULTS.model;
+  if (!key) return null;
+  const temp = Number(ai.temperature);
+  const sys = buildSystemPrompt(ai, kb);
   const hist = messages.slice(-12).map((m) => ({ role: m.role === 'user' ? 'user' : 'model', parts: [{ text: m.text }] }));
-  const body = JSON.stringify({ system_instruction: { parts: [{ text: sys }] }, contents: hist, generationConfig: { temperature: 0.6, maxOutputTokens: 500 } });
+  const body = JSON.stringify({
+    system_instruction: { parts: [{ text: sys }] }, contents: hist,
+    generationConfig: { temperature: temp >= 0 && temp <= 1 ? temp : AI_DEFAULTS.temperature, maxOutputTokens: 500 }
+  });
   return new Promise((resolve) => {
     let u; try { u = new URL('https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent'); } catch (e) { return resolve(null); }
     u.searchParams.set('key', key);
@@ -230,8 +296,17 @@ async function handleChat(req, res, url, loadConfig) {
       const kb = await getKB();
       const kbHit = matchKB(kb, text, cb.matchThreshold || 0.5);
       if (kbHit) { reply = kbHit.answer; from = 'kb'; }
-      if (!reply) { const msgs = await db.getMessages(sid, 0); reply = await callGemini(cfg, msgs); if (reply) from = 'gemini'; }
-      if (!reply) { reply = kb.fallback || 'Cảm ơn bạn! HR sẽ liên hệ sớm nhất ạ.'; from = 'fallback'; }
+      // Ngoài kịch bản -> nhờ AI, nhưng AI chỉ được dựa trên kịch bản đã duyệt.
+      // AI trả lời mơ hồ/không chắc chắn -> bỏ, rơi xuống câu trả lời mặc định.
+      if (!reply) {
+        const ai = await getAiCfg();
+        if (ai.enabled && aiKey(ai, cfg)) {
+          const msgs = await db.getMessages(sid, 0);
+          const draft = await callGemini(cfg, ai, kb, msgs);
+          if (draft && !isUnsure(draft)) { reply = draft.trim(); from = 'gemini'; }
+        }
+      }
+      if (!reply) { reply = kb.fallback || 'Nếu cần hỗ trợ hãy liên hệ anh/chị Nhân sự đã hẹn phỏng vấn hoặc quản lý cửa hàng.'; from = 'fallback'; }
 
       const botTs = await db.addMessage(sid, 'bot', reply, from);
       return sendJson(res, 200, { ok: true, reply, from, ts: botTs, userTs });
@@ -378,6 +453,59 @@ async function handleChat(req, res, url, loadConfig) {
         KBCache = null; KBSource = null;
         const kb = await getKB();
         return sendJson(res, 200, Object.assign({ ok: true }, kb, { source: KBSource }));
+      }
+
+      // Cấu hình trợ lý AI (Gemini) — KHÔNG bao giờ trả API key thật về trình duyệt
+      if (p === '/api/agent/aicfg' && req.method === 'GET') {
+        const ai = await getAiCfg();
+        const envKey = (((cfg && cfg.chatbot) || {}).geminiApiKey || '').trim();
+        const used = aiKey(ai, cfg);
+        const kb = await getKB();
+        return sendJson(res, 200, Object.assign({}, ai, {
+          apiKey: '',
+          _hasKey: !!used,
+          _keyMask: maskKey(used),
+          _keyFrom: (ai.apiKey || '').trim() ? 'dashboard' : (envKey && !/PASTE|YOUR_/i.test(envKey) ? 'env' : ''),
+          _kbCount: (kb.qa || []).length,
+          _fallback: kb.fallback || ''
+        }));
+      }
+      if (p === '/api/agent/aicfg' && req.method === 'POST') {
+        const b = await readBody(req) || {};
+        const cur = await getAiCfg();
+        const newKey = (b.apiKey || '').toString().trim();
+        const c = {
+          enabled: !!b.enabled,
+          // Để trống ô khóa = giữ nguyên khóa đang lưu (tránh xóa nhầm khi chỉ sửa mục khác)
+          apiKey: b.clearKey ? '' : (newKey || cur.apiKey || ''),
+          model: (b.model || '').toString().trim() || AI_DEFAULTS.model,
+          temperature: Math.min(1, Math.max(0, Number(b.temperature) >= 0 ? Number(b.temperature) : AI_DEFAULTS.temperature)),
+          maxWords: Math.min(400, Math.max(30, parseInt(b.maxWords, 10) || AI_DEFAULTS.maxWords)),
+          persona: (b.persona || '').toString().trim() || AI_DEFAULTS.persona,
+          extraContext: (b.extraContext || '').toString().trim()
+        };
+        await db.setSetting('aicfg', JSON.stringify(c));
+        AICache = c;                                  // áp dụng ngay, không cần restart
+        return sendJson(res, 200, { ok: true, hasKey: !!aiKey(c, cfg) });
+      }
+      // Thử 1 câu hỏi để xem chatbot sẽ trả lời từ đâu (kịch bản / AI / câu mặc định)
+      if (p === '/api/agent/aicfg/test' && req.method === 'POST') {
+        const b = await readBody(req) || {};
+        const text = (b.text || '').toString().trim().slice(0, 500);
+        if (!text) return sendJson(res, 400, { error: 'Chưa nhập câu hỏi thử.' });
+        const kb = await getKB();
+        const ai = await getAiCfg();
+        const fb = kb.fallback || '';
+        const hit = matchKB(kb, text, cb.matchThreshold || 0.5);
+        if (hit) return sendJson(res, 200, { ok: true, from: 'kb', reply: hit.answer, score: Math.round(hit.score * 100) / 100 });
+        if (!ai.enabled) return sendJson(res, 200, { ok: true, from: 'fallback', reply: fb, note: 'Trợ lý AI đang tắt.' });
+        if (!aiKey(ai, cfg)) return sendJson(res, 200, { ok: true, from: 'fallback', reply: fb, note: 'Chưa có API key Gemini.' });
+        const draft = await callGemini(cfg, ai, kb, [{ role: 'user', text }]);
+        if (draft && !isUnsure(draft)) return sendJson(res, 200, { ok: true, from: 'gemini', reply: draft.trim() });
+        return sendJson(res, 200, {
+          ok: true, from: 'fallback', reply: fb,
+          note: draft ? 'AI thấy không đủ thông tin chắc chắn → dùng câu mặc định.' : 'AI không phản hồi (sai key/hết hạn mức/quá thời gian) → dùng câu mặc định.'
+        });
       }
 
       // Cấu hình EMAIL tự động (bật/tắt, chế độ test, danh sách test, tiêu đề, nội dung)

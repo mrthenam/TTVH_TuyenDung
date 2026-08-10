@@ -722,6 +722,55 @@
           <div class="fld"><label>Câu trả lời mặc định (khi không khớp kịch bản nào &amp; AI không trả lời được)</label><textarea id="kb_fallback" style="min-height:60px"></textarea></div>
           <p class="hintnote">Mỗi kịch bản gồm <b>Từ khóa</b> (mỗi dòng 1 cụm — khách nhắn trùng hoặc gần trùng sẽ khớp, không phân biệt hoa thường/dấu) và <b>Câu trả lời</b>. Khi khớp ngang điểm, kịch bản <b>đứng trước</b> được ưu tiên. Link http trong câu trả lời tự thành link bấm được. Kịch bản để trống từ khóa hoặc câu trả lời sẽ bị bỏ qua khi lưu. Nhớ bấm <b>Lưu tất cả</b> — thay đổi áp dụng ngay cho chatbot.</p>
         </div>
+
+        <!-- TRỢ LÝ AI (GEMINI) -->
+        <div class="addbox" style="width:auto;max-width:none">
+          <h3 style="display:flex;align-items:center;gap:10px">🧠 Trợ lý AI (Gemini) <span id="aiState" class="permbadge none">Đang tải…</span></h3>
+          <div id="aiOk" class="boxmsg ok"></div>
+          <div id="aiErr" class="boxmsg err"></div>
+          <p class="hintnote" style="margin:0 0 4px">
+            AI đứng <b>trung gian</b>: khách hỏi → khớp kịch bản thì trả lời mẫu → không khớp thì AI trả lời
+            <b>nhưng chỉ được dùng thông tin trong kịch bản trên</b> → AI không chắc chắn thì tự chuyển về
+            <b>câu trả lời mặc định</b>. AI không được phép bịa lương, chế độ, địa chỉ hay đường link.
+          </p>
+
+          <label class="emailtoggle"><input type="checkbox" id="ai_enabled" /> <b>Bật trợ lý AI</b> — khi tắt, câu hỏi ngoài kịch bản sẽ trả lời bằng câu mặc định.</label>
+
+          <div class="grid2">
+            <div class="fld">
+              <label>Gemini API key <span id="ai_keyInfo" style="font-weight:500;color:var(--muted)"></span></label>
+              <input id="ai_apiKey" type="password" autocomplete="off" placeholder="Để trống = giữ khóa hiện tại" />
+            </div>
+            <div class="fld"><label>Model</label>
+              <select id="ai_model">
+                <option value="gemini-2.0-flash">gemini-2.0-flash (nhanh, rẻ — khuyên dùng)</option>
+                <option value="gemini-2.0-flash-lite">gemini-2.0-flash-lite (rẻ nhất)</option>
+                <option value="gemini-2.5-flash">gemini-2.5-flash (thông minh hơn)</option>
+              </select>
+            </div>
+            <div class="fld"><label>Độ sáng tạo (0 = bám sát kịch bản, 1 = tự do)</label><input id="ai_temperature" type="number" min="0" max="1" step="0.1" /></div>
+            <div class="fld"><label>Độ dài tối đa câu trả lời (số từ)</label><input id="ai_maxWords" type="number" min="30" max="400" step="10" /></div>
+            <div class="fld full"><label>Vai trò của bot (persona)</label><textarea id="ai_persona" style="min-height:60px"></textarea></div>
+            <div class="fld full">
+              <label>Thông tin bổ sung được duyệt <span style="font-weight:500">(tùy chọn — AI được dùng như kịch bản; để trống nếu không cần)</span></label>
+              <textarea id="ai_extraContext" style="min-height:90px" placeholder="VD: Giờ làm việc văn phòng 8h–17h thứ 2–thứ 6. Hotline HR: ..."></textarea>
+            </div>
+          </div>
+          <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:4px">
+            <button class="btn primary" id="aiSave">Lưu cấu hình AI</button>
+            <button class="btn" id="aiClearKey">🗑 Xóa API key đã lưu</button>
+          </div>
+
+          <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--line)">
+            <label style="font-weight:700;display:block;margin-bottom:8px">Thử câu hỏi — xem chatbot sẽ trả lời từ đâu</label>
+            <div class="galbar" style="margin:0">
+              <input id="ai_testQ" type="text" placeholder="VD: cửa hàng có nhận người 17 tuổi không?" />
+              <button class="btn primary" id="aiTestBtn">▶ Thử</button>
+            </div>
+            <div id="aiTestOut" style="display:none;margin-top:12px;background:var(--bg);border:1px solid var(--line);border-radius:11px;padding:13px 15px;font-size:13.5px;line-height:1.55"></div>
+          </div>
+        </div>
+
         <div id="kbList" class="kb-list"></div>
       </div>
 
@@ -1529,7 +1578,85 @@ function loadKb() {
     renderKbList();
     renderKbSrc(d.source);
   }).catch(function (e) { if (e.message === '401') logout(); });
+  loadAiCfg();
 }
+
+/* ===== TRỢ LÝ AI (GEMINI) ===== */
+function aiMsg(sel, text) {
+  var el = $(sel); el.textContent = text || '';
+  el.classList.toggle('show', !!text);
+  if (text && sel === '#aiOk') { $('#aiErr').classList.remove('show'); }
+  if (text && sel === '#aiErr') { $('#aiOk').classList.remove('show'); }
+}
+function renderAiState(d) {
+  var b = $('#aiState');
+  var on = !!d.enabled, hasKey = !!d._hasKey;
+  b.className = 'permbadge ' + (on && hasKey ? 'full' : 'none');
+  b.textContent = !hasKey ? 'Chưa có API key' : on ? 'Đang bật' : 'Đang tắt';
+  $('#ai_keyInfo').textContent = hasKey
+    ? '— đã lưu: ' + d._keyMask + (d._keyFrom === 'env' ? ' (từ biến môi trường)' : ' (nhập ở dashboard)')
+    : '— chưa có khóa nào';
+  $('#aiClearKey').style.display = (d._keyFrom === 'dashboard') ? '' : 'none';
+}
+function loadAiCfg() {
+  api('/api/agent/aicfg').then(function (d) {
+    d = d || {};
+    $('#ai_enabled').checked = !!d.enabled;
+    $('#ai_apiKey').value = '';
+    setSelectValue('#ai_model', d.model || 'gemini-2.0-flash');
+    $('#ai_temperature').value = d.temperature == null ? 0.3 : d.temperature;
+    $('#ai_maxWords').value = d.maxWords || 120;
+    $('#ai_persona').value = d.persona || '';
+    $('#ai_extraContext').value = d.extraContext || '';
+    renderAiState(d);
+  }).catch(function (e) { if (e.message === '401') logout(); });
+}
+function saveAiCfg(extra, okText) {
+  var data = Object.assign({
+    enabled: $('#ai_enabled').checked,
+    apiKey: $('#ai_apiKey').value.trim(),
+    model: $('#ai_model').value,
+    temperature: $('#ai_temperature').value,
+    maxWords: $('#ai_maxWords').value,
+    persona: $('#ai_persona').value.trim(),
+    extraContext: $('#ai_extraContext').value.trim()
+  }, extra || {});
+  var btn = $('#aiSave'); btn.disabled = true; var old = btn.textContent; btn.textContent = 'Đang lưu…';
+  return api('/api/agent/aicfg', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+    .then(function (res) {
+      btn.disabled = false; btn.textContent = old;
+      if (res && res.ok) {
+        $('#ai_apiKey').value = '';
+        if (data.enabled && !res.hasKey) aiMsg('#aiErr', 'Đã lưu, nhưng chưa có API key nên AI vẫn chưa hoạt động — câu hỏi ngoài kịch bản sẽ dùng câu mặc định.');
+        else aiMsg('#aiOk', okText || 'Đã lưu cấu hình AI. Chatbot áp dụng ngay lập tức.');
+        loadAiCfg();
+      } else aiMsg('#aiErr', (res && res.error) || 'Lưu thất bại.');
+    })
+    .catch(function (e) { btn.disabled = false; btn.textContent = old; if (e.message === '401') return logout(); aiMsg('#aiErr', 'Lỗi kết nối, vui lòng thử lại.'); });
+}
+$('#aiSave').addEventListener('click', function () { saveAiCfg(); });
+$('#aiClearKey').addEventListener('click', function () {
+  if (!confirm('Xóa API key Gemini đã lưu trong dashboard?\nSau khi xóa, hệ thống sẽ dùng khóa từ biến môi trường (nếu có).')) return;
+  saveAiCfg({ clearKey: true, apiKey: '' }, 'Đã xóa API key đã lưu.');
+});
+$('#aiTestBtn').addEventListener('click', function () {
+  var q = $('#ai_testQ').value.trim();
+  if (!q) { aiMsg('#aiErr', 'Nhập một câu hỏi để thử.'); return; }
+  var out = $('#aiTestOut'); out.style.display = 'block'; out.innerHTML = 'Đang thử…';
+  var btn = $('#aiTestBtn'); btn.disabled = true;
+  api('/api/agent/aicfg/test', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: q }) })
+    .then(function (d) {
+      btn.disabled = false;
+      if (!d || !d.ok) { out.innerHTML = '<b style="color:var(--red)">Lỗi:</b> ' + esc((d && d.error) || 'không thử được'); return; }
+      var tag = { kb: ['📗 Kịch bản có sẵn', 'full'], gemini: ['🧠 Trợ lý AI', 'full'], fallback: ['💬 Câu trả lời mặc định', 'none'] }[d.from] || ['?', 'none'];
+      out.innerHTML = '<span class="permbadge ' + tag[1] + '">' + esc(tag[0]) + '</span>'
+        + (d.score != null ? '<span class="permbadge none">độ khớp ' + d.score + '</span>' : '')
+        + '<div style="margin-top:9px;white-space:pre-wrap">' + esc(d.reply || '(trống)') + '</div>'
+        + (d.note ? '<div class="hintnote" style="margin-top:8px">' + esc(d.note) + '</div>' : '');
+    })
+    .catch(function (e) { btn.disabled = false; if (e.message === '401') return logout(); out.innerHTML = '<b style="color:var(--red)">Lỗi kết nối.</b>'; });
+});
+$('#ai_testQ').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('#aiTestBtn').click(); });
 $('#kbReset').addEventListener('click', function () {
   if (!confirm('Khôi phục kịch bản chatbot theo đúng file mặc định (chatbot-kb.json)?\nBản đã lưu riêng trong dashboard (nếu có) sẽ bị xóa và không thể hoàn tác.')) return;
   var btn = $('#kbReset'); btn.disabled = true; var old = btn.textContent; btn.textContent = 'Đang khôi phục…';
