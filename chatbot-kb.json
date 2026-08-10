@@ -1,6 +1,6 @@
 {
   "greeting": "Xin chào 👋 Mình là trợ lý tuyển dụng của Thịnh Thế Vinh Hoa F&B (MayCha · Tam Hảo · Gà Giòn Ba Cô Gái 🧋🍗). Bạn cần hỗ trợ gì về việc làm ạ?",
-  "fallback": "Cảm ơn bạn đã nhắn! Bạn để lại số điện thoại hoặc điền form 'Đăng ký ứng tuyển' trên trang nhé, HR sẽ liên hệ trong thời gian sớm nhất ạ. 🧡 👉 Form ứng tuyển: https://vieclamthinhthevinhhoa.com.vn/#ungtuyen",
+  "fallback": "Đây là thông tin chi tiết bạn vui lòng liên hệ anh/chị Nhân sự đã hẹn phỏng vấn hoặc quản lý cửa hàng.",
   "qa": [
     { "q": ["ứng tuyển", "muốn ứng tuyển", "cách ứng tuyển", "ứng tuyển như thế nào", "ứng tuyển ở đâu", "làm sao để ứng tuyển", "nộp hồ sơ", "nộp đơn", "đăng ký", "đăng ký ứng tuyển", "đăng ký làm việc", "apply", "muốn apply", "muốn làm việc", "muốn đi làm", "muốn xin việc", "xin việc", "xin vào làm", "muốn vào làm", "muốn làm ở đây", "em muốn làm", "tìm việc", "kiếm việc", "cần việc làm", "form ứng tuyển", "link ứng tuyển", "điền form ở đâu"],
       "a": "Bạn chỉ cần điền form 'Đăng ký ứng tuyển' ngay trên trang này (kéo xuống mục Ứng tuyển), HR sẽ liên hệ trong 24–48h ạ. Rất nhanh gọn! 👉 Hoặc bấm vào link này để đến thẳng form ứng tuyển: https://vieclamthinhthevinhhoa.com.vn/#ungtuyen" },
