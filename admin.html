@@ -76,6 +76,10 @@
   .conv .badge{font-size:10px;font-weight:800;padding:2px 9px;border-radius:99px;margin-left:auto}
   .badge.h{background:rgba(244,165,33,.18);color:#b9740a}.badge.b{background:rgba(224,52,43,.1);color:var(--red)}
   .conv .last{font-size:12px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .conv .del{border:none;background:none;color:var(--muted);cursor:pointer;font-size:13px;padding:3px 5px;border-radius:7px;line-height:1;flex:none}
+  .conv .del:hover{color:var(--red);background:rgba(224,52,43,.12)}
+  .mhd .del{border:1px solid var(--line-2);background:var(--card);color:var(--red);cursor:pointer;font-size:13px;font-weight:700;padding:7px 12px;border-radius:9px;font-family:inherit}
+  .mhd .del:hover{background:rgba(224,52,43,.08)}
   .cmain{flex:1;display:flex;flex-direction:column;background:var(--bg-soft);min-width:0}
   .mhd{padding:13px 18px;background:var(--card);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
   .mhd b{font-size:15px}
@@ -497,6 +501,7 @@
               <button id="modeBot">🤖 Bot</button>
               <button id="modeHuman">👤 Nhân viên</button>
             </div>
+            <button class="del" id="mhdDel" title="Xóa hội thoại này">🗑 Xóa hội thoại</button>
           </div>
           <div class="msgs" id="msgs"><div class="empty">Chọn một hội thoại bên trái để trả lời.</div></div>
           <div class="ft" id="ft" style="display:none">
@@ -1090,12 +1095,31 @@ function refreshList() {
   api('/api/agent/conversations').then(function (d) {
     var html = ''; (d.conversations || []).forEach(function (c) {
       html += '<div class="conv' + (c.id === sel ? ' sel' : '') + '" data-id="' + c.id + '">'
-        + '<div class="top"><span class="nm">' + esc(c.name) + '</span><span class="badge ' + (c.humanMode ? 'h' : 'b') + '">' + (c.humanMode ? 'Nhân viên' : 'Bot') + '</span></div>'
+        + '<div class="top"><span class="nm">' + esc(c.name) + '</span><span class="badge ' + (c.humanMode ? 'h' : 'b') + '">' + (c.humanMode ? 'Nhân viên' : 'Bot') + '</span>'
+        + '<button class="del" data-del-conv="' + esc(c.id) + '" data-name="' + esc(c.name) + '" title="Xóa hội thoại này">🗑</button></div>'
         + '<div class="last">' + (c.lastRole === 'user' ? '👤 ' : (c.lastRole === 'agent' ? '🧑‍💼 ' : '🤖 ')) + esc(c.last || '') + ' · ' + timeAgo(c.updatedAt) + '</div></div>';
     });
     $('#list').innerHTML = html || '<div style="padding:20px;color:#8b7060">Chưa có hội thoại nào.</div>';
     [].forEach.call(document.querySelectorAll('.conv'), function (el) { el.onclick = function () { selectConv(el.getAttribute('data-id')); }; });
+    [].forEach.call(document.querySelectorAll('[data-del-conv]'), function (b) {
+      b.onclick = function (e) { e.stopPropagation(); delConv(b.getAttribute('data-del-conv'), b.getAttribute('data-name')); };
+    });
   }).catch(function (e) { if (e.message === '401') logout(); });
+}
+// Xóa vĩnh viễn 1 hội thoại + toàn bộ tin nhắn (dùng để dọn hội thoại test/rác) — không thể hoàn tác
+function delConv(id, name) {
+  if (!confirm('Xóa vĩnh viễn hội thoại của "' + (name || 'Khách') + '"?\nToàn bộ tin nhắn sẽ mất, không thể hoàn tác.')) return;
+  api('/api/agent/conversations/' + encodeURIComponent(id), { method: 'DELETE' }).then(function (res) {
+    if (res && res.ok) {
+      toast('Đã xóa hội thoại.');
+      if (sel === id) {
+        sel = null; clearInterval(msgTimer); msgTimer = null;
+        $('#mhd').style.display = 'none'; $('#ft').style.display = 'none';
+        $('#msgs').innerHTML = '<div class="empty">Chọn một hội thoại bên trái để trả lời.</div>';
+      }
+      refreshList();
+    } else toast('Xóa thất bại.');
+  }).catch(function (e) { if (e.message === '401') logout(); else toast('Lỗi kết nối.'); });
 }
 function selectConv(id) { sel = id; refreshList(); $('#mhd').style.display = 'flex'; $('#ft').style.display = 'flex'; loadMsgs(); if (!msgTimer) msgTimer = setInterval(loadMsgs, 2500); }
 function loadMsgs() {
@@ -1115,6 +1139,7 @@ function loadMsgs() {
 function setMode(human) { if (!sel) return; api('/api/agent/mode', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sel, humanMode: human }) }).then(function () { loadMsgs(); refreshList(); }); }
 $('#modeBot').addEventListener('click', function () { setMode(false); });
 $('#modeHuman').addEventListener('click', function () { setMode(true); });
+$('#mhdDel').addEventListener('click', function () { if (sel) delConv(sel, $('#mname').textContent); });
 function sendReply() {
   var t = $('#reply').value.trim(); if (!t || !sel) return; $('#reply').value = '';
   api('/api/agent/send', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sel, text: t }) }).then(function () { loadMsgs(); refreshList(); });

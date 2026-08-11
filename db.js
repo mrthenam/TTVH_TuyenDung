@@ -287,6 +287,16 @@ async function listConversations() {
     return { id: c.id, name: c.name, humanMode: c.human_mode, updatedAt: c.updated_at, last: last ? last.text.slice(0, 70) : '', lastRole: last ? last.role : '', count: ms.length };
   });
 }
+// Xóa hẳn 1 hội thoại + toàn bộ tin nhắn (dùng để dọn hội thoại test/rác)
+async function deleteConversation(id) {
+  if (HAS_PG) {
+    await pool.query('DELETE FROM messages WHERE conv_id=$1', [id]);
+    const r = await pool.query('DELETE FROM conversations WHERE id=$1', [id]);
+    return r.rowCount;
+  }
+  memMsg.delete(id);
+  return memConv.delete(id) ? 1 : 0;
+}
 
 // typing (RAM)
 function setTyping(id) { typing.set(id, Date.now()); }
@@ -594,7 +604,7 @@ module.exports = {
   init, HAS_PG,
   verifyAgent, createAgent, listAgents, getAgentPerms, updateAgentPerms, updateAgent, JOB_DEPTS, normDept,
   createSession, getSession,
-  ensureConv, addMessage, getMessages, setHumanMode, getConv, listConversations,
+  ensureConv, addMessage, getMessages, setHumanMode, getConv, listConversations, deleteConversation,
   setTyping, isTyping,
   addTraining, listTraining, updateTraining, deleteTraining, restoreTraining, getTrainingById,
   TRAIN_STATUS, normStatus,

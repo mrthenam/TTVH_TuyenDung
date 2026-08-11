@@ -671,6 +671,13 @@ async function handleChat(req, res, url, loadConfig) {
         return sendJson(res, 200, { ok: n > 0, deleted: n });
       }
       if (p === '/api/agent/conversations' && req.method === 'GET') return sendJson(res, 200, { conversations: await db.listConversations() });
+      // Xóa hẳn 1 hội thoại (dùng để dọn hội thoại test/rác) — không thể hoàn tác
+      if (p.startsWith('/api/agent/conversations/') && req.method === 'DELETE') {
+        const sid = decodeURIComponent(p.slice('/api/agent/conversations/'.length));
+        if (!sid) return sendJson(res, 400, { error: 'Thiếu mã hội thoại.' });
+        const n = await db.deleteConversation(sid);
+        return sendJson(res, 200, { ok: n > 0, deleted: n });
+      }
       if (p === '/api/agent/messages' && req.method === 'GET') {
         const sid = url.searchParams.get('sessionId') || '';
         const conv = await db.getConv(sid);
