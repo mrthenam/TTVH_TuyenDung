@@ -101,10 +101,13 @@
   },
 
   "_note_chatbot": "Chatbot: geminiApiKey (dùng khi KB không có câu trả lời), agentKey (mật khẩu trang quản trị /admin). Khi deploy đặt qua biến môi trường GEMINI_API_KEY / AGENT_KEY.",
+  "_note_kbSheet": "Kịch bản chatbot đọc trực tiếp từ Google Sheet công khai (CSV export, không cần OAuth) — Sheet chỉ cần chia sẻ 'Bất kỳ ai có đường liên kết' ở mức Người xem trở lên. Sheet lỗi/riêng tư sẽ tự rơi về kịch bản lưu trong DB/file, không làm câm chatbot. Override qua env KB_SHEET_ID / KB_SHEET_GID. kbSheetId lấy từ URL .../d/<ID>/edit, kbSheetGid lấy từ #gid=<GID>.",
   "chatbot": {
     "geminiApiKey": "PASTE_YOUR_GEMINI_API_KEY",
     "geminiModel": "gemini-2.0-flash",
     "matchThreshold": 0.5,
-    "zaloLink": "https://zalo.me/"
+    "zaloLink": "https://zalo.me/",
+    "kbSheetId": "1dXJHera3HNF_SEA9FW63-1YGZtxGVF2Le-VVShSL14U",
+    "kbSheetGid": "262915287"
   }
 }

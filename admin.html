@@ -729,7 +729,8 @@
           <div><h1>🤖 Kịch bản chatbot</h1><div class="sub" id="kbCount">Câu trả lời tự động của chatbot theo từ khóa.</div></div>
           <div class="spacer"></div>
           <div class="tbar">
-            <a class="btn" href="https://docs.google.com/spreadsheets/d/1-17XN0668aAeY67NTNucGIEtMZz-MldPD6jnacDyNQw/edit?gid=0#gid=0" target="_blank" rel="noopener">📄 Tài liệu kịch bản</a>
+            <a class="btn" id="kbSheetLink" href="https://docs.google.com/spreadsheets/d/1dXJHera3HNF_SEA9FW63-1YGZtxGVF2Le-VVShSL14U/edit?gid=262915287#gid=262915287" target="_blank" rel="noopener">📄 Tài liệu kịch bản</a>
+            <button class="btn" id="kbSheetRefresh">🔄 Làm mới từ Sheet</button>
             <button class="btn" id="kbReset">↺ Khôi phục mặc định</button>
             <button class="btn" id="kbAdd">＋ Thêm kịch bản</button>
             <button class="btn primary" id="kbSave">Lưu tất cả</button>
@@ -1652,10 +1653,21 @@ function collectKb() {
   KB_ITEMS = items;
   return items;
 }
-function renderKbSrc(source) {
-  $('#kbSrc').innerHTML = source === 'db'
-    ? 'Đang dùng: <b>bản đã lưu trong dashboard</b> — sửa file <code>chatbot-kb.json</code> trong code sẽ <b>không</b> áp dụng cho tới khi bạn bấm "Lưu tất cả" ở đây hoặc "↺ Khôi phục theo file mặc định".'
-    : 'Đang dùng: <b>file mặc định chatbot-kb.json</b> trong code — sửa file này (rồi deploy) sẽ áp dụng ngay, không cần bấm gì ở đây.';
+function fmtHM(ts) { if (!ts) return ''; var d = new Date(ts); return (d.getHours() < 10 ? '0' : '') + d.getHours() + ':' + (d.getMinutes() < 10 ? '0' : '') + d.getMinutes(); }
+function renderKbSrc(source, sheetInfo) {
+  sheetInfo = sheetInfo || {};
+  var fallbackTxt = source === 'db' ? '<b>bản đã lưu trong dashboard</b>' : '<b>file mặc định chatbot-kb.json</b> trong code';
+  if (source === 'sheet') {
+    $('#kbSrc').innerHTML = '✅ Đang dùng: <b>Google Sheet</b> (' + sheetInfo.count + ' kịch bản, đọc lúc ' + fmtHM(sheetInfo.cachedAt) + ') — '
+      + 'sửa trực tiếp trong Sheet, chatbot tự đọc lại tối đa mỗi 5 phút (bấm "🔄 Làm mới từ Sheet" để áp dụng ngay). '
+      + 'Phần chỉnh sửa bên dưới chỉ dùng làm <b>dự phòng</b> khi không đọc được Sheet.';
+  } else if (sheetInfo.configured) {
+    $('#kbSrc').innerHTML = '⚠️ Chưa đọc được Google Sheet kịch bản (lỗi: ' + esc(sheetInfo.error || 'không rõ') + '). '
+      + 'Đang tạm dùng ' + fallbackTxt + ' bên dưới. Kiểm tra lại quyền chia sẻ Sheet: "Bất kỳ ai có đường liên kết" → ít nhất <b>Người xem</b>.';
+  } else {
+    $('#kbSrc').innerHTML = 'Đang dùng: ' + fallbackTxt
+      + (source === 'db' ? ' — sửa file chatbot-kb.json trong code sẽ <b>không</b> áp dụng cho tới khi bấm "Lưu tất cả" ở đây hoặc "↺ Khôi phục mặc định".' : ' — sửa file này (rồi deploy) sẽ áp dụng ngay, không cần bấm gì ở đây.');
+  }
 }
 function loadKb() {
   api('/api/agent/chatbotkb').then(function (d) {
@@ -1664,10 +1676,19 @@ function loadKb() {
     $('#kb_fallback').value = d.fallback || '';
     KB_ITEMS = (d.qa || []).map(function (x) { return { q: x.q || [], a: x.a || '' }; });
     renderKbList();
-    renderKbSrc(d.source);
+    renderKbSrc(d.source, d.sheetInfo);
   }).catch(function (e) { if (e.message === '401') logout(); });
   loadAiCfg();
 }
+$('#kbSheetRefresh').addEventListener('click', function () {
+  var btn = $('#kbSheetRefresh'); btn.disabled = true; var old = btn.textContent; btn.textContent = 'Đang làm mới…';
+  api('/api/agent/chatbotkb/sheetrefresh', { method: 'POST' }).then(function (res) {
+    btn.disabled = false; btn.textContent = old;
+    if (res && res.ok) toast('Đã đọc lại Google Sheet ✓');
+    else toast('Không đọc được Sheet: ' + ((res && res.sheetInfo && res.sheetInfo.error) || 'lỗi không rõ'));
+    loadKb();
+  }).catch(function (e) { btn.disabled = false; btn.textContent = old; if (e.message === '401') return logout(); toast('Lỗi kết nối.'); });
+});
 
 /* ===== TRỢ LÝ AI (GEMINI) ===== */
 function aiMsg(sel, text) {
@@ -1756,7 +1777,7 @@ $('#kbReset').addEventListener('click', function () {
         $('#kb_fallback').value = res.fallback || '';
         KB_ITEMS = (res.qa || []).map(function (x) { return { q: x.q || [], a: x.a || '' }; });
         renderKbList();
-        renderKbSrc(res.source);
+        renderKbSrc(res.source, res.sheetInfo);
         $('#kbOk').textContent = 'Đã khôi phục theo file mặc định (' + KB_ITEMS.length + ' kịch bản).';
         $('#kbOk').classList.add('show');
         toast('Đã khôi phục kịch bản chatbot theo file mặc định.');
@@ -1780,8 +1801,8 @@ $('#kbSave').addEventListener('click', function () {
     .then(function (res) {
       btn.disabled = false; btn.textContent = old;
       if (res && res.ok) {
-        KB_ITEMS = qa; renderKbList(); renderKbSrc('db');
-        $('#kbOk').textContent = 'Đã lưu ' + qa.length + ' kịch bản. Chatbot áp dụng ngay lập tức.';
+        loadKb(); // tải lại để biết chính xác Sheet hay bản vừa lưu đang thật sự được dùng
+        $('#kbOk').textContent = 'Đã lưu ' + qa.length + ' kịch bản.';
         $('#kbOk').classList.add('show');
         toast('Đã lưu kịch bản chatbot.');
       } else toast('Lưu thất bại.');

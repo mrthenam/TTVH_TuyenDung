@@ -24,6 +24,14 @@ Thứ tự trả lời: **kịch bản có sẵn → trợ lý AI → câu trả
 - **Câu trả lời mặc định**: dùng khi không khớp kịch bản và AI không trả lời chắc chắn (hoặc AI đang tắt / sai key / quá thời gian).
 - API key đặt trong dashboard (lưu ở DB, không bao giờ gửi lại về trình duyệt) hoặc qua env `GEMINI_API_KEY`. Nút **Thử** cho biết câu hỏi sẽ được trả lời từ nguồn nào.
 
+### Kịch bản đọc từ Google Sheet (`sheetkb.js`)
+Kịch bản có thể được **sửa trực tiếp trong Google Sheet** thay vì vào dashboard — tiện cho HR không rành kỹ thuật:
+- Server đọc Sheet qua link xuất CSV công khai (`/export?format=csv`), **không cần OAuth**. Sheet chỉ cần chia sẻ **"Bất kỳ ai có đường liên kết" → ít nhất Người xem** (không cần quyền Chỉnh sửa cho server, chỉ cần Xem để đọc được).
+- Định dạng cột: `STT | Loại | Từ khóa (cách nhau bởi " | ") | Câu trả lời | Ghi chú`. Cột **Loại** chứa "chào" = lời chào, chứa "mặc định" = câu trả lời mặc định, còn lại = 1 kịch bản Q&A.
+- Cấu hình `chatbot.kbSheetId` / `chatbot.kbSheetGid` trong `config.json` (hoặc env `KB_SHEET_ID` / `KB_SHEET_GID`) — lấy từ URL Sheet: `.../d/<ID>/edit#gid=<GID>`.
+- **Cache 5 phút** — sửa Sheet xong đợi tối đa 5 phút hoặc bấm "🔄 Làm mới từ Sheet" trên dashboard để áp dụng ngay.
+- **Không bao giờ làm câm chatbot**: Sheet riêng tư/lỗi/sai định dạng → tự động rơi về kịch bản đã lưu trong DB (dashboard) hoặc file `chatbot-kb.json`. Dashboard hiển thị rõ đang dùng nguồn nào và cảnh báo khi Sheet lỗi.
+
 ## Cài đặt & chạy
 1. Copy file mẫu thành cấu hình thật:
    ```bash

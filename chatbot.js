@@ -13,6 +13,7 @@ const db = require('./db');
 const sheet = require('./sheet');
 const notify = require('./notify');
 const mailer = require('./mailer');
+const sheetkb = require('./sheetkb');
 
 function sendJson(res, status, obj) {
   const b = JSON.stringify(obj);
@@ -140,10 +141,12 @@ function loadKB() {
   return KB;
 }
 // KB đã lưu từ dashboard (bảng settings, key 'chatbotkb'). null = chưa có -> dùng file chatbot-kb.json
-// KBSource cho biết KBCache đang tới từ đâu ('db' hay 'file') để hiển thị trên dashboard.
+// KBSource cho biết bản KB dự phòng (DB/file) đang tới từ đâu ('db' hay 'file') để hiển thị trên dashboard.
+// Nguồn thật sự đang áp dụng có thể là 'sheet' (ưu tiên cao nhất) nếu đã cấu hình + đọc được —
+// xem thêm getKbWithSource().
 let KBCache = null;
 let KBSource = null;
-async function getKB() {
+async function getFallbackKB() {
   if (KBCache) return KBCache;
   try {
     const v = await db.getSetting('chatbotkb');
@@ -152,6 +155,15 @@ async function getKB() {
   KBSource = 'file';
   return loadKB();
 }
+// Ưu tiên: Google Sheet công khai (nếu đã cấu hình & đọc được) -> DB đã lưu qua dashboard -> file mặc định.
+// Sheet lỗi/riêng tư/chưa cấu hình sẽ tự rơi êm về DB/file, chatbot không bao giờ bị "câm".
+async function getKbWithSource(cfg) {
+  const fromSheet = await sheetkb.getSheetKb(cfg);
+  if (fromSheet) return { kb: fromSheet, source: 'sheet' };
+  const kb = await getFallbackKB();
+  return { kb, source: KBSource };
+}
+async function getKB(cfg) { return (await getKbWithSource(cfg)).kb; }
 function matchKB(kb, text, threshold) {
   const un = norm(text); if (!un) return null;
   const ut = new Set(un.split(' '));
@@ -270,7 +282,7 @@ async function handleChat(req, res, url, loadConfig) {
   try {
     // ---------- KHÁCH ----------
     if (p === '/api/chat/config' && req.method === 'GET') {
-      const kb = await getKB();
+      const kb = await getKB(cfg);
       return sendJson(res, 200, { greeting: kb.greeting || '', zaloLink: cb.zaloLink || '' });
     }
     if (p === '/api/chat/send' && req.method === 'POST') {
@@ -293,7 +305,7 @@ async function handleChat(req, res, url, loadConfig) {
       }
 
       let reply = null, from = null;
-      const kb = await getKB();
+      const kb = await getKB(cfg);
       const kbHit = matchKB(kb, text, cb.matchThreshold || 0.5);
       if (kbHit) { reply = kbHit.answer; from = 'kb'; }
       // Ngoài kịch bản -> nhờ AI, nhưng AI chỉ được dựa trên kịch bản đã duyệt.
@@ -428,9 +440,11 @@ async function handleChat(req, res, url, loadConfig) {
       }
 
       // Kịch bản chatbot (KB): lời chào, câu mặc định, danh sách từ khóa -> câu trả lời
+      // Ưu tiên đọc từ Google Sheet công khai (nếu đã cấu hình) — sheetInfo cho dashboard biết
+      // đang thật sự dùng nguồn nào (sheet/db/file) để không nhầm tưởng sửa ở đây là có tác dụng.
       if (p === '/api/agent/chatbotkb' && req.method === 'GET') {
-        const kb = await getKB();
-        return sendJson(res, 200, Object.assign({}, kb, { source: KBSource }));
+        const r = await getKbWithSource(cfg);
+        return sendJson(res, 200, Object.assign({}, r.kb, { source: r.source, sheetInfo: sheetkb.sheetStatus(cfg) }));
       }
       if (p === '/api/agent/chatbotkb' && req.method === 'POST') {
         const b = await readBody(req) || {};
@@ -444,15 +458,20 @@ async function handleChat(req, res, url, loadConfig) {
           qa
         };
         await db.setSetting('chatbotkb', JSON.stringify(kb));
-        KBCache = kb; KBSource = 'db'; // áp dụng ngay, không cần restart
+        KBCache = kb; KBSource = 'db'; // áp dụng ngay, không cần restart (chỉ có tác dụng khi Sheet chưa cấu hình/lỗi)
         return sendJson(res, 200, { ok: true, count: qa.length });
       }
       // Khôi phục KB về đúng nội dung file chatbot-kb.json (xóa bản đã lưu trong DB, KHÔNG sửa file)
       if (p === '/api/agent/chatbotkb/reset' && req.method === 'POST') {
         await db.deleteSetting('chatbotkb');
         KBCache = null; KBSource = null;
-        const kb = await getKB();
-        return sendJson(res, 200, Object.assign({ ok: true }, kb, { source: KBSource }));
+        const r = await getKbWithSource(cfg);
+        return sendJson(res, 200, Object.assign({ ok: true }, r.kb, { source: r.source, sheetInfo: sheetkb.sheetStatus(cfg) }));
+      }
+      // Bấm "Làm mới ngay" trên dashboard — bỏ qua cache 5 phút, đọc lại Sheet ngay lập tức
+      if (p === '/api/agent/chatbotkb/sheetrefresh' && req.method === 'POST') {
+        const kb = await sheetkb.getSheetKb(cfg, true);
+        return sendJson(res, 200, { ok: !!kb, sheetInfo: sheetkb.sheetStatus(cfg) });
       }
 
       // Cấu hình trợ lý AI (Gemini) — KHÔNG bao giờ trả API key thật về trình duyệt
@@ -460,7 +479,7 @@ async function handleChat(req, res, url, loadConfig) {
         const ai = await getAiCfg();
         const envKey = (((cfg && cfg.chatbot) || {}).geminiApiKey || '').trim();
         const used = aiKey(ai, cfg);
-        const kb = await getKB();
+        const kb = await getKB(cfg);
         return sendJson(res, 200, Object.assign({}, ai, {
           apiKey: '',
           _hasKey: !!used,
@@ -493,7 +512,7 @@ async function handleChat(req, res, url, loadConfig) {
         const b = await readBody(req) || {};
         const text = (b.text || '').toString().trim().slice(0, 500);
         if (!text) return sendJson(res, 400, { error: 'Chưa nhập câu hỏi thử.' });
-        const kb = await getKB();
+        const kb = await getKB(cfg);
         const ai = await getAiCfg();
         const fb = kb.fallback || '';
         const hit = matchKB(kb, text, cb.matchThreshold || 0.5);

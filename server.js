@@ -77,6 +77,9 @@ function loadConfig() {
   if (process.env.GEMINI_API_KEY) cb.geminiApiKey = process.env.GEMINI_API_KEY;
   if (process.env.GEMINI_MODEL) cb.geminiModel = process.env.GEMINI_MODEL;
   if (process.env.AGENT_KEY) cb.agentKey = process.env.AGENT_KEY;
+  // Google Sheet công khai chứa kịch bản chatbot (đọc qua CSV export, không cần OAuth)
+  if (process.env.KB_SHEET_ID) cb.kbSheetId = process.env.KB_SHEET_ID;
+  if (process.env.KB_SHEET_GID) cb.kbSheetGid = process.env.KB_SHEET_GID;
   return cfg;
 }
 
