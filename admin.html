@@ -105,12 +105,22 @@
   #viewForm,#viewApply,#viewKb{overflow-y:auto}
   /* Kịch bản chatbot */
   .kb-list{display:flex;flex-direction:column;gap:12px}
-  .kb-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:0 12px 30px -26px rgba(224,52,43,.5)}
-  .kb-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-  .kb-head b{font-size:13.5px}
+  .kb-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px;box-shadow:0 12px 30px -26px rgba(224,52,43,.5)}
+  .kb-head{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+  .kb-head b{font-size:13.5px;flex:none}
+  .kb-chevron{display:inline-block;width:12px;flex:none;color:var(--muted);font-size:11px;transition:transform .15s}
+  .kb-chevron.open{transform:rotate(90deg)}
+  .kb-preview{flex:1;min-width:0;font-size:12.5px;color:var(--muted);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .kb-body{margin-top:12px}
   .kb-grid{display:grid;grid-template-columns:300px 1fr;gap:12px}
   .kb-grid textarea{min-height:110px}
   @media(max-width:820px){.kb-grid{grid-template-columns:1fr}}
+  .kblist-tools{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:12.5px;color:var(--muted)}
+  .linklike{background:none;border:none;color:var(--red);font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit;padding:0}
+  .linklike:hover{text-decoration:underline}
+  .collapse-hd{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+  .collapse-hd h3{margin:0}
+  .collapse-body{margin-top:16px}
   .pagehd{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
   .pagehd h1{font-size:23px;font-weight:700}
   .pagehd .sub{color:var(--muted);font-size:13px;font-weight:600}
@@ -718,64 +728,79 @@
         <div class="pagehd">
           <div><h1>🤖 Kịch bản chatbot</h1><div class="sub" id="kbCount">Câu trả lời tự động của chatbot theo từ khóa.</div></div>
           <div class="spacer"></div>
-          <div class="tbar"><button class="btn" id="kbReset">↺ Khôi phục theo file mặc định</button><button class="btn" id="kbAdd">＋ Thêm kịch bản</button><button class="btn primary" id="kbSave">Lưu tất cả</button></div>
+          <div class="tbar">
+            <a class="btn" href="https://docs.google.com/spreadsheets/d/1-17XN0668aAeY67NTNucGIEtMZz-MldPD6jnacDyNQw/edit?gid=0#gid=0" target="_blank" rel="noopener">📄 Tài liệu kịch bản</a>
+            <button class="btn" id="kbReset">↺ Khôi phục mặc định</button>
+            <button class="btn" id="kbAdd">＋ Thêm kịch bản</button>
+            <button class="btn primary" id="kbSave">Lưu tất cả</button>
+          </div>
         </div>
         <div class="addbox" style="width:auto;max-width:none">
           <div id="kbOk" class="boxmsg ok"></div>
           <div id="kbSrc" class="hintnote"></div>
-          <div class="fld"><label>Lời chào (khi khách mở cửa sổ chat)</label><textarea id="kb_greeting" style="min-height:60px"></textarea></div>
-          <div class="fld"><label>Câu trả lời mặc định (khi không khớp kịch bản nào &amp; AI không trả lời được)</label><textarea id="kb_fallback" style="min-height:60px"></textarea></div>
-          <p class="hintnote">Mỗi kịch bản gồm <b>Từ khóa</b> (mỗi dòng 1 cụm — khách nhắn trùng hoặc gần trùng sẽ khớp, không phân biệt hoa thường/dấu) và <b>Câu trả lời</b>. Khi khớp ngang điểm, kịch bản <b>đứng trước</b> được ưu tiên. Link http trong câu trả lời tự thành link bấm được. Kịch bản để trống từ khóa hoặc câu trả lời sẽ bị bỏ qua khi lưu. Nhớ bấm <b>Lưu tất cả</b> — thay đổi áp dụng ngay cho chatbot.</p>
+          <div class="fld"><label>Lời chào (khi khách mở cửa sổ chat)</label><textarea id="kb_greeting" style="min-height:56px"></textarea></div>
+          <div class="fld"><label>Câu trả lời mặc định (khi không khớp kịch bản nào &amp; AI không trả lời được)</label><textarea id="kb_fallback" style="min-height:56px"></textarea></div>
         </div>
 
-        <!-- TRỢ LÝ AI (GEMINI) -->
+        <!-- TRỢ LÝ AI (GEMINI) — thu gọn mặc định, bấm để mở -->
         <div class="addbox" style="width:auto;max-width:none">
-          <h3 style="display:flex;align-items:center;gap:10px">🧠 Trợ lý AI (Gemini) <span id="aiState" class="permbadge none">Đang tải…</span></h3>
-          <div id="aiOk" class="boxmsg ok"></div>
-          <div id="aiErr" class="boxmsg err"></div>
-          <p class="hintnote" style="margin:0 0 4px">
-            AI đứng <b>trung gian</b>: khách hỏi → khớp kịch bản thì trả lời mẫu → không khớp thì AI trả lời
-            <b>nhưng chỉ được dùng thông tin trong kịch bản trên</b> → AI không chắc chắn thì tự chuyển về
-            <b>câu trả lời mặc định</b>. AI không được phép bịa lương, chế độ, địa chỉ hay đường link.
-          </p>
-
-          <label class="emailtoggle"><input type="checkbox" id="ai_enabled" /> <b>Bật trợ lý AI</b> — khi tắt, câu hỏi ngoài kịch bản sẽ trả lời bằng câu mặc định.</label>
-
-          <div class="grid2">
-            <div class="fld">
-              <label>Gemini API key <span id="ai_keyInfo" style="font-weight:500;color:var(--muted)"></span></label>
-              <input id="ai_apiKey" type="password" autocomplete="off" placeholder="Để trống = giữ khóa hiện tại" />
-            </div>
-            <div class="fld"><label>Model</label>
-              <select id="ai_model">
-                <option value="gemini-2.0-flash">gemini-2.0-flash (nhanh, rẻ — khuyên dùng)</option>
-                <option value="gemini-2.0-flash-lite">gemini-2.0-flash-lite (rẻ nhất)</option>
-                <option value="gemini-2.5-flash">gemini-2.5-flash (thông minh hơn)</option>
-              </select>
-            </div>
-            <div class="fld"><label>Độ sáng tạo (0 = bám sát kịch bản, 1 = tự do)</label><input id="ai_temperature" type="number" min="0" max="1" step="0.1" /></div>
-            <div class="fld"><label>Độ dài tối đa câu trả lời (số từ)</label><input id="ai_maxWords" type="number" min="30" max="400" step="10" /></div>
-            <div class="fld full"><label>Vai trò của bot (persona)</label><textarea id="ai_persona" style="min-height:60px"></textarea></div>
-            <div class="fld full">
-              <label>Thông tin bổ sung được duyệt <span style="font-weight:500">(tùy chọn — AI được dùng như kịch bản; để trống nếu không cần)</span></label>
-              <textarea id="ai_extraContext" style="min-height:90px" placeholder="VD: Giờ làm việc văn phòng 8h–17h thứ 2–thứ 6. Hotline HR: ..."></textarea>
-            </div>
+          <div class="collapse-hd" id="aiToggleHd">
+            <span class="kb-chevron" id="aiChevron">▸</span>
+            <h3 style="display:flex;align-items:center;gap:10px">🧠 Trợ lý AI (Gemini) <span id="aiState" class="permbadge none">Đang tải…</span></h3>
           </div>
-          <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:4px">
-            <button class="btn primary" id="aiSave">Lưu cấu hình AI</button>
-            <button class="btn" id="aiClearKey">🗑 Xóa API key đã lưu</button>
-          </div>
+          <div class="collapse-body" id="aiBody" style="display:none">
+            <div id="aiOk" class="boxmsg ok"></div>
+            <div id="aiErr" class="boxmsg err"></div>
+            <p class="hintnote" style="margin:0 0 4px">
+              AI đứng <b>trung gian</b>: khách hỏi → khớp kịch bản thì trả lời mẫu → không khớp thì AI trả lời
+              <b>nhưng chỉ được dùng thông tin trong kịch bản ở trên</b> → AI không chắc chắn thì tự chuyển về
+              <b>câu trả lời mặc định</b>. AI không được phép bịa lương, chế độ, địa chỉ hay đường link.
+            </p>
 
-          <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--line)">
-            <label style="font-weight:700;display:block;margin-bottom:8px">Thử câu hỏi — xem chatbot sẽ trả lời từ đâu</label>
-            <div class="galbar" style="margin:0">
-              <input id="ai_testQ" type="text" placeholder="VD: cửa hàng có nhận người 17 tuổi không?" />
-              <button class="btn primary" id="aiTestBtn">▶ Thử</button>
+            <label class="emailtoggle"><input type="checkbox" id="ai_enabled" /> <b>Bật trợ lý AI</b> — khi tắt, câu hỏi ngoài kịch bản sẽ trả lời bằng câu mặc định.</label>
+
+            <div class="grid2">
+              <div class="fld">
+                <label>Gemini API key <span id="ai_keyInfo" style="font-weight:500;color:var(--muted)"></span></label>
+                <input id="ai_apiKey" type="password" autocomplete="off" placeholder="Để trống = giữ khóa hiện tại" />
+              </div>
+              <div class="fld"><label>Model</label>
+                <select id="ai_model">
+                  <option value="gemini-2.0-flash">gemini-2.0-flash (nhanh, rẻ — khuyên dùng)</option>
+                  <option value="gemini-2.0-flash-lite">gemini-2.0-flash-lite (rẻ nhất)</option>
+                  <option value="gemini-2.5-flash">gemini-2.5-flash (thông minh hơn)</option>
+                </select>
+              </div>
+              <div class="fld"><label>Độ sáng tạo (0 = bám sát kịch bản, 1 = tự do)</label><input id="ai_temperature" type="number" min="0" max="1" step="0.1" /></div>
+              <div class="fld"><label>Độ dài tối đa câu trả lời (số từ)</label><input id="ai_maxWords" type="number" min="30" max="400" step="10" /></div>
+              <div class="fld full"><label>Vai trò của bot (persona)</label><textarea id="ai_persona" style="min-height:56px"></textarea></div>
+              <div class="fld full">
+                <label>Thông tin bổ sung được duyệt <span style="font-weight:500">(tùy chọn — AI được dùng như kịch bản; để trống nếu không cần)</span></label>
+                <textarea id="ai_extraContext" style="min-height:80px" placeholder="VD: Giờ làm việc văn phòng 8h–17h thứ 2–thứ 6. Hotline HR: ..."></textarea>
+              </div>
             </div>
-            <div id="aiTestOut" style="display:none;margin-top:12px;background:var(--bg);border:1px solid var(--line);border-radius:11px;padding:13px 15px;font-size:13.5px;line-height:1.55"></div>
+            <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:4px">
+              <button class="btn primary" id="aiSave">Lưu cấu hình AI</button>
+              <button class="btn" id="aiClearKey">🗑 Xóa API key đã lưu</button>
+            </div>
+
+            <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--line)">
+              <label style="font-weight:700;display:block;margin-bottom:8px">Thử câu hỏi — xem chatbot sẽ trả lời từ đâu</label>
+              <div class="galbar" style="margin:0">
+                <input id="ai_testQ" type="text" placeholder="VD: cửa hàng có nhận người 17 tuổi không?" />
+                <button class="btn primary" id="aiTestBtn">▶ Thử</button>
+              </div>
+              <div id="aiTestOut" style="display:none;margin-top:12px;background:var(--bg);border:1px solid var(--line);border-radius:11px;padding:13px 15px;font-size:13.5px;line-height:1.55"></div>
+            </div>
           </div>
         </div>
 
+        <div class="kblist-tools">
+          <span>Bấm vào từng kịch bản để xem/sửa —</span>
+          <button class="linklike" id="kbExpandAll">Mở rộng tất cả</button>
+          <span>·</span>
+          <button class="linklike" id="kbCollapseAll">Thu gọn tất cả</button>
+        </div>
         <div id="kbList" class="kb-list"></div>
       </div>
 
@@ -1558,25 +1583,63 @@ $('#afSave').addEventListener('click', function () {
 
 /* ===== KỊCH BẢN CHATBOT ===== */
 var KB_ITEMS = [];
-function renderKbList() {
+// Dòng tóm tắt hiển thị khi kịch bản đang thu gọn (từ khóa + câu trả lời rút gọn)
+function kbPreview(it) {
+  var kws = (it.q || []).slice(0, 3).join(', ') + ((it.q || []).length > 3 ? '…' : '');
+  var ans = (it.a || '').replace(/\s+/g, ' ').trim();
+  if (ans.length > 90) ans = ans.slice(0, 90) + '…';
+  return (kws || '(chưa có từ khóa)') + ' — ' + (ans || '(chưa có câu trả lời)');
+}
+// expandIdx: chỉ số kịch bản cần mở sẵn (vd vừa thêm mới) — còn lại mặc định thu gọn cho đỡ rườm rà
+function renderKbList(expandIdx) {
   var wrap = $('#kbList');
   wrap.innerHTML = KB_ITEMS.map(function (it, i) {
+    var open = i === expandIdx;
     return '<div class="kb-card">'
-      + '<div class="kb-head"><b>Kịch bản ' + (i + 1) + '</b><button class="btn kb-del" data-i="' + i + '">🗑 Xóa</button></div>'
+      + '<div class="kb-head" data-toggle="1"><span class="kb-chevron' + (open ? ' open' : '') + '">▸</span>'
+      + '<b>Kịch bản ' + (i + 1) + '</b><span class="kb-preview">' + esc(kbPreview(it)) + '</span>'
+      + '<button class="btn kb-del" data-i="' + i + '">🗑</button></div>'
+      + '<div class="kb-body" style="display:' + (open ? 'block' : 'none') + '">'
       + '<div class="kb-grid">'
-      + '<div class="fld"><label>Từ khóa (mỗi dòng 1 cụm)</label><textarea class="kb-q" spellcheck="false">' + esc((it.q || []).join('\n')) + '</textarea></div>'
+      + '<div class="fld"><label>Từ khóa (mỗi dòng 1 cụm — trùng/gần trùng đều khớp, không phân biệt hoa thường/dấu)</label><textarea class="kb-q" spellcheck="false">' + esc((it.q || []).join('\n')) + '</textarea></div>'
       + '<div class="fld"><label>Câu trả lời</label><textarea class="kb-a">' + esc(it.a || '') + '</textarea></div>'
-      + '</div></div>';
+      + '</div></div></div>';
   }).join('');
   $('#kbCount').textContent = KB_ITEMS.length + ' kịch bản · khách nhắn trùng từ khóa sẽ nhận câu trả lời tương ứng';
   [].forEach.call(wrap.querySelectorAll('.kb-del'), function (b) {
-    b.onclick = function () {
+    b.onclick = function (e) {
+      e.stopPropagation();
       collectKb();
       KB_ITEMS.splice(+b.getAttribute('data-i'), 1);
       renderKbList();
     };
   });
+  [].forEach.call(wrap.querySelectorAll('[data-toggle]'), function (h) {
+    h.onclick = function () {
+      var body = h.nextElementSibling, chev = h.querySelector('.kb-chevron');
+      var isOpen = body.style.display !== 'none';
+      body.style.display = isOpen ? 'none' : 'block';
+      chev.classList.toggle('open', !isOpen);
+    };
+  });
 }
+$('#kbExpandAll').addEventListener('click', function () {
+  [].forEach.call(document.querySelectorAll('#kbList .kb-body'), function (b) { b.style.display = 'block'; });
+  [].forEach.call(document.querySelectorAll('#kbList .kb-chevron'), function (c) { c.classList.add('open'); });
+});
+$('#kbCollapseAll').addEventListener('click', function () {
+  [].forEach.call(document.querySelectorAll('#kbList .kb-body'), function (b) { b.style.display = 'none'; });
+  [].forEach.call(document.querySelectorAll('#kbList .kb-chevron'), function (c) { c.classList.remove('open'); });
+});
+// Khối "Trợ lý AI" thu gọn mặc định — nhớ trạng thái mở/đóng theo lựa chọn gần nhất của người dùng
+var AI_BOX_KEY = 'ttvh_ai_box_open';
+function setAiBoxOpen(open) {
+  $('#aiBody').style.display = open ? 'block' : 'none';
+  $('#aiChevron').classList.toggle('open', open);
+  try { localStorage.setItem(AI_BOX_KEY, open ? '1' : '0'); } catch (e) {}
+}
+$('#aiToggleHd').addEventListener('click', function () { setAiBoxOpen($('#aiBody').style.display === 'none'); });
+setAiBoxOpen(localStorage.getItem(AI_BOX_KEY) === '1');
 // Đọc lại nội dung đang gõ trong các thẻ (giữ chỉnh sửa trước khi thêm/xóa/lưu)
 function collectKb() {
   var items = [];
@@ -1704,7 +1767,7 @@ $('#kbReset').addEventListener('click', function () {
 $('#kbAdd').addEventListener('click', function () {
   collectKb();
   KB_ITEMS.unshift({ q: [], a: '' });
-  renderKbList();
+  renderKbList(0);
   var first = document.querySelector('#kbList .kb-q');
   if (first) { first.focus(); first.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
 });
