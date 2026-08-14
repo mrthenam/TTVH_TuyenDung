@@ -282,6 +282,12 @@
   .jobrow .jdept.jsub{color:var(--muted);background:rgba(54,28,18,.07)}
   .jobrow .ja{display:flex;gap:8px;flex:none}
   .jobrow .jlock{font-size:12px;color:var(--muted);white-space:nowrap;flex:none}
+  /* trạng thái tin theo hạn nộp */
+  .jstat{font-size:11.5px;font-weight:700;border-radius:999px;padding:3px 10px;white-space:nowrap;flex:none}
+  .jstat.open{color:#1c8a4c;background:rgba(47,170,94,.16)}
+  .jstat.expired{color:var(--red-2);background:rgba(224,52,43,.11)}
+  .jobrow.expired{background:var(--bg-soft);border-style:dashed}
+  .jobrow .jm .jdl-exp{color:var(--red-2);font-weight:700}
   /* phân quyền nhân viên */
   .permrow{display:flex;flex-wrap:wrap;gap:8px 12px;margin:4px 0}
   .permrow label{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--txt);cursor:pointer;user-select:none}
@@ -818,6 +824,7 @@
           <div class="tbar"><a class="btn" href="viec-lam.html" target="_blank">↗ Mở trang</a><button class="btn primary" id="jobAddBtn">+ Thêm công việc</button></div>
         </div>
         <div class="job-tabs" id="jobTabs"></div>
+        <div class="job-tabs" id="jobStatTabs" style="margin-top:-6px"></div>
         <div id="jobsList" class="jobs-admin"></div>
         <div class="jpager" id="jobPager"></div>
       </div>
@@ -1211,9 +1218,27 @@ var JOB_GROUPS = [
   { key: 'Văn phòng', label: '🏢 Văn phòng' },
   { key: 'Khối sản xuất', label: '🏭 Khối sản xuất' }
 ];
+var JOB_KNOWN_DEPTS = JOB_GROUPS.map(function (g) { return g.key; });
 var jobDeptSel = ''; // '' = Tất cả, '__other__' = nhóm Khác, hoặc đúng key của JOB_GROUPS
+var jobStatSel = ''; // '' = Tất cả, 'open' = còn tuyển, 'expired' = quá hạn
 var JOB_PAGE_SIZE = 10;
 var jobPage = 1;
+// Hết hạn = hạn nộp đã qua (so theo ngày, không tính giờ). Tin KHÔNG có hạn nộp
+// được coi là còn tuyển — tuyển liên tục, không giới hạn thời gian.
+function todayIso() { var d = new Date(); return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+function jobExpired(j) {
+  var d = String((j && j.deadline) || '').slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(d) && d < todayIso();
+}
+function matchJobDept(j) {
+  if (jobDeptSel === '') return true;
+  if (jobDeptSel === '__other__') return JOB_KNOWN_DEPTS.indexOf(j.dept) === -1;
+  return j.dept === jobDeptSel;
+}
+function matchJobStat(j) {
+  if (jobStatSel === '') return true;
+  return jobStatSel === 'expired' ? jobExpired(j) : !jobExpired(j);
+}
 function jobGroupLabel(j) {
   var g = null;
   JOB_GROUPS.forEach(function (gr) { if (gr.key === j.dept) g = gr; });
@@ -1252,15 +1277,17 @@ function renderJobPager(totalPages) {
 }
 function jobRowHtml(j) {
   var editable = canDept(j.dept);
+  var expired = jobExpired(j);
   var actions = editable
     ? '<button class="btn" data-edit="' + j.id + '">Sửa</button><button class="btn danger" data-del="' + j.id + '">Xóa</button>'
     : '<span class="jlock" title="Bạn không có quyền chỉnh sửa khối này">🔒 Chỉ xem</span>';
-  return '<div class="jobrow">' +
+  return '<div class="jobrow' + (expired ? ' expired' : '') + '">' +
     '<div class="ji"><h4>' + esc(j.title) + '</h4><div class="jm">' +
     (j.salary ? '<b>' + esc(j.salary) + '</b>' : '') +
     (j.location ? '<span>📍 ' + esc(j.location) + '</span>' : '') +
-    (j.deadline ? '<span>⏳ ' + esc(jdmy(j.deadline)) + '</span>' : '') +
+    (j.deadline ? '<span' + (expired ? ' class="jdl-exp"' : '') + '>⏳ ' + esc(jdmy(j.deadline)) + '</span>' : '<span>⏳ Không đặt hạn</span>') +
     '</div></div>' +
+    '<span class="jstat ' + (expired ? 'expired">⛔ Hết hạn' : 'open">✅ Còn tuyển') + '</span>' +
     (j.dept ? '<span class="jdept">' + esc(j.dept) + '</span>' : '') +
     (function () { var s = window.JobFilters && JobFilters.subLabel(j); return s ? '<span class="jdept jsub">' + esc(s) + '</span>' : ''; })() +
     '<div class="ja">' + actions + '</div>' +
@@ -1270,29 +1297,36 @@ function loadJobs() {
   updateJobAddBtn();
   api('/api/agent/jobs').then(function (d) {
     JOBS_CACHE = (d && d.rows) || [];
-    $('#jobsCount').textContent = JOBS_CACHE.length + ' công việc · hiển thị ở trang Tuyển dụng';
+    var exp = JOBS_CACHE.filter(jobExpired).length;
+    $('#jobsCount').textContent = JOBS_CACHE.length + ' công việc · ' + (JOBS_CACHE.length - exp) + ' còn tuyển · ' + exp + ' hết hạn';
     renderJobsList();
   }).catch(function (e) { if (e.message === '401') logout(); });
 }
 function renderJobsList() {
   if (!JOBS_CACHE.length) {
-    $('#jobTabs').innerHTML = '';
+    $('#jobTabs').innerHTML = ''; $('#jobStatTabs').innerHTML = ''; $('#jobPager').innerHTML = '';
     $('#jobsList').innerHTML = '<div style="color:var(--muted);padding:24px">Chưa có công việc nào. Bấm “+ Thêm công việc”.</div>';
     return;
   }
-  var known = JOB_GROUPS.map(function (g) { return g.key; });
-  var otherRows = JOBS_CACHE.filter(function (j) { return known.indexOf(j.dept) === -1; });
+  var otherRows = JOBS_CACHE.filter(function (j) { return JOB_KNOWN_DEPTS.indexOf(j.dept) === -1; });
   // Danh sách khối thực sự có tin (menu con) không tự reset lựa chọn đang xem khi ẩn đi mất
   if (jobDeptSel && jobDeptSel !== '__other__' && !JOBS_CACHE.some(function (j) { return j.dept === jobDeptSel; })) jobDeptSel = '';
   if (jobDeptSel === '__other__' && !otherRows.length) jobDeptSel = '';
-  var tabsHtml = '<button class="rtab' + (jobDeptSel === '' ? ' act' : '') + '" data-jd="">Tất cả<span class="n">' + JOBS_CACHE.length + '</span></button>';
+
+  // Đếm chéo: số trên tab Khối tính trong phạm vi trạng thái đang chọn và ngược lại,
+  // để 2 bộ lọc kết hợp được mà con số vẫn đúng với những gì sẽ hiện ra.
+  var inStat = JOBS_CACHE.filter(matchJobStat);
+  var inDept = JOBS_CACHE.filter(matchJobDept);
+
+  var tabsHtml = '<button class="rtab' + (jobDeptSel === '' ? ' act' : '') + '" data-jd="">Tất cả<span class="n">' + inStat.length + '</span></button>';
   JOB_GROUPS.forEach(function (g) {
-    var n = JOBS_CACHE.filter(function (j) { return j.dept === g.key; }).length;
-    if (!n) return;
+    if (!JOBS_CACHE.some(function (j) { return j.dept === g.key; })) return;
+    var n = inStat.filter(function (j) { return j.dept === g.key; }).length;
     tabsHtml += '<button class="rtab' + (jobDeptSel === g.key ? ' act' : '') + '" data-jd="' + esc(g.key) + '">' + g.label + '<span class="n">' + n + '</span></button>';
   });
   if (otherRows.length) {
-    tabsHtml += '<button class="rtab' + (jobDeptSel === '__other__' ? ' act' : '') + '" data-jd="__other__">🗂️ Khác<span class="n">' + otherRows.length + '</span></button>';
+    var nOther = inStat.filter(function (j) { return JOB_KNOWN_DEPTS.indexOf(j.dept) === -1; }).length;
+    tabsHtml += '<button class="rtab' + (jobDeptSel === '__other__' ? ' act' : '') + '" data-jd="__other__">🗂️ Khác<span class="n">' + nOther + '</span></button>';
   }
   $('#jobTabs').innerHTML = tabsHtml;
   [].forEach.call(document.querySelectorAll('#jobTabs .rtab'), function (b) {
@@ -1300,6 +1334,21 @@ function renderJobsList() {
       var v = b.getAttribute('data-jd');
       if (v === jobDeptSel) return;
       jobDeptSel = v; jobPage = 1; renderJobsList();
+    };
+  });
+
+  // Tab trạng thái theo hạn nộp
+  var nOpen = inDept.filter(function (j) { return !jobExpired(j); }).length;
+  var nExp = inDept.length - nOpen;
+  $('#jobStatTabs').innerHTML =
+    '<button class="rtab' + (jobStatSel === '' ? ' act' : '') + '" data-js="">Mọi trạng thái<span class="n">' + inDept.length + '</span></button>' +
+    '<button class="rtab' + (jobStatSel === 'open' ? ' act' : '') + '" data-js="open">✅ Còn tuyển<span class="n">' + nOpen + '</span></button>' +
+    '<button class="rtab' + (jobStatSel === 'expired' ? ' act' : '') + '" data-js="expired">⛔ Hết hạn<span class="n">' + nExp + '</span></button>';
+  [].forEach.call(document.querySelectorAll('#jobStatTabs .rtab'), function (b) {
+    b.onclick = function () {
+      var v = b.getAttribute('data-js');
+      if (v === jobStatSel) return;
+      jobStatSel = v; jobPage = 1; renderJobsList();
     };
   });
 
@@ -1314,6 +1363,7 @@ function renderJobsList() {
   } else {
     rowsToShow = JOBS_CACHE.filter(function (j) { return j.dept === jobDeptSel; });
   }
+  rowsToShow = rowsToShow.filter(matchJobStat);
 
   var totalPages = Math.max(1, Math.ceil(rowsToShow.length / JOB_PAGE_SIZE));
   if (jobPage > totalPages) jobPage = totalPages;
@@ -1334,7 +1384,8 @@ function renderJobsList() {
     }
     html += jobRowHtml(j);
   });
-  $('#jobsList').innerHTML = html;
+  $('#jobsList').innerHTML = html
+    || '<div style="color:var(--muted);padding:24px">Không có công việc nào khớp bộ lọc đang chọn.</div>';
   renderJobPager(totalPages);
 }
 function fillDeptOptions(selected) {
