@@ -31,7 +31,6 @@ const memTraining = [];      // [{...registration, id, ts}]  (fallback RAM)
 const memBrandCampaigns = new Map(); // brand -> {brand, code, name}
 const memSettings = new Map();       // k -> v (fallback RAM)
 const memLog = [];                   // lịch sử chỉnh sửa (fallback RAM)
-const memRecruit = new Map();        // thông tin tuyển dụng theo thương hiệu (fallback RAM)
 const memGallery = [];               // Khoảnh khắc Vinh Hoa: [{id,url,sort_order}] (fallback RAM)
 const memJobs = [];                  // Việc làm (tuyển dụng): [{id,...,sort_order}] (fallback RAM)
 // dùng chung cho cả 2 chế độ:
@@ -76,8 +75,6 @@ async function init() {
     await pool.query(`ALTER TABLE training_log ADD COLUMN IF NOT EXISTS ref_id bigint`);
     await pool.query(`ALTER TABLE training_log ADD COLUMN IF NOT EXISTS actor text`);
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_trainlog_ref ON training_log(ref_id, ts)`);
-    await pool.query(`CREATE TABLE IF NOT EXISTS recruitment_info(
-      brand text PRIMARY KEY, name text, title text, content text, updated_at bigint)`);
     await pool.query(`CREATE TABLE IF NOT EXISTS gallery(
       id bigserial PRIMARY KEY, url text, sort_order int)`);
     await pool.query(`CREATE TABLE IF NOT EXISTS jobs(
@@ -473,36 +470,6 @@ async function seedBrandCampaigns(obj) {
   }
 }
 
-// ----- thông tin tuyển dụng theo thương hiệu -----
-async function listRecruitment() {
-  if (HAS_PG) { const r = await pool.query('SELECT brand,name,title,content FROM recruitment_info ORDER BY brand'); return r.rows; }
-  return [...memRecruit.values()].map(x => ({ brand: x.brand, name: x.name, title: x.title, content: x.content }));
-}
-async function setRecruitment(brand, name, title, content) {
-  brand = (brand || '').trim(); if (!brand) return false;
-  const now = Date.now();
-  if (HAS_PG) {
-    await pool.query(
-      `INSERT INTO recruitment_info(brand,name,title,content,updated_at) VALUES($1,$2,$3,$4,$5)
-       ON CONFLICT (brand) DO UPDATE SET name=$2, title=$3, content=$4, updated_at=$5`,
-      [brand, name || '', title || '', content || '', now]);
-  } else { memRecruit.set(brand, { brand, name: name || '', title: title || '', content: content || '' }); }
-  return true;
-}
-async function seedRecruitment(arr) {
-  if (!arr) return;
-  const ex = await listRecruitment();
-  const cur = {}; ex.forEach(r => { cur[r.brand] = r; });
-  for (const r of arr) {
-    const c = cur[r.brand];
-    if (!c) { await setRecruitment(r.brand, r.name, r.title, r.content); }
-    else if ((!c.content || !c.content.trim()) && r.content && r.content.trim()) {
-      // điền nội dung mặc định cho thương hiệu còn trống (không ghi đè nội dung đã có)
-      await setRecruitment(r.brand, c.name || r.name, c.title || r.title, r.content);
-    }
-  }
-}
-
 // ----- Khoảnh khắc Vinh Hoa (gallery) -----
 async function listGallery() {
   if (HAS_PG) { const r = await pool.query('SELECT id,url,sort_order FROM gallery ORDER BY sort_order ASC, id ASC'); return r.rows.map(x => ({ id: Number(x.id), url: x.url, sort_order: x.sort_order })); }
@@ -610,7 +577,6 @@ module.exports = {
   TRAIN_STATUS, normStatus,
   addTrainingLog, listTrainingLog,
   listBrandCampaigns, setBrandCampaign, deleteBrandCampaign, getBrandCampaignMap, seedBrandCampaigns,
-  listRecruitment, setRecruitment, seedRecruitment,
   listGallery, addGallery, deleteGallery, reorderGallery, seedGallery,
   listJobs, getJob, addJob, updateJob, deleteJob, reorderJobs, seedJobs,
   getSetting, setSetting, deleteSetting

@@ -601,15 +601,6 @@ async function handleChat(req, res, url, loadConfig) {
         return sendJson(res, 200, { ok: true });
       }
 
-      // Thông tin tuyển dụng theo thương hiệu
-      if (p === '/api/agent/recruitment' && req.method === 'GET') return sendJson(res, 200, { rows: await db.listRecruitment() });
-      if (p === '/api/agent/recruitment' && req.method === 'POST') {
-        const b = await readBody(req) || {};
-        const brand = (b.brand || '').toString().trim();
-        if (!brand) return sendJson(res, 400, { error: 'Thiếu thương hiệu' });
-        await db.setRecruitment(brand, (b.name || '').toString(), (b.title || '').toString(), (b.content || '').toString());
-        return sendJson(res, 200, { ok: true });
-      }
       // Lưu/đọc 1 Google Sheet duy nhất (id + url) đã tạo
       if (p === '/api/agent/gsheet' && req.method === 'GET') return sendJson(res, 200, { id: await db.getSetting('gsheet_id'), url: await db.getSetting('gsheet_url') });
       if (p === '/api/agent/gsheet' && req.method === 'POST') {

@@ -994,14 +994,6 @@ const server = http.createServer(async (req, res) => {
     return createCandidate(form, cfg, res);
   }
 
-  // Thông tin tuyển dụng theo thương hiệu (công khai cho popup trang chủ)
-  if (url.pathname === "/api/recruitment" && req.method === "GET") {
-    try {
-      return sendJson(res, 200, { rows: await db.listRecruitment() });
-    } catch (e) {
-      return sendJson(res, 200, { rows: [] });
-    }
-  }
   // Danh sách cửa hàng theo thương hiệu (đọc từ Google Sheet, cache) — cho form đào tạo
   if (url.pathname === "/api/stores" && req.method === "GET") {
     try {
@@ -1081,183 +1073,6 @@ const server = http.createServer(async (req, res) => {
 
 const cfg = loadConfig() || { port: 3000 };
 const PORT = process.env.PORT || cfg.port || 3000;
-const GARAN_CONTENT = [
-  "A. Thông tin vị trí tuyển dụng:",
-  "",
-  "1. Store Manager/ Quản lý cửa hàng: https://drive.google.com/file/d/194pu5EhOvQ4ZYBZO9qsOR27YSoYIvjyi/view",
-  "",
-  "2. Nhân viên cửa hàng toàn thời gian/Captain/Tổ trưởng: https://drive.google.com/file/d/1mLiasQTcoDN2I4YTCaXzQ-_6-qxbOjav/view",
-  "- Có kinh nghiệm làm việc tại các cửa hàng đồ ăn, uống (F&B) từ 6 tháng đến 1 năm.",
-  "- Vận hành cửa hàng cùng cửa hàng trưởng, sắp xếp ca làm.",
-  "- Là đội ngũ tiềm năng thăng tiến lên vị trí Trưởng ca, Quản lý cửa hàng.",
-  "",
-  "3. Nhân viên cửa hàng bán thời gian:",
-  "- Đảm nhận các công việc về tư vấn bán hàng (Order); thanh toán, ...",
-  "- Đảm bảo vệ sinh Cửa hàng.",
-  "- Các công việc khác theo sự phân công của Quản lý cửa hàng.",
-  "",
-  "B. Quyền lợi:",
-  "",
-  "1. Cấp quản lý",
-  "- Thu nhập:",
-  "+ Quản lý cửa hàng: 10.000.000 - 11.200.000 + thưởng BSC từ 700.000 đến 2.000.000/tháng + thưởng doanh thu",
-  "+ Trưởng ca: 7.500.000 - 8.500.000 + thưởng BSC từ 700.000 đến 2.000.000/tháng + thưởng doanh thu",
-  "+ Tổ trưởng/Captain: 6.500.000 - 7.000.000 + thưởng BSC từ 700.000 đến 2.000.000/tháng + thưởng doanh thu",
-  "- Phúc lợi:",
-  "+ Thử việc 100% lương",
-  "+ Tham gia BHXH sau 2 tháng thử việc",
-  "+ Được đào tạo lên các vị trí cao hơn. Lộ trình đào tạo và phát triển rõ ràng, cụ thể",
-  "+ Xét tăng lương, cấp bậc định kỳ 3 - 6 tháng",
-  "+ Bảo hiểm sức khỏe 24/7 PVI",
-  "+ Lương tháng 13",
-  "+ Chính sách ưu đãi nội bộ",
-  "+ Các hoạt động truyền thông nội bộ",
-  "",
-  "2. Nhân viên cửa hàng:",
-  "- Toàn thời gian:",
-  "+ Toàn thời gian chưa có kinh nghiệm, sẽ được đào tạo: 5.800.000đ/tháng đến 6.000.000đ/tháng.",
-  "+ Thời gian làm việc: xoay ca fulltime (Ca 8 tiếng), cửa hàng mở từ 08:30 - 23:00, off 1 ngày/tuần.",
-  "- Bán thời gian:",
-  "+ Mức lương dao động từ 24.000đ đến 25.500đ/giờ + thưởng BSC từ 300.000đ đến 1.300.000đ/tháng",
-  "+ Thời gian làm việc linh hoạt theo lịch đăng ký: 4-6 ca/tuần, 6-8 tiếng/ca, đăng ký trong khung giờ:",
-  "Ca 8 tiếng: 08h00 - 16h00 & 16h00 - 23h00",
-  "Ca 6 tiếng: 18h00 - 23h00 & 10h00 - 16h00",
-  "+ Môi trường làm việc thân thiện, ưu tiên bố trí gần nhà.",
-  "+ Được đào tạo lên các vị trí cao hơn. Lộ trình đào tạo và phát triển rõ ràng, cụ thể",
-  "+ Xét tăng lương, cấp bậc định kỳ 3 - 6 tháng",
-].join("\n");
-function brandContent(brandDrink) {
-  return [
-    "A. Thông tin vị trí tuyển dụng:",
-    "",
-    "1. Quản lý cửa hàng / Trưởng ca:",
-    "- Vận hành cửa hàng, sắp xếp ca làm, quản lý nhân sự & doanh thu.",
-    "- Ưu tiên có kinh nghiệm F&B từ 6 tháng đến 1 năm.",
-    "- Lộ trình thăng tiến lên Quản lý khu vực.",
-    "",
-    "2. Nhân viên pha chế & phục vụ (toàn thời gian):",
-    "- Pha chế " + brandDrink + ", đồ uống theo công thức chuẩn.",
-    "- Phục vụ, order, vệ sinh khu vực; được đào tạo bài bản từ đầu.",
-    "",
-    "3. Nhân viên bán thời gian:",
-    "- Tư vấn bán hàng (Order), thanh toán, đảm bảo vệ sinh cửa hàng.",
-    "- Ca linh hoạt, phù hợp với sinh viên.",
-    "",
-    "B. Quyền lợi:",
-    "- Thử việc 100% lương; tham gia BHXH theo quy định.",
-    "- Lộ trình thăng tiến rõ ràng: Nhân viên → Trưởng ca → Quản lý cửa hàng.",
-    "- Xét tăng lương, cấp bậc định kỳ 3 - 6 tháng.",
-    "- Lương tháng 13, chính sách ưu đãi nội bộ, các hoạt động truyền thông nội bộ.",
-    "- Môi trường trẻ trung, thân thiện; ưu tiên bố trí gần nhà.",
-  ].join("\n");
-}
-function deptContent(role, place) {
-  return [
-    "Mô tả công việc:",
-    "- " + role,
-    "- Làm việc " + (place || "tại văn phòng TP.HCM") + ", toàn thời gian.",
-    "",
-    "Quyền lợi:",
-    "- Lương thỏa thuận theo năng lực; thử việc 100% lương.",
-    "- Tham gia BHXH; lương tháng 13; xét tăng lương định kỳ.",
-    "- Lộ trình đào tạo & phát triển rõ ràng.",
-    "- Chính sách ưu đãi nội bộ; các hoạt động truyền thông nội bộ.",
-  ].join("\n");
-}
-const DEPT_OFFICE = [
-  {
-    brand: "marketing",
-    name: "Marketing",
-    role: "Lập kế hoạch & triển khai truyền thông thương hiệu, content, chạy quảng cáo.",
-  },
-  {
-    brand: "hr",
-    name: "Nhân sự (HR)",
-    role: "Tuyển dụng, đào tạo, vận hành đội ngũ; xây dựng chính sách nhân sự.",
-  },
-  {
-    brand: "it",
-    name: "IT",
-    role: "Vận hành, hỗ trợ hệ thống, phần mềm và hạ tầng công nghệ.",
-  },
-  {
-    brand: "finance",
-    name: "Tài chính – Kế toán",
-    role: "Quản lý sổ sách, báo cáo tài chính, kiểm soát chi phí.",
-  },
-];
-const DEPT_PROD = [
-  {
-    brand: "sanxuat",
-    name: "Sản xuất / Vận hành",
-    role: "Tham gia quy trình sản xuất, vận hành dây chuyền theo tiêu chuẩn.",
-    place: "tại nhà máy",
-  },
-  {
-    brand: "qaqc",
-    name: "QA / QC",
-    role: "Kiểm soát chất lượng nguyên liệu & thành phẩm theo tiêu chuẩn ATVSTP.",
-    place: "tại nhà máy",
-  },
-  {
-    brand: "khovan",
-    name: "Kho vận",
-    role: "Quản lý kho, xuất nhập hàng, điều phối giao vận.",
-    place: "tại kho/nhà máy",
-  },
-  {
-    brand: "kythuat",
-    name: "Kỹ thuật / Bảo trì",
-    role: "Bảo trì, sửa chữa máy móc thiết bị; đảm bảo vận hành ổn định.",
-    place: "tại nhà máy",
-  },
-];
-const RECRUIT_DEFAULTS = [
-  {
-    brand: "maycha",
-    name: "MayCha",
-    title: "Thông tin tuyển dụng — MayCha",
-    content: brandContent("trà sữa"),
-  },
-  {
-    brand: "tamhao",
-    name: "Hồng Trà Sữa Tam Hảo",
-    title: "Thông tin tuyển dụng — Hồng Trà Sữa Tam Hảo",
-    content: brandContent("hồng trà sữa"),
-  },
-  {
-    brand: "gagion",
-    name: "Gà Giòn Sốt Ba Cô Gái",
-    title: "🍗 Tụi mình tìm đồng đội cho Gà rán",
-    content: GARAN_CONTENT,
-  },
-  {
-    brand: "trahu",
-    name: "Trà Hú",
-    title: "Thông tin tuyển dụng — Trà Hú",
-    content: brandContent("trà"),
-  },
-]
-  .concat(
-    DEPT_OFFICE.map(function (d) {
-      return {
-        brand: d.brand,
-        name: d.name,
-        title: "Thông tin tuyển dụng — " + d.name,
-        content: deptContent(d.role, "tại văn phòng TP.HCM"),
-      };
-    }),
-  )
-  .concat(
-    DEPT_PROD.map(function (d) {
-      return {
-        brand: d.brand,
-        name: d.name,
-        title: "Thông tin tuyển dụng — " + d.name,
-        content: deptContent(d.role, d.place),
-      };
-    }),
-  );
 
 const TRAININGFORM_DEFAULTS = {
   title: "Maycha - Thông Tin Đăng Ký Tham Gia Lớp Đào Tạo Đầu Vào",
@@ -1331,7 +1146,6 @@ chatbot
       cfg.oneOffice.create.brandCampaigns;
     if (bc) return db.seedBrandCampaigns(bc);
   })
-  .then(() => db.seedRecruitment(RECRUIT_DEFAULTS))
   .then(() =>
     db.seedGallery([
       "images/anh vinh danh/1.jpg",
