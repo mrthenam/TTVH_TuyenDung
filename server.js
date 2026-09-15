@@ -1168,21 +1168,33 @@ chatbot
       );
   })
   .then(async () => {
-    // Bổ sung thương hiệu "Trà Hú" vào form đào tạo đã lưu trước đó trong DB.
-    // Chạy MỘT LẦN (có cờ) để quản trị vẫn xóa được trong dashboard mà không bị thêm lại.
+    // Đảm bảo form đào tạo có đủ danh sách thương hiệu. Chạy MỘT LẦN (có cờ) để quản trị
+    // vẫn tự sửa được trong dashboard mà không bị ghi đè lại ở lần khởi động sau.
+    // Lưu ý: bản ghi cũ trong DB có brands RỖNG (client tự rơi về danh sách trong HTML).
+    // Bước bổ sung Trà Hú trước đây push vào mảng rỗng đó -> form chỉ còn 1 thương hiệu,
+    // nên ở đây phải khôi phục cả danh sách mặc định khi thấy rỗng/chỉ còn Trà Hú.
     try {
-      if (await db.getSetting("trainingform_trahu_added")) return;
+      if (await db.getSetting("trainingform_brands_fixed")) return;
       const raw = await db.getSetting("trainingform");
       if (raw) {
         const cfg = JSON.parse(raw);
-        if (Array.isArray(cfg.brands) && cfg.brands.indexOf("Trà Hú") === -1) {
-          cfg.brands.push("Trà Hú");
+        const cur = Array.isArray(cfg.brands)
+          ? cfg.brands.map((b) => String(b || "").trim()).filter(Boolean)
+          : [];
+        let next = null;
+        if (cur.length === 0 || (cur.length === 1 && cur[0] === "Trà Hú")) {
+          next = TRAININGFORM_DEFAULTS.brands.slice(); // chưa cấu hình / bị hỏng -> dùng mặc định đủ 4
+        } else if (cur.indexOf("Trà Hú") === -1) {
+          next = cur.concat("Trà Hú"); // đã cấu hình sẵn -> chỉ bổ sung Trà Hú
+        }
+        if (next) {
+          cfg.brands = next;
           await db.setSetting("trainingform", JSON.stringify(cfg));
         }
       }
-      await db.setSetting("trainingform_trahu_added", "1");
+      await db.setSetting("trainingform_brands_fixed", "1");
     } catch (e) {
-      console.warn(" [trainingform] không thêm được Trà Hú: " + e.message);
+      console.warn(" [trainingform] không sửa được danh sách thương hiệu: " + e.message);
     }
   })
   .then(async () => {
