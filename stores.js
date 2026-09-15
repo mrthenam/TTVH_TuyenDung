@@ -8,7 +8,10 @@ const https = require('https');
 const { URL } = require('url');
 
 const DEFAULT_CSV = 'https://docs.google.com/spreadsheets/d/1JorCdnX9GEWOvkg-lAyVjBkGSELThGOY1JTKdtJrTaE/export?format=csv&gid=327494494';
-const BRAND_MAP = { MC: 'Trà Sữa MayCha', TH: 'Hồng Trà Sữa Tam Hảo', GA: 'Gà Giòn Sốt Ba Cô Gái' };
+const BRAND_MAP = { MC: 'Trà Sữa MayCha', TH: 'Hồng Trà Sữa Tam Hảo', GA: 'Gà Giòn Sốt Ba Cô Gái', HU: 'Trà Hú', TRAHU: 'Trà Hú' };
+// Sheet cửa hàng chưa có dữ liệu Trà Hú -> tạm dùng địa chỉ này. Khi sheet có dòng Trà Hú
+// (cột Brand = HU/TRAHU hoặc tên chứa "Trà Hú") thì dữ liệu thật sẽ tự thay thế danh sách tạm.
+const TRAHU_TAM = ['2B1 Ngô Văn Năm'];
 const TTL = 10 * 60 * 1000;
 let cache = null, cacheAt = 0;
 
@@ -52,6 +55,7 @@ function brandFromName(name) {
   if (/^\s*MC/i.test(name)) return 'Trà Sữa MayCha';
   if (/^\s*BB/i.test(name)) return 'Hồng Trà Sữa Tam Hảo';
   if (/^\s*(GA|Food)/i.test(name)) return 'Gà Giòn Sốt Ba Cô Gái';
+  if (/tr[aà]\s*h[uú]/i.test(name)) return 'Trà Hú';
   return null;
 }
 
@@ -69,7 +73,7 @@ async function getStores(cfg, force) {
       const n = r.findIndex((c) => c === 'tên cửa hàng');
       if (b >= 0 && n >= 0) { hi = i; bi = b; ni = n; break; }
     }
-    const out = { 'Trà Sữa MayCha': [], 'Hồng Trà Sữa Tam Hảo': [], 'Gà Giòn Sốt Ba Cô Gái': [] };
+    const out = { 'Trà Sữa MayCha': [], 'Hồng Trà Sữa Tam Hảo': [], 'Gà Giòn Sốt Ba Cô Gái': [], 'Trà Hú': [] };
     if (hi >= 0) {
       for (let i = hi + 1; i < rows.length; i++) {
         const r = rows[i]; if (!r) continue;
@@ -81,11 +85,12 @@ async function getStores(cfg, force) {
       }
     }
     Object.keys(out).forEach((k) => { out[k] = [...new Set(out[k])]; }); // bỏ trùng
+    if (!out['Trà Hú'].length) out['Trà Hú'] = [...TRAHU_TAM]; // sheet chưa có -> dùng địa chỉ tạm
     cache = out; cacheAt = now; return out;
   } catch (e) {
     console.warn(' [stores] không đọc được sheet: ' + e.message);
     if (cache) return cache;
-    return { 'Trà Sữa MayCha': [], 'Hồng Trà Sữa Tam Hảo': [], 'Gà Giòn Sốt Ba Cô Gái': [] };
+    return { 'Trà Sữa MayCha': [], 'Hồng Trà Sữa Tam Hảo': [], 'Gà Giòn Sốt Ba Cô Gái': [], 'Trà Hú': [...TRAHU_TAM] };
   }
 }
 

@@ -590,6 +590,7 @@
                 <option value="Trà Sữa MayCha">Trà Sữa MayCha</option>
                 <option value="Hồng Trà Sữa Tam Hảo">Hồng Trà Sữa Tam Hảo</option>
                 <option value="Gà Giòn Sốt Ba Cô Gái">Gà Giòn Sốt Ba Cô Gái</option>
+                <option value="Trà Hú">Trà Hú</option>
               </select>
             </div>
 
@@ -786,7 +787,8 @@
       var STORES = {
         'Trà Sữa MayCha': [],
         'Hồng Trà Sữa Tam Hảo': [],
-        'Gà Giòn Sốt Ba Cô Gái': []
+        'Gà Giòn Sốt Ba Cô Gái': [],
+        'Trà Hú': []
       };
       fetch('/api/stores').then(function(r) {
         return r.json();
@@ -816,8 +818,10 @@
       storeTS.disable();
 
       function fillStores(brand) {
-        storeTS.clearOptions();
+        // Phải bỏ chọn TRƯỚC rồi mới xóa options: clearOptions() giữ lại option của mục đang
+        // được chọn, nên nếu xóa trước thì cửa hàng của thương hiệu cũ lọt sang danh sách mới.
         storeTS.clear(true);
+        storeTS.clearOptions();
         var list = STORES[brand] || [];
         list.forEach(function(s) {
           storeTS.addOption({

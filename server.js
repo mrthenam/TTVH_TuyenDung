@@ -1091,7 +1091,12 @@ const TRAININGFORM_DEFAULTS = {
     "Tham gia Online ngày đầu - trực tiếp ngày thứ hai",
     "Tham gia Online toàn bộ",
   ],
-  brands: ["Trà Sữa MayCha", "Hồng Trà Sữa Tam Hảo", "Gà Giòn Sốt Ba Cô Gái"],
+  brands: [
+    "Trà Sữa MayCha",
+    "Hồng Trà Sữa Tam Hảo",
+    "Gà Giòn Sốt Ba Cô Gái",
+    "Trà Hú",
+  ],
 };
 
 // Cấu hình mặc định form ứng tuyển (trang index.html). 3 khối là KHÓA CỐ ĐỊNH
@@ -1161,6 +1166,24 @@ chatbot
         "trainingform",
         JSON.stringify(TRAININGFORM_DEFAULTS),
       );
+  })
+  .then(async () => {
+    // Bổ sung thương hiệu "Trà Hú" vào form đào tạo đã lưu trước đó trong DB.
+    // Chạy MỘT LẦN (có cờ) để quản trị vẫn xóa được trong dashboard mà không bị thêm lại.
+    try {
+      if (await db.getSetting("trainingform_trahu_added")) return;
+      const raw = await db.getSetting("trainingform");
+      if (raw) {
+        const cfg = JSON.parse(raw);
+        if (Array.isArray(cfg.brands) && cfg.brands.indexOf("Trà Hú") === -1) {
+          cfg.brands.push("Trà Hú");
+          await db.setSetting("trainingform", JSON.stringify(cfg));
+        }
+      }
+      await db.setSetting("trainingform_trahu_added", "1");
+    } catch (e) {
+      console.warn(" [trainingform] không thêm được Trà Hú: " + e.message);
+    }
   })
   .then(async () => {
     if (!(await db.getSetting("applyform")))
