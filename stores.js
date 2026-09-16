@@ -105,7 +105,11 @@ async function getStores(cfg, force) {
         if (brand && out[brand]) out[brand].push(name);
       }
     }
-    Object.keys(out).forEach((k) => { out[k] = [...new Set(out[k])]; }); // bỏ trùng
+    // Bỏ trùng + sắp theo mã cửa hàng (tên luôn bắt đầu bằng mã): numeric để MC2 đứng
+    // trước MC10 chứ không phải sau. Sheet nhập không theo thứ tự nên phải tự sắp ở đây.
+    Object.keys(out).forEach((k) => {
+      out[k] = [...new Set(out[k])].sort((a, b) => a.localeCompare(b, 'vi', { numeric: true }));
+    });
     cache = out; cacheAt = now; return out;
   } catch (e) {
     console.warn(' [stores] không đọc được sheet: ' + e.message);
